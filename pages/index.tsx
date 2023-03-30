@@ -15,6 +15,7 @@ export default function Home() {
 
         <meta name="renderer" content="webkit" />
         <meta name="force-rendering" content="webkit" />
+        <link rel="alternate" href="https://elarcabeer.com" media="only screen and (max-width: 640px)"></link>
         
         <title>El arca beer</title>
         <meta name="description" content="Microcervecería" />
