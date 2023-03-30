@@ -12,6 +12,10 @@ export default function Home() {
         <meta name="apple-mobile-web-app-capable" content="yes"/>
 				<meta name="mobile-web-app-capable" content="yes"/>
 				<meta name="referrer" content="no-referrer"/>
+
+        <meta name="renderer" content="webkit" />
+        <meta name="force-rendering" content="webkit" />
+        
         <title>El arca beer</title>
         <meta name="description" content="Microcervecería" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
