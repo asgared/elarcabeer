@@ -9,9 +9,6 @@ export default function Home() {
   return (
     <>
       <Head>
-
-        <link rel="alternate" href="https://elarcabeer.com" media="only screen and (max-width: 640px)"></link>
-        
         <title>El arca beer</title>
         <meta name="description" content="Microcervecería" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
