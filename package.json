@@ -9,33 +9,33 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@chakra-ui/icons": "^2.0.17",
-		"@chakra-ui/react": "^2.5.4",
-		"@chakra-ui/system": "^2.5.1",
+    "@chakra-ui/icons": "^2.0.18",
+    "@chakra-ui/react": "^2.5.5",
+    "@chakra-ui/system": "^2.5.5",
     "@emotion/react": "^11.10.6",
     "@emotion/styled": "^11.10.6",
     "@types/node": "18.15.11",
-    "@types/react": "18.0.31",
+    "@types/react": "18.0.34",
     "@types/react-dom": "18.0.11",
     "eslint": "8.37.0",
     "eslint-config-next": "13.2.4",
-    "framer-motion": "^10.10.0",
-    "i18next": "^22.4.11",
-		"next": "13.2.4",
-		"next-i18next": "^13.2.2",
+    "framer-motion": "^10.11.2",
+    "i18next": "^22.4.14",
+    "next": "13.3.0",
+    "next-i18next": "^13.2.2",
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "react-gtm-module": "^2.0.11",
-		"react-i18next": "^12.2.0",
-		"react-icons": "^4.7.1",
-    "typescript": "5.0.2"
+    "react-i18next": "^12.2.0",
+    "react-icons": "^4.8.0"
   },
   "devDependencies": {
-		"@cld-apis/types": "^0.1.6",
-		"@types/react-gtm-module": "^2.0.1",
-		"eslint": "8.34.0",
-		"eslint-config-next": "13.1.6",
-		"pnpm": "^7.29.0",
-		"ts-standard": "^12.0.2"
-	}
+    "@cld-apis/types": "^0.1.6",
+    "@types/react-gtm-module": "^2.0.1",
+    "eslint": "8.38.0",
+    "eslint-config-next": "13.3.0",
+    "pnpm": "^8.2.0",
+    "ts-standard": "^12.0.2",
+    "typescript": "5.0.4"
+  }
 }

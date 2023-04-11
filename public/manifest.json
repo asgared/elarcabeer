@@ -1,0 +1,35 @@
+{
+	"theme_color": "#f2b826",
+	"background_color": "#111111",
+	"display": "standalone",
+	"scope": "/",
+	"start_url": "/",
+	"name": "Cervecería el Arca",
+	"short_name": "Cervecería el Arca",
+	"description": "En la cervecería artesanal El Arca, creamos cervezas únicas inspiradas en barcos legendarios de diferentes países. Nuestros productos son el resultado de años de experiencia y pasión por la elaboración de cerveza artesanal. Descubre nuestros tres estilos de cerveza y nuestras deliciosas galletas 'Naufragio', hechas con cebada sobrante de la elaboración de la cerveza. ¡Ven y saborea la historia con nosotros!",
+	"categories": ["Cerveza", "Gourmet", "Historia", "Artesanal", "Emprendimiento", "Creatividad", "Sustentabilidad"],
+	"orientation": "any",
+	"icons": [
+		{
+			"src": "/icons/icon-192x192.png",
+			"sizes": "192x192",
+			"type": "image/png"
+		},
+		{
+			"src": "/icons/icon-256x256.png",
+			"sizes": "256x256",
+			"type": "image/png"
+		},
+		{
+			"src": "/icons/icon-384x384.png",
+			"sizes": "384x384",
+			"type": "image/png"
+		},
+		{
+			"src": "/icons/icon-512x512.png",
+			"sizes": "512x512",
+			"type": "image/png"
+		}
+	],
+	"splash_pages": null
+}

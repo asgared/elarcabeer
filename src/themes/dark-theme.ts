@@ -11,32 +11,32 @@ const theme = extendTheme({
 		global: () => ({
 			body: {
 				bg: "#1A1A1A",
-				fontFamily: "boston-regular",
+				fontFamily: "optima-medium",
 			},
 		}),
 	},
 	colors: {
-		taggyPrimary: {
-			900: "#ff3385",
+		arcaPrimary: {
+			900: "#f2b826",
 		},
-		taggySecondary: {
+		arcaSecondary: {
 			900: "#5EAD27",
 		},
-		taggyTertiary: {
+		arcaTertiary: {
 			900: "#245484",
 		},
-		taggyText: {
+		arcaText: {
 			900: "#e6e6e6",
 		},
-		taggyGray: {
+		arcaGray: {
 			100: "#7F7F7F",
 			500: "#464646",
 			900: "#1A1A1A",
 		},
-		taggyCardBg: {
+		arcaCardBg: {
 			900: "#222222",
 		},
-		taggyDisabled: {
+		arcaDisabled: {
 			900: "#385425",
 		},
 		textBtn: {
@@ -44,8 +44,8 @@ const theme = extendTheme({
 		},
 	},
 	fonts: {
-		body: 'boston',
-		heading: 'boston',
+		body: 'optima-medium',
+		heading: 'optima-medium',
 	  },
 })
 
