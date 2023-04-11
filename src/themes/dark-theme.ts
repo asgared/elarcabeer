@@ -11,7 +11,7 @@ const theme = extendTheme({
 		global: () => ({
 			body: {
 				bg: "#1A1A1A",
-				fontFamily: "optima-bold",
+				fontFamily: "optima-medium",
 			},
 		}),
 	},
@@ -44,8 +44,8 @@ const theme = extendTheme({
 		},
 	},
 	fonts: {
-		body: 'optima-bold',
-		heading: 'optima-bold',
+		body: 'optima-medium',
+		heading: 'optima-medium',
 	  },
 })
 
