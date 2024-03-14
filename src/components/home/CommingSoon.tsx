@@ -27,7 +27,7 @@ const CommingSoon = () => {
         </Heading>
         <Text color="white" fontSize="xl" mb={8}>
           Estamos trabajando duro para brindarte la mejor experiencia de
-          degustación de cerveza artesanal.
+          degustación de cerveza artesanal 😊.
         </Text>
         <MotionBox
           animate={{ y: [-20, 20], rotate: [0, 10, -10, 0] }}
