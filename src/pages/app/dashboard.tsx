@@ -59,9 +59,9 @@ function DashboardPage() {
     <>
       {imageStatusState === ImageStatus.READY || imageStatusState === ImageStatus.DONE ? (
         <AppLayout
-          title={'Generate - Taggy'}
+          title={'Cervecería el Arca'}
           pageDescription={
-            'Enhance your visibility on social media by generating engaging captions and quotes based on your picture content.'
+            'En la cervecería artesanal El Arca, creamos cervezas únicas inspiradas en barcos legendarios de diferentes países. Nuestros productos son el resultado de años de experiencia y pasión por la elaboración de cerveza artesanal. Descubre nuestros tres estilos de cerveza y nuestras deliciosas galletas "Naufragio", hechas con cebada sobrante de la elaboración de la cerveza. ¡Ven y saborea la historia con nosotros!'
           }
           imageUrl={
             'https://kcucmyjfkamgodxkmurb.supabase.co/storage/v1/object/public/taggy-assets/og-image-updated.jpg?t=2023-08-24T16%3A25%3A57.112Z'
@@ -73,7 +73,7 @@ function DashboardPage() {
         <ScanningLayout
           title={'Taggy - Free generation'}
           pageDescription={
-            'Enhance your visibility on social media by generating engaging captions and quotes based on your picture content.'
+            'En la cervecería artesanal El Arca, creamos cervezas únicas inspiradas en barcos legendarios de diferentes países. Nuestros productos son el resultado de años de experiencia y pasión por la elaboración de cerveza artesanal. Descubre nuestros tres estilos de cerveza y nuestras deliciosas galletas "Naufragio", hechas con cebada sobrante de la elaboración de la cerveza. ¡Ven y saborea la historia con nosotros!'
           }
           imageUrl={
             'https://kcucmyjfkamgodxkmurb.supabase.co/storage/v1/object/public/taggy-assets/og-image-updated.jpg?t=2023-08-24T16%3A25%3A57.112Z'
