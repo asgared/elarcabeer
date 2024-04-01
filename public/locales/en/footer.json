@@ -1,0 +1,16 @@
+{
+	"taggyDownload": {
+		"button": "Download Taggy",
+		"head": "Download Taggy",
+		"description": "To enjoy the best experience with Taggy, we invite you to download our application.",
+		"download": "Download",
+		"cancel": "Cancel",
+		"list1": "If your device is an IOS, open Taggy in Safari.",
+		"list2": "Tap the Share icon at the bottom of the screen.",
+		"list3": "Scroll down in the Share menu and select \"Add to Home Screen\".",
+		"list4": "Tap \"Add\" in the top right corner of the screen.",
+		"list5": "Taggy will be added to your home screen and you can access it like any other native app."
+	},
+	"madeWith": "Made with 💚 by",
+	"and": "and"
+}

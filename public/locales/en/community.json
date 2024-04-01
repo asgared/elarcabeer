@@ -1,0 +1,13 @@
+{
+  "title": "Community",
+  "counters":{
+    "users":"Registered users",
+    "captions":"Captions generated"
+  },
+  "sendToCommunity": {
+    "button": "Send to community",
+    "sent": "Sent to community",
+    "sendedCaption": "* All generations sent to the community are previously reviewed and approved."
+  },
+  "saveGeneration": "Save generation"
+}

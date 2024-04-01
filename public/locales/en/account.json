@@ -1,0 +1,12 @@
+{
+  "title": "Account",
+  "currentPlan": "Current subscription:",
+  "credits": "Available credits:",
+  "buttons" : {
+    "manageAccount": "Manage Subscription",
+    "upgradePlan": "Upgrade Subscription"
+  },
+  "warningAccountMessage": "Your subscription ends on ",
+	"credistsEqualsTo": "(1 credit = 1 generation)",
+	"upgradePlan": "Upgrade subscription"
+}

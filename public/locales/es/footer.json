@@ -1,0 +1,16 @@
+{
+	"taggyDownload": {
+		"button": "Descargar Taggy",
+		"head": "Descarga Taggy",
+		"description": "Para disfrutar de la mejor experiencia con Taggy, te invitamos a descargar nuestra aplicación.",
+		"download": "Descargar",
+		"cancel": "Cancelar",
+		"list1": "Si tu dispositivo es un IOS Abre Taggy en Safari.",
+		"list2": "Toca el icono de Compartir en la parte inferior de la pantalla.",
+		"list3": "Desplázate hacia abajo en el menú Compartir y selecciona \"Agregar a pantalla de inicio\".",
+		"list4": "Toca \"Agregar\" en la esquina superior derecha de la pantalla.",
+		"list5": "Taggy se agregará a tu pantalla de inicio y podrás acceder como cualquier otra aplicación nativa."
+	},
+	"madeWith": "Hecho con 💚 por",
+	"and": "y"
+}

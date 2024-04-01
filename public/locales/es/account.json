@@ -1,0 +1,12 @@
+{
+  "title": "Cuenta",
+  "currentPlan": "Suscripción actual:",
+  "credits": "Créditos disponibles:",
+  "buttons" : {
+    "manageAccount": "Manejar Suscripción",
+    "upgradePlan": "Actualizar Suscripción"
+  },
+  "warningAccountMessage": "Tu suscripción termina el ",
+	"credistsEqualsTo": "(1 crédito = 1 generación)",
+	"upgradePlan": "Actualizar suscripción"
+}

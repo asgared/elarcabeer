@@ -1,0 +1,99 @@
+{
+	"scanningArea": {
+		"dropTapText": "Suelta o pulsa para cargar",
+		"uploading": "Cargando tu imagen, por favor espera un momento 🙌",
+		"scanning": "Espera un momento para ver tus resultados 😊",
+		"tryAgain": "Intentar de nuevo"
+	},
+	"scanningResults": {
+		"keywordsDetected": "Selecciona Palabras Clave para generar los textos",
+		"suggestedHashtags": "Selecciona Hashtags",
+		"selectHashtags": "Por favor selecciona al menos 3 palabras clave o hashtags para generar los textos.",
+		"generatingCaption": "Generando nueva Descripción",
+		"generatingQuotes": "Generando nuevas Frases",
+		"scale": "Escalar",
+		"rotate": "Rotar",
+		"personality": "Seleccionar tipo de usuario",
+		"actAs": "Actúar como",
+		"actor": {
+			"USER": "Usuario Regular",
+			"CREATOR": "Creador de Contenido",
+			"COMPANY": "Empresa"
+		},
+		"msgHistoryCaptions":"Aquí podrás ver tu historial de descripciones.",
+		"msgHistoryQuotes":"Aquí podrás ver tu historial de frases.",
+		"msgAtLeast":"Por favor selecciona al menos 3 palabras clave o hashtags",
+		"actingAs":"Actuando como:",
+		"captionPlaceholder": "Tu descripción aparecerá aquí.\nSe han seleccionado algunas palabras clave para ti, siéntete libre de cambiarlas.",
+		"quotesPlaceholder": "Tus frases aparecerán aquí.\nSe han seleccionado algunas palabras clave para ti, siéntete libre de cambiarlas."
+	},
+	"demos": {
+		"title": "O prueba seleccionando alguna de estas fotos:",
+		"userTitle": "Usuario Regular",
+		"creatorTitle": "Creador de Contenido",
+		"companyTitle": "Empresa o Negocio"
+	},
+	"buttons": {
+		"saveImage": "Guardar Imagen",
+		"reloadCaption": "Generar Descripcion",
+		"reloadQuotes": "Generar Frases",
+		"copyToClipboard": "Copiar",
+		"copied": "Copiado",
+		"newImage": "Nueva Foto",
+		"caption": "Descripción",
+		"quotes": "Frases",
+		"editImage": "Editar Imagen",
+		"feedback": "Enviar comentarios",
+		"keyWordsAndHashtags": "Palabras Clave y Hashtags",
+		"magicConfiguration": "Configuraciones Especiales",
+		"signout": "Cerrar sesión",
+		"signin": "Iniciar sesión",
+		"signup": "Suscribirse",
+		"createAccount": "Crear cuenta",
+		"myCaptionsGenerated": "Descripciones Generadas",
+		"myQuotesGenerated": "Frases Generadas",
+		"generate": "Generar",
+		"profile": "Perfil",
+		"account": "Cuenta",
+		"saveSettings": "Guardar Configuración",
+		"copyKeywords": "Copiar palabras clave",
+		"tweetFormat": "Formato Tweet(X)"
+	},
+	"tooltip": {
+		"keywords": "Los textos se generan en base a las palabras clave seleccionadas. Puede agregar o eliminar palabras para generar textos más adecuados. Recuerde volver a generar los textos después de realizar cambios.",
+		"info": "No olvides volver a generar los textos después de agregar o eliminar palabras."
+	},
+		"buyMeAAcoffe":"¡Hey! 👋 Nos encanta ver el creciente interés y el aumento en el uso de Taggy. Si te gusta y deseas apoyar el proyecto",
+	"community": {
+		"cardShow": {
+			"image": "/images/demos/demo_0222.jpg",
+			"text": "La felicidad irradia mientras nos empapamos del calor del sol junto al tranquilo lago, creando hermosos recuerdos llenos de amor y risas. ☀️🌊💖\n\nCada momento es una oportunidad perfecta para capturar la alegría, creando una foto del día que refleje felicidad pura. 🌳🌸",
+			"tags": "#happy #lake #fun #love #photooftheday"
+		},
+		"madeWithTaggy": "Echo con Taggy:"
+	},
+	"newFeatures": "Nuevas funcionalidades en camino.",
+	"chekItOut": "Revísalas aqui!",
+		"navLinks":{
+		"generate": "Generar",
+		"dashboard": "Dashboard"
+	},
+	"links":{
+		"backTaggy": "Regresar a Taggy"
+	},
+	"configurations":{
+		"chooseLanguage": "Elegir Idioma",
+		"choosePersonality": "Elegir Personalidad",
+		"chooseFeeling": "Elegir Sentimiento",
+		"tweetFormat": "Formato Tweet (X)",
+		"configurationsMsg": "* Algunas funciones son de suscripción.",
+		"location": "Lugar:",
+		"placeholderLocation": "Ej. en Central Park, en Ciudad de México, en la playa, etc. (máx. 32 caracteres)",
+		"occasion": "Ocasión:",
+		"placeholderOccasion": "Ej. mi cumpleaños, la boda, mi primer día de colegio, etc. (máx. 32 caracteres)",
+		"additionalContext": "Contexto Adicional:",
+		"placeholderAdditionalContext": "Ej. con mi familia, con mis cologas, mi producto mas vendido, etc. (máx. 32 caracteres)"
+	},
+	"warningCredits": "No tienes suficientes créditos.",
+	"upgradePlan": "Actualizar suscripción"
+}

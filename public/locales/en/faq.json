@@ -1,0 +1,24 @@
+{
+  "title":"Frecuently asked questions",
+  "howInstallPWA": "How to install a PWA",
+  "q1": {
+    "question":"How does Taggy work?",
+    "answer":"Taggy uses AI to detect and classify keywords in your photo, then converts them into engaging text and hashtags for your posts."
+  },
+    "q2": {
+    "question":"What image formats and sizes does Taggy support?",
+    "answer":"Taggy accepts three popular image formats: JPG, JPEG and PNG. The maximum image size allowed is 6MB."
+  },
+    "q3": {
+    "question":"What happens to the images I upload?",
+    "answer":"When you upload images to Taggy, they are temporarily stored for the caption generation process.\nAll uploaded images are automatically deleted from our servers every 24 hours.\n\nThe images are not used for any other purpose."
+  },
+  "q4": {
+    "question":"Is there a mobile version?",
+    "answer":"Unfortunately, not at the moment. However, it might be a possibility in the future.\nOn a positive note, Taggy is a Progressive Web App (PWA), which allows you to install the web app on your phone.\nFollow the steps below to do so:"
+  },
+  "q5": {
+    "question":"Can I give feedback or suggest new features?",
+    "answer":"Absolutely!\nWe love to receive your comments and suggestions for new features. \nWrite directly to us using:"
+  }
+}

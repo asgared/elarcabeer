@@ -1,0 +1,111 @@
+.skewed {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+  transform: skewY(-2deg);
+  transform-origin: top left;
+  border-top: 1px solid #3a3a3a;
+}
+
+/* .skewedFit {} */
+
+.skewedDark {
+  background: #090909;
+  /* background: #fff; */
+}
+
+.skewedBlue {
+  background: #3385FF;
+}
+
+.skewedPink {
+  background: #ff3385;
+}
+
+.skewedGreen {
+  background: #85FF33;
+}
+
+.spikes_ {
+  position: relative;
+  background: #101010;
+  height: 100vh;
+}
+
+.spikes_::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  left: -0%;
+  top: 100%;
+  z-index: 10;
+  display: block;
+  height: 35px;
+  background-size: 35px 100%;
+  background-image: linear-gradient(135deg, #1A1A1A 25%, transparent 25%), linear-gradient(225deg, #1A1A1A 25%, transparent 25%);
+  background-position: 0 0;
+}
+
+.spikes_Blue {
+  background: #3385FF;
+}
+
+.spikes_Blue::after {
+  background-image: linear-gradient(135deg, #3385FF 25%, transparent 25%), linear-gradient(225deg, #3385FF 25%, transparent 25%);
+}
+
+.spikes_Green {
+  background: #85FF33;
+}
+
+.spikes_Green::after {
+  background-image: linear-gradient(135deg, #85FF33 25%, transparent 25%), linear-gradient(225deg, #85FF33 25%, transparent 25%);
+}
+
+.spikes_Pink {
+  background: #ff3385;
+}
+
+.spikes_Pink::after {
+  background-image: linear-gradient(135deg, #ff3385 25%, transparent 25%), linear-gradient(225deg, #ff3385 25%, transparent 25%);
+}
+
+.zigZag {
+  width: 100%;
+  background-color: #000;
+  background-image: linear-gradient(135deg, #1a1a1a 25%, transparent 25%),
+    linear-gradient(225deg, #1a1a1a 25%, transparent 25%),
+    linear-gradient(315deg, #1a1a1a 25%, transparent 25%),
+    linear-gradient(45deg, #1a1a1a 25%, transparent 25%);
+  background-position: -20px 0, -20px 0, 0 0, 0 0;
+  background-size: 40px 40px;
+  background-repeat: repeat;
+}
+
+.zigZagBottom {
+  width: 100%;
+  background-color: #000;
+  background-image: linear-gradient(135deg, #1a1a1a 25%, transparent 25%),
+    linear-gradient(225deg, #1a1a1a 25%, transparent 25%),
+    linear-gradient(315deg, #1a1a1a 25%, transparent 25%),
+    linear-gradient(45deg, #1a1a1a 25%, transparent 25%);
+  background-position: -20px 0, -20px 0, 0 0, 0 0;
+  background-size: 40px 40px;
+  background-repeat: repeat;
+}
+
+.stripes {
+  background-image: linear-gradient(177deg, #1a1a1a 25%, #000000 25%, #000000 50%, #1a1a1a 50%, #1a1a1a 75%, #000000 75%, #000000 100%);
+  background-size: 764.29px 40.05px;
+}
+
+.diagonalBg {
+  background-color: #090909;
+  opacity: 1;
+  background: repeating-linear-gradient(-60deg, #444444, #444444 1px, #090909 1px, #090909 15px);
+}

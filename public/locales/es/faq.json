@@ -1,0 +1,24 @@
+{
+  "title":"Preguntas Frecuentes",
+  "howInstallPWA": "Cómo instalar una PWA",
+  "q1": {
+    "question":"¿Cómo funciona Taggy?",
+    "answer":"Taggy utiliza IA para detectar y clasificar las palabras clave de tu foto, después las convierte en texto y hashtags atractivos para tus publicaciones."
+  },
+    "q2": {
+    "question":"¿Qué formatos y tamaños de imagen admite Taggy?",
+    "answer":"Taggy acepta tres formatos de imagen populares: JPG, JPEG y PNG. El tamaño máximo de imagen permitido es de 6 MB."
+  },
+    "q3": {
+    "question":"¿Qué ocurre con las imágenes que subo?",
+    "answer":"Cuando subes imágenes a Taggy, éstas se almacenan temporalmente para el proceso de generación de descripciones.\nTodas las imágenes subidas se eliminan automáticamente de nuestros servidores cada 24 horas.\n\nLas imágenes no se utilizan para ningún otro propósito."
+  },
+  "q4": {
+    "question":"¿Hay una versión móvil?",
+    "answer":"Desafortunadamente, no por el momento. Sin embargo, podría ser una posibilidad en el futuro. En una nota positiva, Taggy es una aplicación web progresiva (PWA), que le permite instalar la aplicación web en tu smartphone. Sigue los pasos a continuación para hacerlo:"
+  },
+  "q5": {
+    "question":"¿Puedo dar mi opinión o sugerir nuevas funciones?",
+    "answer":"¡Por supuesto!\nNos encanta recibir tus comentarios y sugerencias sobre nuevas funcionalidades.\nEscríbenos directamente utilizando:"
+  }
+}

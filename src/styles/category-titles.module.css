@@ -1,0 +1,275 @@
+.topkeywords::before {
+  content: "✨ ";
+}
+
+.tophashtags::before {
+  content: "🔥 ";
+}
+
+.othertrendshashtags::before {
+  content: "⭐ ";
+}
+
+.advertisingandmarketing::before {
+  content: "📰 ";
+}
+
+.animals::before {
+  content: "🐎 ";
+}
+
+.art::before {
+  content: "🎨 ";
+}
+
+.beautyandmakeup::before {
+  content: "💄 ";
+}
+
+.bussiness::before {
+  content: "👔 ";
+}
+
+.contest::before {
+  content: "🎉 ";
+}
+
+.education::before {
+  content: "📖 ";
+}
+
+.entertainment::before {
+  content: "📺 ";
+}
+
+.fashion::before {
+  content: "💫 ";
+}
+
+.finance::before {
+  content: "💰 ";
+}
+
+.fitness::before {
+  content: "🏃 ";
+}
+
+.foodandbeverage::before {
+  content: "🍕 ";
+}
+
+.holiday::before {
+  content: "🌴 ";
+}
+
+.homeandgarden::before {
+  content: "🏠 ";
+}
+
+.lifestyle::before {
+  content: "😎 ";
+}
+
+.likesandfollows::before {
+  content: "👍 ";
+}
+
+.motivational::before {
+  content: "😌 ";
+}
+
+.motoring::before {
+  content: "🚗 ";
+}
+
+.music::before {
+  content: "🎵 ";
+}
+
+.nature::before {
+  content: "🌱 ";
+}
+
+.parenting::before {
+  content: "👪 ";
+}
+
+.pet::before {
+  content: "🐶 ";
+}
+
+.photography::before {
+  content: "📷 ";
+}
+
+.reels::before {
+  content: "📹 ";
+}
+
+.retail::before {
+  content: "💸 ";
+}
+
+.sports::before {
+  content: "⚽ ";
+}
+
+.techandgadgets::before {
+  content: "🎮 ";
+}
+
+.travel::before {
+  content: "✈️ ";
+}
+
+.wedding::before {
+  content: "💒 ";
+}
+
+.ifyourimageisgeneratedbyai::before {
+  content: "🤖 ";
+}
+
+.christmas::before {
+  content: "🎄 ";
+}
+
+.gym::before {
+  content: "💪 ";
+}
+
+.yoga::before {
+  content: "🧘‍♀️ ";
+}
+
+.funny::before {
+  content: "🤡 ";
+}
+
+.cats::before {
+  content: "🐈 ";
+}
+
+.dogs::before {
+  content: "🐕 ";
+}
+
+.birthday::before {
+  content: "🎂 ";
+}
+
+.summer::before {
+  content: "⛱️ ";
+}
+
+.sunset::before {
+  content: "🎴 ";
+}
+
+.beach::before {
+  content: "🏖️ ";
+}
+
+.coffee::before {
+  content: "☕ ";
+}
+
+.design::before {
+  content: "🖌️ ";
+}
+
+.party::before {
+  content: "🎉 ";
+}
+
+.gaming::before {
+  content: "🕹️ ";
+}
+
+.anime::before {
+  content: "🦄 ";
+}
+
+.tattoo::before {
+  content: "🐉 ";
+}
+
+.books::before {
+  content: "📖 ";
+}
+
+.baby::before {
+  content: "👶 ";
+}
+
+.bike::before {
+  content: "🚴‍♂️ ";
+}
+
+.smile::before {
+  content: "😄 ";
+}
+
+.chef::before {
+  content: "👩‍🍳 ";
+}
+
+.colors::before {
+  content: "🖍️ ";
+}
+
+.dress::before {
+  content: "👗 ";
+}
+
+.shop::before {
+  content: "🛍️ ";
+}
+
+.bikini::before {
+  content: "👙 ";
+}
+
+.hair::before {
+  content: "💇‍♀️ ";
+}
+
+.interior::before {
+  content: "💺 ";
+}
+
+.festival::before {
+  content: "🎊 ";
+}
+
+.architecture::before {
+  content: "📏 ";
+}
+
+.jewellery::before {
+  content: "💎 ";
+}
+
+.restaurant::before {
+  content: "🍽️ ";
+}
+
+.drink::before {
+  content: "🍷 ";
+}
+
+.motorcycle::before {
+  content: "🏍️ ";
+}
+
+.cars::before {
+  content: "🏎️ ";
+}
+
+.logo::before {
+  content: "⭕ ";
+}
+
+.nonprofit::before {
+  content: "🙌 ";
+}

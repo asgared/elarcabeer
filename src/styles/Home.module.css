@@ -56,3 +56,12 @@
     transform: rotate(0deg);
   }
 }
+.header{
+  background-color: #4d4d4d;
+}
+.grayColor{
+  fill:#4d4d4d
+}
+.pinkColor{
+  fill:#d9a5cb
+}

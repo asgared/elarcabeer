@@ -1,0 +1,88 @@
+{
+  "accessBtn": "Solicitar acceso",
+  "tryItNowBtn": "Comenzar gratis",
+  "addWaitList": "Unirme a la lista de espera",
+  "addWaitListError": "Por favor, ingresa un email válido.",
+  "waitListSuscribed": "¡Genial! 🙌 Te notificaremos cuando las funcionalidades estén disponibles.",
+  "tryItNowBtnMobile": "Comenzar gratis",
+  "nav":{
+    "howItWorks": "Cómo funciona",
+    "pricing": "Precios",
+    "community": "Comunidad",
+    "privacy": "Privacidad",
+    "terms": "Términos"
+  },
+  "mainSection": {
+    "value": "Descubre la magia de las palabras detras de tus fotos",
+    "description": "Mejora tu visibilidad en las redes sociales generando descripciones y frases atractivas basadas en el contenido de tu foto.",
+    "cta":"Generar ahora"
+
+  },
+  "section1": {
+    "title": "Carga tu foto 🌄",
+    "description": {
+      "text1": "Taggy generará automáticamente palabras clave y hashtags según el contenido de tu foto.\n\nPuedes elegir los que desees para generar descripciones y frases personalizadas."
+    }
+  },
+  "section2": {
+    "title": "Elige tu estilo 🎤",
+    "description": {
+      "text1": "Genera textos en tres tonos distintos para compartir recuerdos, llegar a más personas o proyectar un tono profesional para promocionar tus productos.\nCon Taggy, tienes la libertad de elegir el estilo que mejor se ajuste a ti. \n\n¡Explora y crea textos a tu medida!"
+    }
+  },
+  "section3": {
+    "title": "Elije tu personalidad y sentimiento 🤩",
+    "description": {
+      "text1": "¿Quieres que tu publicación sea más divertida, seria o profesional?\n\nAgrega personalidad y sentimientos a tus descripciones para que se ajusten a tu estilo y a tu público objetivo."
+    }
+  },
+  "section4": {
+    "title": "Comparte el lugar y el momento 📅",
+    "description": {
+      "text1": "¿Quieres compartir el lugar y el momento en el que tomaste tu foto?\n\nAgrega contexto adicional a tus descripciones para que tus publicaciones sean más atractivas y relevantes."
+    }
+  },
+  "section5": {
+    "title": "Describe tus creaciones echas con IA 🤖",
+    "description": {
+      "text1": "¿Ya haz creado lo que deseabas, pero ahora te cuesta encontrar la descripción perfecta?\n\nCarga tu obra de arte y obten inspiración para tus descripciones en cuestión de segundos.\nMuestra las características distintivas de una manera convincente y cautivadora."
+    }
+  },
+  "pricing":{
+    "title":"Postea como un Pro",
+    "subtitle":"Planes que se adaptan a tus necesidades",
+    "description":" El plan Hobby no requiere tarjeta de crédito.",
+    "subscribe": "Suscribirse",
+    "manageSubscription": "Manejar Suscripción",
+    "createAccount": "Crear Cuenta",
+    "generateNow": "Generar ahora"
+  },
+  "features": {
+      "hobbyFeatures": {
+        "feature1": "Genera descripciones y frases en tres tonos diferentes.",
+        "feature2": "Consigue las palabras clave y hashtags más relevantes.",
+        "feature3": "Edita los textos generados y conserva el historial de tus generaciones.",
+        "feature4": "20 creditos (1 crédito = 1 generación)."
+    },
+    "creatorFeatures": {
+      "hobby": "Funcionalidades del plan Hobby.",
+      "feature1": "Agrega personalidades y sentimientos.",
+      "feature2": "Agrega contexto adicional como ocación y ubicación.",
+      "feature3": "Genera descripciones en 10 idiomas diferentes.",
+      "feature4": "Guarda tus generaciones favoritas en tu perfil.",
+      "feature5": "Ajusta tus descripciones para Twitter ahora X",
+      "feature6": "Copia fácilmente todas las palabras clave.",
+      "feature7": "Sin limite de creditos."
+    }
+  },
+  "madeWithTaggy": "Echo con Taggy:",
+  "ctaBottom":{
+    "title":"Comienza a generar hoy",
+    "subtitle":"Y elige las palabras adecuadas para tus publicaciones.",
+    "tryItNowBtn": "Generar ahora"
+  },
+    "community":{
+    "title": "Comunidad"
+  },
+  "howDoesItWorks": "¿Cómo funciona?"
+}

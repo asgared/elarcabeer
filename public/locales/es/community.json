@@ -1,0 +1,13 @@
+{
+  "title": "Comunidad",
+  "counters":{
+    "users":"Usuarios registrados",
+    "captions":"Descripciones generadas"
+  },
+  "sendToCommunity": {
+    "button": "Enviar a la comunidad",
+    "sent": "Enviado a la comunidad",
+    "sendedCaption": "* Todas las generaciones enviadas a la comunidad son previamente revisadas y aprobadas."
+  },
+  "saveGeneration": "Guardar generación"
+}

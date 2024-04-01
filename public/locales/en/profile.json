@@ -1,0 +1,10 @@
+{
+  "title": "Profile",
+  "buttons": {
+    "specialSettings": "Special Settings",
+    "mygenerations": "My Generations",
+    "community": "Community"
+  },
+  "myGenerationsMsg": "You have no saved generation yet.",
+  "communityMsg": "You have not yet sent any generation to the community."
+}

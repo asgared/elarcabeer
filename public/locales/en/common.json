@@ -1,0 +1,99 @@
+{
+	"scanningArea": {
+		"dropTapText": "Drop or tap to upload",
+		"uploading": "Uploading your image, please wait a few seconds 🙌",
+		"scanning": "Wait a few seconds to see your results 😊",
+		"tryAgain": "Try Again"
+	},
+	"scanningResults": {
+		"keywordsDetected": "Select key words to generate the texts",
+		"suggestedHashtags": "Select Hashtags",
+		"selectHashtags": "Please select at least 3 keywords or hashtags and then click on Generate.",
+		"generatingCaption": "Generating new Caption",
+		"generatingQuotes": "Generating new Quotes",
+		"scale": "Scale",
+		"rotate": "Rotate",
+		"personality": "Select type of user",
+		"actAs": "Act as a",
+		"actor": {
+			"USER": "Regular User",
+			"CREATOR": "Content Creator",
+			"COMPANY": "Company"
+		},
+		"msgHistoryCaptions":"Here, you can view your captions history.",
+		"msgHistoryQuotes":"Here, you can view your quotes history.",
+		"msgAtLeast":"Please select at least 3 keywords or hashtags",
+		"actingAs":"Acting as a:",
+		"captionPlaceholder": "Your caption will appear here.\nSome keywords have been selected for you, feel free to change them.",
+		"quotesPlaceholder": "Your quotes will appear here.\nSome keywords have been selected for you, feel free to change them.",
+		"tweetFormat": "Tweet(X) Format"
+	},
+	"demos": {
+		"title": "Or try selecting one of these photos:",
+		"userTitle": "Regular User",
+		"creatorTitle": "Content Creator",
+		"companyTitle": "Company"
+	},
+	"buttons": {
+		"saveImage": "Save Image",
+		"reloadCaption": "Generate Caption",
+		"reloadQuotes": "Generate Quotes",
+		"copyToClipboard": "Copy Text",
+		"copied": "Copied",
+		"newImage": "New Photo",
+		"caption": "Caption",
+		"quotes": "Quotes",
+		"editImage": "Edit Image",
+		"feedback": "Send Feedback",
+		"keyWordsAndHashtags": "Key words and Hashtags",
+		"magicConfiguration": "Special Settings",
+		"signout": "Sign out",
+		"signin": "Sign In",
+		"signup": "Sign Up",
+		"createAccount": "Create Account",
+		"myCaptionsGenerated": "Captions Generated",
+		"myQuotesGenerated": "Quotes Generated",
+		"generate": "Generate",
+		"profile": "Profile",
+		"account": "Account",
+		"saveSettings": "Save Settings",
+		"copyKeywords": "Copy keywords"
+	},
+	"tooltip": {
+		"keywords": "Texts are generated based on selected keywords. You can add or remove words to generate more suitable texts. Remember to re-generate the texts after making changes.",
+		"info": "Don't forget to re-generate the texts after adding or deleting words."
+	},
+	"buyMeAAcoffe":"Hey! 👋 We love seeing the growing interest and increased usage of Taggy. If you like and want to support the project",
+	"community": {
+		"cardShow": {
+			"image": "/images/demos/demo_0222.png",
+			"text": "Happiness radiates as we soak up the sun's warmth by the tranquil lake, making beautiful memories filled with love and laughter. ☀️🌊💖\n\nEvery moment is a perfect opportunity to capture joy, creating a photo of the day that reflects pure bliss. 🌳🌸🥰",
+			"tags": "#happy #lake #fun #love #photooftheday"
+		},
+		"madeWithTaggy": "Made with Taggy:"
+	},
+	"newFeatures": "New features are comming.",
+	"chekItOut": "Check it out!",
+	"navLinks":{
+		"generate": "Generate",
+		"dashboard": "Dashboard"
+	},
+	"links":{
+		"backTaggy": "Back to Taggy"
+	},
+	"configurations":{
+		"chooseLanguage": "Choose Language",
+		"choosePersonality": "Choose Personality",
+		"chooseFeeling": "Choose Feeling",
+		"tweetFormat": "Tweet (X) Format",
+		"configurationsMsg": "* Some features are subscription-based",
+		"location": "Location:",
+		"placeholderLocation": "E.g. in Central Park, in Mexico city, at the beach, etc. (Max 32 characters)",
+		"occasion": "Occasion:",
+		"placeholderOccasion": "E.g. my birthday, the wedding, my first day at school, etc. (Max 32 characters)",
+		"additionalContext": "Additional Context:",
+		"placeholderAdditionalContext": "E.g. with my family, with my partners, my best selling product, etc. (Max 32 characters)"
+	},
+	"warningCredits": "You don't have enough credits.",
+	"upgradePlan": "Upgrade subscription"
+}

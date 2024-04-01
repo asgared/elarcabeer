@@ -1,0 +1,87 @@
+{
+  "accessBtn": "Get early access",
+  "tryItNowBtn": "Get started for free",
+  "tryItNowBtnMobile": "Get started",
+  "addWaitList": "Join waitlist",
+  "addWaitListError": "Please, enter a valid email.",
+  "waitListSuscribed": "Great! 🙌 We'll let you know when the features are available.",
+  "nav":{
+    "howItWorks": "How does it work",
+    "pricing": "Pricing",
+    "community": "Community",
+    "privacy": "Privacy",
+    "terms": "Terms"
+  },
+  "mainSection": {
+    "value": "Discover the magic of words behind your pictures",
+    "description": "Enhance your visibility on social media by generating engaging captions and quotes based on your picture content.",
+    "cta":"Generate now"
+  },
+  "section1": {
+    "title": "Upload your picture 🌄",
+    "description": {
+      "text1": "Taggy will automatically generate keywords and hashtags based on the content of your picture.\n\nYou can choose the ones you want to generate captions and personalized quotes."
+    }
+  },
+  "section2": {
+    "title": "Choose your tone 🎤",
+    "description": {
+      "text1": "Generate texts in three different tones to share memories, reach more people or project a professional tone to promote your products.\nWith Taggy, you have the freedom to choose the style that best suits you.\n\nExplore and create texts to suit you!"
+    }
+  },
+  "section3": {
+    "title": "Choose your personality and feelings 🤩",
+    "description": {
+      "text1": "Want to make your post more fun, serious or professional?\n\nAdd personality and sentiment to your descriptions to fit your style and your target audience."
+    }
+  },
+  "section4": {
+    "title": "Share the place and time 📅",
+    "description": {
+      "text1": "Want to share where and when you took your photo?\n\nAdd additional context to your descriptions to make your posts more engaging and relevant."
+    }
+  },
+  "section5": {
+    "title": "Describe your AI creations 🤖",
+    "description": {
+      "text1": "Have you already created what you desired, but now struggling with the perfect description?\n\nUpload your artwork and get inspiration for your captions in seconds.\nShowcase the distinctive features in a compelling and captivating manner."
+    }
+  },
+  "pricing":{
+    "title":"Post like a Pro",
+    "subtitle":"Plans that fit your need",
+    "description":"Hobby plan does not require a credit card.",
+    "subscribe": "Subscribe",
+    "manageSubscription": "Manage Subscription",
+    "createAccount": "Create Account",
+    "generateNow": "Generate now"
+  },
+  "features": {
+    "hobbyFeatures": {
+      "feature1": "Generate captions and quotes in three different tones based on your picture content",
+      "feature2": "Get the most relevant keywords and hashtags.",
+      "feature3": "Edit the generated texts and keep the history of your generations.",
+      "feature4": "20 credits. (1 credit = 1 generation)"
+    },
+    "creatorFeatures": {
+      "hobby": "Hobby plan features.",
+      "feature1": "Add personalities and feelings.",
+      "feature2": "Add additional context such as occasion and location.",
+      "feature3": "Generate captions and quotes in 10 different languages.",
+      "feature4": "Save your favorite generations to your profile.",
+      "feature5": "Adjust your captions for Twitter now X.",
+      "feature6": "Easily copy all the keywords.",
+      "feature7": "No credits limit."
+    }
+  },
+  "madeWithTaggy": "Made with Taggy:",
+  "ctaBottom":{
+    "title":"Start generating today",
+    "subtitle":"And choose the right words for your posts.",
+      "tryItNowBtn": "Generate now"
+  },
+  "community":{
+    "title": "Community"
+  },
+  "howDoesItWorks": "How does it work?"
+}

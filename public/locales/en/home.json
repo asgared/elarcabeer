@@ -1,0 +1,12 @@
+{
+	"taggyDescription": {
+		"description": "Find the right text for your posts based on the content of your photo and increase the visibility of your content on social networks.",
+		"WhatCanyouDo": "What can you do with Taggy?",
+		"WhatCanyouDoText1": "Generate custom captions and quotes based on the content of your photo. You can add or remove hashtags and generate new texts.",
+		"WhatCanyouDoText2": "Easily copy the text with the hashtags and use them in your publication.",
+		"WhatCanyouDoText3": "Edit and download your optimized photo adapted for social networks.",
+		"HowDoesItWorks": "How does it work?",
+		"HowDoesItWorksText1": "We use AI to detect and rank the keywords in your photo, and then convert them into SEO-optimized text, themes, and hashtags."
+	},
+	"asSeenOn": "As seen on:"
+}

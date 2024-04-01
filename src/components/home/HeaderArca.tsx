@@ -1,117 +1,101 @@
-import { useState } from 'react';
 import {
   Box,
   Flex,
   IconButton,
-  Stack,
+  Collapse,
   useDisclosure,
-  Text,
-  useColorModeValue,
-  Modal,
-  ModalOverlay,
-  ModalContent,
-  ModalHeader,
-  ModalCloseButton,
-  ModalBody,
-  FormControl,
-  Input,
-  FormLabel,
-  ModalFooter,
-  Button,
+  HStack,
+  Heading,
+  Stack,
 } from '@chakra-ui/react';
-import { HamburgerIcon } from '@chakra-ui/icons';
+import { HamburgerIcon, CloseIcon } from '@chakra-ui/icons';
+import NextLink from 'next/link';
+import { Button } from '@chakra-ui/button';
+import { Link } from '@chakra-ui/layout';
 
-export default function Header() {
-  const { isOpen, onOpen, onClose } = useDisclosure();
-  const [showMenu, setShowMenu] = useState(false);
+import {IconArcaLogo} from '@/assets/arcaIcons'
 
-  const bg = useColorModeValue('gray.100', 'gray.700');
-  const color = useColorModeValue('gray.700', 'white');
+import styles from '@/styles/home.module.css'
+
+const HeaderArca = () => {
+  const { isOpen, onToggle } = useDisclosure();
 
   return (
-    <>
-      <Box bg={bg} py={4}>
-        <Flex alignItems='center' justifyContent='space-between'>
-          <IconButton
-            aria-label='Toggle Menu'
-            display={{ base: 'block', md: 'none' }}
-            onClick={() => setShowMenu(!showMenu)}
-            icon={<HamburgerIcon />}
-          />
-          <Text fontSize='lg' fontWeight='bold' color={color} mx={4}>
-            My Website
-          </Text>
-          <Stack
-            direction={{ base: 'column', md: 'row' }}
-            alignItems='center'
-            spacing={4}
-            display={{ base: showMenu ? 'block' : 'none', md: 'flex' }}
-            mt={{ base: 4, md: 0 }}
+    <Box className={styles.header} px={4}>
+      <Flex h={16} alignItems="center" justifyContent="space-between">
+        <IconButton
+          size="md"
+          icon={isOpen ? <CloseIcon /> : <HamburgerIcon />}
+          aria-label="Open Menu"
+          display={{ md: 'none' }}
+          onClick={onToggle}
+        />
+        <HStack spacing={8} alignItems="center">
+          <NextLink href="/" passHref>
+            <IconArcaLogo width={50} height={50}/>
+          </NextLink>
+          <HStack as="nav" spacing={4} display={{ base: 'none', md: 'flex' }}>
+            <NextLink href="/about" passHref>
+              About
+            </NextLink>
+            {/* Agrega más enlaces según sea necesario */}
+          </HStack>
+        </HStack>
+        <Flex alignItems="center">
+          <Button
+            colorScheme="teal"
+            variant="solid"
+            size="sm"
+            mr={4}
+            display={{ base: 'none', md: 'inline-flex' }}
           >
-            <Text color={color}>Home</Text>
-            <Text color={color}>About</Text>
-            <Text color={color}>Contact</Text>
-            <IconButton
-              aria-label='Login'
-              onClick={onOpen}
-              variant='outline'
-              colorScheme='gray'
-              size='sm'
-              icon={<i className='bi bi-box-arrow-in-right'></i>}
-            />
-          </Stack>
+            Sign In
+          </Button>
+          <Button
+            colorScheme="teal"
+            variant="outline"
+            size="sm"
+            display={{ base: 'none', md: 'inline-flex' }}
+          >
+            Sign Up
+          </Button>
         </Flex>
-      </Box>
-      <LoginModal isOpen={isOpen} onClose={onClose} />
-    </>
-  );
-}
+      </Flex>
 
-interface LoginModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-}
-function LoginModal({ isOpen, onClose }: LoginModalProps) {
-  const handleSubmit = (e: { preventDefault: () => void; }) => {
-    e.preventDefault();
-    // Handle login
-  };
-
-  return (
-    <Box>
-      <IconButton
-        aria-label='Login'
-        onClick={onClose}
-        variant='outline'
-        colorScheme='gray'
-        size='sm'
-        icon={<i className='bi bi-box-arrow-in-right'></i>}
-      />
-      <Modal isOpen={isOpen} onClose={onClose} isCentered>
-        <ModalOverlay />
-        <ModalContent>
-          <ModalHeader>Login / Sign Up</ModalHeader>
-          <ModalCloseButton />
-          <form onSubmit={handleSubmit}>
-            <ModalBody>
-              <FormControl mb={4}>
-                <FormLabel>Email address</FormLabel>
-                <Input type='email' placeholder='Enter email' />
-              </FormControl>
-              <FormControl mb={4}>
-                <FormLabel>Password</FormLabel>
-                <Input type='password' placeholder='Password' />
-              </FormControl>
-            </ModalBody>
-            <ModalFooter>
-              <Button colorScheme='blue' mr={3} type='submit'>
-                Login
-              </Button>
-              <Button variant='ghost'>Sign Up</Button>
-            </ModalFooter>
-          </form>
-        </ModalContent>
-      </Modal>
+      <Collapse in={isOpen} animateOpacity>
+        <Box pb={4}>
+          <Stack as="nav" spacing={4}>
+            <NextLink href="/" passHref>
+                <Heading size="md">Home</Heading>
+            </NextLink>
+            <NextLink href="/about" passHref>
+              About
+            </NextLink>
+            <Flex alignItems="center">
+          <Button
+            colorScheme="teal"
+            variant="solid"
+            size="sm"
+            mr={4}
+            display={{ base: 'inline-flex', md: 'none' }}
+          >
+            Sign In
+          </Button>
+          <Button
+            colorScheme="teal"
+            variant="outline"
+            size="sm"
+            display={{ base: 'inline-flex', md: 'none' }}
+          >
+            Sign Up
+          </Button>
+        </Flex>
+            {/* Agrega más enlaces según sea necesario */}
+          </Stack>
+        </Box>
+      </Collapse>
     </Box>
   );
-}
+};
+
+export default HeaderArca;
