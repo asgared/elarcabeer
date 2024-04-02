@@ -12,7 +12,7 @@ const TermsPage = () => {
       title={'Taggy - Terms & Conditions'}
       pageDescription={'Terms and Conditions'}
       imageUrl={
-        'https://kcucmyjfkamgodxkmurb.supabase.co/storage/v1/object/public/taggy-assets/og-image-updated.jpg?t=2023-08-24T16%3A25%3A57.112Z'
+        'https://poipgxodwlrddqeqauwg.supabase.co/storage/v1/object/public/arca-assets/el_arca.jpg'
       }
     >
       <Box

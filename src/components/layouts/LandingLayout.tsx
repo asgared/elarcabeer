@@ -10,7 +10,8 @@ interface Props {
 
 export default function LandingLayout({
   children,
-  imageUrl = 'https://kcucmyjfkamgodxkmurb.supabase.co/storage/v1/object/public/taggy-assets/og-image-updated.jpg?t=2023-08-24T16%3A25%3A57.112Z?t=2023-08-13T16%3A48%3A30.944Z',
+  // imageUrl = 'https://kcucmyjfkamgodxkmurb.supabase.co/storage/v1/object/public/taggy-assets/og-image-updated.jpg?t=2023-08-24T16%3A25%3A57.112Z?t=2023-08-13T16%3A48%3A30.944Z',
+  imageUrl = 'https://poipgxodwlrddqeqauwg.supabase.co/storage/v1/object/public/arca-assets/el_arca.jpg',
   pageDescription,
   title,
 }: Props) {
@@ -79,7 +80,7 @@ export default function LandingLayout({
 
       <Box
         as={'main'}
-        className='taggy__layout'
+        className='arca__layout'
         width='full'
         margin={'auto'}
       >

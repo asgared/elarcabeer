@@ -9,7 +9,7 @@ import { Box, Center, Text, VStack, Card, CardHeader, Heading, CardBody, CardFoo
 // import LandingSection from '@/components/ui/LandingSection'
 import LandingLayout from '@/components/layouts/LandingLayout'
 // import MarqueeCard from '@/components/landing/MarqueeCard'
-// import IconTaggy from '@/assets/taggyIcons/IconTaggy'
+import IconArcaLogo from '@/assets/arcaIcons/IconArcaLogo'
 // import AsSeenOn from '@/components/landing/AsSeenOn'
 // import Counters from '@/components/community/Counters'
 // import FeatureCardH from '@/components/landing/FeatureCardH'
@@ -41,7 +41,7 @@ const LandingPage = () => {
         'En la cervecería artesanal El Arca, creamos cervezas únicas inspiradas en barcos legendarios de diferentes países. Nuestros productos son el resultado de años de experiencia y pasión por la elaboración de cerveza artesanal. Descubre nuestros tres estilos de cerveza y nuestras deliciosas galletas "Naufragio", hechas con cebada sobrante de la elaboración de la cerveza. ¡Ven y saborea la historia con nosotros!'
       }
       imageUrl={
-        'https://kcucmyjfkamgodxkmurb.supabase.co/storage/v1/object/public/taggy-assets/og-image-updated.jpg?t=2023-08-24T16%3A25%3A57.112Z'
+        'https://poipgxodwlrddqeqauwg.supabase.co/storage/v1/object/public/arca-assets/el_arca.jpg'
       }
     >
       {/* hero section  */}
@@ -64,7 +64,7 @@ const LandingPage = () => {
           zIndex={'-1'}
           sx={{
             background:
-              'radial-gradient(circle at 50% 0%, rgba(255,255,255,0.6) 1%, rgb(255, 177, 199,0.6) 10%, rgb(159, 32, 83,0.6) 30%, #181818 50%)',
+              'radial-gradient(circle at 50% 0%, rgba(255,255,255,0.6) 1%, rgb(247, 235, 169,0.6) 10%, rgb(196, 151, 0,0.6) 30%, #181818 50%)',
           }}
         />
         <Card
@@ -125,7 +125,7 @@ const LandingPage = () => {
               color={'taggyDark.100'}
               boxShadow='0px 4px 10px rgba(0,0,0,0.4)'
               sx={{
-                backgroundImage: 'linear-gradient(to right, #ff9db9 0%, #ff3385  51%, #ff9db9  100%)',
+                backgroundImage: 'linear-gradient(to right, #f7e795 0%, #f7be00  51%, #f7e795  100%)',
                 transition: '0.5s',
                 backgroundSize: '200% auto',
               }}
@@ -271,7 +271,7 @@ const LandingPage = () => {
                 border={'1px'}
                 borderColor={'taggyDark.300'}
               >
-                {/* <IconTaggy /> */}
+                <IconArcaLogo />
               </Box>
               <Heading
                 as={'h3'}
@@ -312,7 +312,7 @@ const LandingPage = () => {
                 color={'taggyDark.100'}
                 boxShadow='0px 4px 10px rgba(0,0,0,0.4)'
                 sx={{
-                  backgroundImage: 'linear-gradient(to right, #ff9db9 0%, #ff3385  51%, #ff9db9  100%)',
+                  backgroundImage: 'linear-gradient(to right, #f7e795 0%, #f7be00  51%, #f7e795  100%)',
                   transition: '0.5s',
                   backgroundSize: '200% auto',
                 }}
@@ -337,7 +337,7 @@ const LandingPage = () => {
           zIndex={'-1'}
           sx={{
             background:
-              'radial-gradient(circle at 50% 100%, rgba(255,255,255,0.6) 1%, rgb(255, 177, 199,0.6) 10%, rgb(159, 32, 83,0.6) 30%, #181818 50%)',
+              'radial-gradient(circle at 50% 100%, rgba(255,255,255,0.6) 1%, rgb(247, 235, 169,0.6) 10%, rgb(196, 151, 0,0.6) 30%, #181818 50%)',
           }}
         />
         <div className={`${styles.skewed} `} />
