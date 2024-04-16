@@ -30,7 +30,7 @@ export default function useTaggyDropzone(): ReturnProps {
   const [isFileTooLarge, setIsFileTooLarge] = useState(false)
 
   const setImageStatus = useTaggyStore(state => state.setImageStatus)
-  const setDetectionResult = useTaggyStore(state => state.setDetectionResult)
+  const setDetectionResult: (result: any) => void = useTaggyStore(state => state.setDetectionResult)
   const setUploadId = useTaggyStore(state => state.setUploadId)
 
   const getUser = async () => {
@@ -46,7 +46,6 @@ export default function useTaggyDropzone(): ReturnProps {
       formData.append('api_key', process.env.NEXT_PUBLIC_CLOUDINARY_API_KEY as string)
 
       axios({
-        // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
         url: `${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_URL}/image/upload`,
         method: 'POST',
         headers: {
@@ -101,7 +100,6 @@ export default function useTaggyDropzone(): ReturnProps {
           setImageStatus(ImageStatus.UPLOADING)
 
           const file = acceptedFiles[0]
-          // eslint-disable-next-line @typescript-eslint/prefer-optional-chain
           if (file && file.type.startsWith('image/')) {
             setSelectedFile(file)
             setIsDragActive(false)

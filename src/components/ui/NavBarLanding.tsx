@@ -21,7 +21,7 @@ import {
   Button,
 } from '@chakra-ui/react'
 import { HamburgerIcon, CloseIcon } from '@chakra-ui/icons'
-// import IconTaggyLogo from '@/assets/taggyIcons/IconTaggyLogo'
+import IconArcaLogoHeader from '@/assets/arcaIcons/IconArcaLogoHeader'
 import { FaSignOutAlt } from 'react-icons/fa'
 
 import NavLink from './NavLink'
@@ -116,7 +116,7 @@ export default function NavBarLanding() {
           />
           {!isDesktop && (
             <NextLink href={'/'}>
-              {/* <IconTaggyLogo width={'120px'} /> */}
+              <IconArcaLogoHeader width={'75px'} />
             </NextLink>
           )}
         </Flex>
@@ -127,7 +127,7 @@ export default function NavBarLanding() {
               alignItems={'center'}
             >
               <NextLink href={'/'}>
-                {/* <IconTaggyLogo width={'120px'} /> */}
+                <IconArcaLogoHeader width={'75px'} />
               </NextLink>
             </HStack>
           </Flex>

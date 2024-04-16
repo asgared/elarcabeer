@@ -64,7 +64,7 @@ const LandingPage = () => {
           zIndex={'-1'}
           sx={{
             background:
-              'radial-gradient(circle at 50% 0%, rgba(255,255,255,0.6) 1%, rgb(247, 235, 169,0.6) 10%, rgb(196, 151, 0,0.6) 30%, #181818 50%)',
+              'radial-gradient(circle at 50% 0%, rgba(255,255,255,0.6) 1%, rgb(247, 235, 169,0.6) 10%, rgb(196, 151, 0,0.6) 30%, #1A1A1A 50%)',
           }}
         />
         <Card
@@ -93,7 +93,7 @@ const LandingPage = () => {
               mb={6}
               sx={{ textWrap: 'balance' }}
             >
-              {t('mainSection.value')} <span style={{ fontSize: '40px' }}>🖼️</span>
+              {t('mainSection.value')} <span style={{ fontSize: '40px' }}>🍺</span>
             </Heading>
           </CardHeader>
           <CardBody

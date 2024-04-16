@@ -13,7 +13,7 @@ import CommunityCardV from '@/components/community/CommunityCardV'
 
 // import { AuthRedirect } from '@/hooks/useAuthUser'
 
-// import IconTaggyLogo from '@/assets/taggyIcons/IconTaggyLogo'
+import IconArcaLogo from '@/assets/arcaIcons/IconArcaLogo'
 import { ArrowBackIcon } from '@chakra-ui/icons'
 
 function SignInPage() {
@@ -68,7 +68,7 @@ function SignInPage() {
                 </Text>
               </NextLink>
 
-              <Box
+              {/* <Box
                 transform={'translateX(-100px)'}
                 opacity={0}
                 sx={{
@@ -83,7 +83,7 @@ function SignInPage() {
                   text={t('community.cardShow.text')}
                   tags={t('community.cardShow.tags')}
                 />
-              </Box>
+              </Box> */}
             </AspectRatio>
           </VStack>
         </Center>
@@ -107,7 +107,7 @@ function SignInPage() {
                 textAlign={'center'}
               >
                 <Text color={'taggyDark.600'}>Welcome to </Text>
-                {/* <IconTaggyLogo width={'200px'} /> */}
+                <IconArcaLogo width={'75px'} />
               </Box>
               <AuthForm />
             </VStack>

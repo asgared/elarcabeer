@@ -15,7 +15,7 @@ import {
   MenuDivider,
   Skeleton,
 } from '@chakra-ui/react'
-// import IconTaggyLogo from '@/assets/taggyIcons/IconTaggyLogo'
+import IconArcaLogoHeader from '@/assets/arcaIcons/IconArcaLogoHeader'
 import { FaMagic, FaSignOutAlt } from 'react-icons/fa'
 
 import { useTranslation } from 'next-i18next'
@@ -38,7 +38,7 @@ export default function NavBar() {
 
   return (
     <Box
-      id='taggy-navbar'
+      id='arca-navbar'
       as='nav'
       width={['100%', '100%', '90%', '80%']}
       maxW={'1200px'}
@@ -56,7 +56,7 @@ export default function NavBar() {
           spacing={4}
           alignItems={'center'}
         >
-          {/* <IconTaggyLogo width={'120px'} /> */}
+        <IconArcaLogoHeader width={'75px'} />
         </HStack>
 
         {pathname === '/freegeneration' ? (

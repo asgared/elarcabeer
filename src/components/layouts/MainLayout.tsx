@@ -10,7 +10,8 @@ interface Props {
 
 export default function MainLayout({
 	children,
-	imageUrl = "https://res.cloudinary.com/ljtdev/image/upload/v1678488373/WhatsApp_Image_2023-03-10_at_17.45.20_xdibu7.jpg",
+	// imageUrl = "https://res.cloudinary.com/ljtdev/image/upload/v1678488373/WhatsApp_Image_2023-03-10_at_17.45.20_xdibu7.jpg",
+	imageUrl = 'https://poipgxodwlrddqeqauwg.supabase.co/storage/v1/object/public/arca-assets/el_arca.jpg',
 	pageDescription,
 	title,
 }: Props) {

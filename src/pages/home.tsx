@@ -67,7 +67,7 @@ function HomePage() {
     <>
       {imageStatusState === ImageStatus.READY || imageStatusState === ImageStatus.DONE ? (
         <AppLayout
-          title={'Taggy'}
+          title={'El Arca Beer'}
           pageDescription={'Find the right text for your posts based on the content of your photo.'}
         >
           {renderContent()}
