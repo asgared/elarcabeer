@@ -5,7 +5,7 @@ import TaggyList from './TaggyList'
 import TaggyListKeywords from './TaggyListKeywords'
 
 import { InfoIcon } from '@chakra-ui/icons'
-import TaggyCopyToClipboardSimple from '@/components/ui/TaggyCopyToClipboardSimple'
+// import TaggyCopyToClipboardSimple from '@/components/ui/TaggyCopyToClipboardSimple'
 import { useUserContext } from '@/hooks/useAuthUser'
 import { useTaggyStore } from '@/store/taggyStore'
 
@@ -62,11 +62,11 @@ export default function CategorizationResult() {
             mt={2}
             justifyContent={'flex-end'}
           >
-            <TaggyCopyToClipboardSimple
+            {/* <TaggyCopyToClipboardSimple
               text={keywordsDetected?.join(', ')}
               id={'tags-detected'}
               buttonText={t('buttons.copyKeywords')}
-            />
+            /> */}
           </HStack>
         )}
       </Box>

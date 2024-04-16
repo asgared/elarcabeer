@@ -1,7 +1,7 @@
 /* eslint-disable @next/next/no-img-element */
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import ReactCrop, { centerCrop, makeAspectCrop, type Crop, type PixelCrop } from 'react-image-crop'
-import { buildUrl } from 'cloudinary-build-url'
+// import { buildUrl } from 'cloudinary-build-url'
 
 import { AspectRatio, Box, useMediaQuery } from '@chakra-ui/react'
 import ControlsImage from './ControlsImage'
@@ -92,22 +92,22 @@ export default function ImageCropResult() {
     }
   }
 
-  const myBuildUrl = useCallback(
-    (imageType: TaggyImageType) => {
-      const imageParams = taggyParams()
-      const paramValue = imageParams[imageType]
+  // const myBuildUrl = useCallback(
+  //   (imageType: TaggyImageType) => {
+  //     const imageParams = taggyParams()
+  //     const paramValue = imageParams[imageType]
 
-      return buildUrl(detectionResult.publicId, {
-        cloud: {
-          cloudName: process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME,
-        },
-        transformations: {
-          rawTransformation: paramValue,
-        },
-      })
-    },
-    [detectionResult.publicId]
-  )
+  //     return buildUrl(detectionResult.publicId, {
+  //       cloud: {
+  //         cloudName: process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME,
+  //       },
+  //       transformations: {
+  //         rawTransformation: paramValue,
+  //       },
+  //     })
+  //   },
+  //   [detectionResult.publicId]
+  // )
 
   function saveImage() {
     if (previewCanvasRef.current == null) {
@@ -140,12 +140,12 @@ export default function ImageCropResult() {
     [completedCrop, scale, rotate]
   )
 
-  const imgSrc = useMemo(() => myBuildUrl(TaggyImageType.IMAGECROPPAD), [myBuildUrl])
-  const imgSrcBlur = useMemo(() => myBuildUrl(TaggyImageType.IMAGECROPPADBLUR), [myBuildUrl])
+  // const imgSrc = useMemo(() => myBuildUrl(TaggyImageType.IMAGECROPPAD), [myBuildUrl])
+  // const imgSrcBlur = useMemo(() => myBuildUrl(TaggyImageType.IMAGECROPPADBLUR), [myBuildUrl])
 
   return (
     <>
-      <AspectRatio
+      {/* <AspectRatio
         p={10}
         ratio={[4 / 5.3]}
         backgroundImage={
@@ -202,7 +202,7 @@ export default function ImageCropResult() {
             />
           )}
         </Box>
-      </AspectRatio>
+      </AspectRatio> */}
 
       <canvas
         ref={previewCanvasRef}
@@ -227,7 +227,7 @@ export default function ImageCropResult() {
       </a>
 
       <Box>
-        <ControlsImage
+        {/* <ControlsImage
           imgSrc={imgSrc}
           scale={scale}
           rotate={rotate}
@@ -238,7 +238,7 @@ export default function ImageCropResult() {
           setImageCropSelected={setImageCropSelected}
           saveImage={saveImage}
           setEditImage={setEditImage}
-        />
+        /> */}
       </Box>
     </>
   )

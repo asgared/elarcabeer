@@ -1,7 +1,6 @@
 import axios from 'axios'
 import { type ImageParams, type Config } from '../types'
 
-// eslint-disable-next-line @typescript-eslint/naming-convention
 export const scanningAndCategorization = async (secure_url: string) => {
   const categorizationResult = await axios({
     method: 'POST',

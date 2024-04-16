@@ -9,6 +9,7 @@ export default function TagListKeywords() {
   const data = detectionResult?.keyWords?.[0]
   if (data?.tags.length === 0) return null
 
+  // eslint-disable-next-line react-hooks/rules-of-hooks
   const [isDesktop] = useMediaQuery('(min-width: 769px)')
 
   return (

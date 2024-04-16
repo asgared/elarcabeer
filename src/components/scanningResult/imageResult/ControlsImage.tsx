@@ -14,14 +14,14 @@ import {
   AccordionIcon,
   AccordionPanel,
 } from '@chakra-ui/react'
-import IconTaggyDownloadImage from '@/assets/taggyIcons/IconTaggyDownloadImage'
-import IconTaggyRectangle from '@/assets/taggyIcons/IconTaggyRectangle'
-import IconTaggySquareImage from '@/assets/taggyIcons/IconTaggySquareImage'
+// import IconTaggyDownloadImage from '@/assets/taggyIcons/IconTaggyDownloadImage'
+// import IconTaggyRectangle from '@/assets/taggyIcons/IconTaggyRectangle'
+// import IconTaggySquareImage from '@/assets/taggyIcons/IconTaggySquareImage'
 
 import { TaggyImageCropType } from '@/types.d'
 
 import { FaImage } from 'react-icons/fa'
-import ButtonTaggyGhost from '@/components/ui/ButtonTaggyGhost'
+// import ButtonTaggyGhost from '@/components/ui/ButtonTaggyGhost'
 
 interface Props {
   imgSrc: string
@@ -95,10 +95,10 @@ export default function ControlsImage({
                   setImageCropSelected(TaggyImageCropType.SQUARECROP)
                 }}
               >
-                <IconTaggySquareImage
+                {/* <IconTaggySquareImage
                   fill={imageCropSelected === TaggyImageCropType.SQUARECROP ? '#E0E0E0' : '#3a3a3a'}
                   width='30px'
-                />
+                /> */}
               </Button>
               <Button
                 variant='unstyled'
@@ -106,14 +106,14 @@ export default function ControlsImage({
                   setImageCropSelected(TaggyImageCropType.VERTICALCROP)
                 }}
               >
-                <IconTaggyRectangle
+                {/* <IconTaggyRectangle
                   fill={imageCropSelected === TaggyImageCropType.VERTICALCROP ? '#E0E0E0' : '#3a3a3a'}
                   width='30px'
-                />
+                /> */}
               </Button>
             </Flex>
 
-            <ButtonTaggyGhost
+            {/* <ButtonTaggyGhost
               id={'save-image'}
               handleClick={saveImage}
             >
@@ -122,7 +122,7 @@ export default function ControlsImage({
                 color='#ff9db9'
               />
               {t('buttons.saveImage')}
-            </ButtonTaggyGhost>
+            </ButtonTaggyGhost> */}
           </Flex>
           <Box>
             <label htmlFor='scale-input'>{t('scanningResults.scale')}: </label>

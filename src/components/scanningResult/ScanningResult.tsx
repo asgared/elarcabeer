@@ -4,8 +4,8 @@ import CategorizationResult from './categorizationResult/CategorizationResult'
 import TaggyResultMobile from './categorizationResult/CategorizationResultMobile'
 
 import { useTaggyStore } from '@/store/taggyStore'
-import ButtonTaggySimple from '@/components/ui/ButtonTaggySimple'
-import IconTaggyAddImage from '@/assets/taggyIcons/IconTaggyAddImage'
+// import ButtonTaggySimple from '@/components/ui/ButtonTaggySimple'
+// import IconTaggyAddImage from '@/assets/taggyIcons/IconTaggyAddImage'
 import { useTranslation } from 'next-i18next'
 import GenerateConfiguration from '@/components/scanningResult/categorizationResult/GenerateConfiguration'
 import ImageCropResult from './imageResult/ImageCropResult'
@@ -55,7 +55,7 @@ export default function ScanningResult() {
               pt={0}
               p={`${isDesktop ? 6 : 4}`}
             >
-              <Flex
+              {/* <Flex
                 w={'full'}
                 justifyContent={'flex-end'}
                 // borderTop={'1px'}
@@ -75,7 +75,7 @@ export default function ScanningResult() {
                   />
                   {t('buttons.newImage')}
                 </ButtonTaggySimple>
-              </Flex>
+              </Flex> */}
             </CardFooter>
           </Card>
 

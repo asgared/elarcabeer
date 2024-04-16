@@ -3,14 +3,14 @@ import { useTranslation } from 'next-i18next'
 import NextLink from 'next/link'
 
 import { Alert, AlertIcon, Box, Flex, Text, VStack } from '@chakra-ui/react'
-import { TaggyCopyToClipboard } from '@/components/ui'
+// import { TaggyCopyToClipboard } from '@/components/ui'
 import TaggyQuotes from './TaggyQuotes'
 
-import IconTaggyReload from '../../../assets/taggyIcons/IconTaggyReload'
+// import IconTaggyReload from '../../../assets/taggyIcons/IconTaggyReload'
 
 import { useTaggyStore } from '@/store/taggyStore'
 import { getQuotesByTags } from '@/services/cloudinary'
-import ButtonTaggy from '@/components/ui/ButtonTaggy'
+// import ButtonTaggy from '@/components/ui/ButtonTaggy'
 import { updateGenerations } from '@/utils/supabase-db'
 import LocalHistory from '../LocalHistory'
 import { updateLocalHIstory } from '@/utils/generation-utils'
@@ -125,7 +125,7 @@ export default function QuotesResult({ selectedTags, textCaptionTags, tabSelecte
         </Text>
       </Box>
 
-      <Flex
+      {/* <Flex
         id='taggy-regenerate-buttons'
         justifyContent={'space-between'}
         alignItems={'center'}
@@ -156,7 +156,7 @@ export default function QuotesResult({ selectedTags, textCaptionTags, tabSelecte
           text={quotes.text}
           tags={textCaptionTags}
         />
-      </Flex>
+      </Flex> */}
 
       {showError && (
         <Alert status='error'>

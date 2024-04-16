@@ -11,7 +11,7 @@ export default function TaggyTabs() {
 
   const { t } = useTranslation()
 
-  const { selectedWordsAndTags, textHashtags } = useSelectedWordsAndTags()
+  // const { selectedWordsAndTags, textHashtags } = useSelectedWordsAndTags()
 
   return (
     <Tabs
@@ -58,21 +58,21 @@ export default function TaggyTabs() {
           padding={0}
           margin={0}
         >
-          <CaptionResult
+          {/* <CaptionResult
             textCaptionTags={textHashtags}
             selectedTags={selectedWordsAndTags}
             tabSelected={tabSelected}
-          />
+          /> */}
         </TabPanel>
         <TabPanel
           padding={0}
           margin={0}
         >
-          <QuotesResult
+          {/* <QuotesResult
             textCaptionTags={textHashtags}
             selectedTags={selectedWordsAndTags}
             tabSelected={tabSelected}
-          />
+          /> */}
         </TabPanel>
       </TabPanels>
     </Tabs>

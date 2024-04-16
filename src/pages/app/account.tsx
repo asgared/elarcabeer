@@ -6,7 +6,7 @@ import axios from 'axios'
 
 import AccountLayout from '@/components/layouts/AppLayout'
 import { Alert, AlertIcon, Box, HStack, Stack, Text, VStack } from '@chakra-ui/react'
-import ButtonTaggyGhost from '@/components/ui/ButtonTaggyGhost'
+// import ButtonTaggyGhost from '@/components/ui/ButtonTaggyGhost'
 import BadgedPlan from '@/components/ui/BadgedPlan'
 import Title from '@/components/ui/Title'
 
@@ -76,7 +76,7 @@ const AccountPage = () => {
           </VStack>
         </Stack>
 
-        <VStack
+        {/* <VStack
           mt={6}
           gap={4}
           alignItems={'flex-start'}
@@ -105,7 +105,7 @@ const AccountPage = () => {
               {t('buttons.upgradePlan')}
             </ButtonTaggyGhost>
           )}
-        </VStack>
+        </VStack> */}
       </VStack>
     </AccountLayout>
   )

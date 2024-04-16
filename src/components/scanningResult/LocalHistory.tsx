@@ -14,7 +14,7 @@ import {
   Textarea,
 } from '@chakra-ui/react'
 
-import TaggyCopyToClipboardSimple from '../ui/TaggyCopyToClipboardSimple'
+// import TaggyCopyToClipboardSimple from '../ui/TaggyCopyToClipboardSimple'
 
 import { MdHistory } from 'react-icons/md'
 interface Props {
@@ -93,11 +93,11 @@ export default function LocalHistory({ tab, newCaption }: Props) {
                   {text.text}
                 </Textarea>
                 <HStack justifyContent={'flex-end'}>
-                  <TaggyCopyToClipboardSimple
+                  {/* <TaggyCopyToClipboardSimple
                     id={`history${tab}Text${text.id}`}
                     text={text.text}
                     buttonText={t('buttons.copyToClipboard')}
-                  />
+                  /> */}
                 </HStack>
               </Box>
             ))}

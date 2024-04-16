@@ -14,7 +14,7 @@ import { useTaggyStore } from '@/store/taggyStore'
 import { ImageStatus } from '@/types.d'
 import { Center } from '@chakra-ui/react'
 import { TaggyDropzone } from '@/components/ui'
-import { Demos } from '@/components/home'
+// import { Demos } from '@/components/home'
 
 function GenerationPage() {
   const imageStatus = useTaggyStore(state => state.imageStatus)
@@ -45,7 +45,7 @@ function GenerationPage() {
               as='section'
               className='demos-section'
             >
-              <Demos />
+              {/* <Demos /> */}
             </Center>
           </>
         )

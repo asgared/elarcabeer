@@ -3,17 +3,17 @@ import { useTranslation } from 'next-i18next'
 
 import { Alert, AlertIcon, Box, Flex, HStack, Text, VStack } from '@chakra-ui/react'
 
-import IconTaggyReload from '../../../assets/taggyIcons/IconTaggyReload'
+// import IconTaggyReload from '../../../assets/taggyIcons/IconTaggyReload'
 
 import { useTaggyStore } from '@/store/taggyStore'
 import { getCaptionByTags, getCaptionTweetByTags } from '@/services/cloudinary'
-import ButtonTaggy from '@/components/ui/ButtonTaggy'
+// import ButtonTaggy from '@/components/ui/ButtonTaggy'
 import { updateGenerations } from '@/utils/supabase-db'
 import LocalHistory from '../LocalHistory'
 import { updateLocalHIstory } from '@/utils/generation-utils'
 import PreviewCard from '../PreviewCard'
 import TaggyCaption from './TaggyCaption'
-import { TaggyCopyToClipboard } from '@/components/ui'
+// import { TaggyCopyToClipboard } from '@/components/ui'
 import { useConfigStore } from '@/store/configStore'
 import { useUserContext } from '@/hooks/useAuthUser'
 import { supabase } from '@/utils/supabase-client'
@@ -155,7 +155,7 @@ export default function CaptionResult({ selectedTags, textCaptionTags, tabSelect
         mb={4}
       >
         <Flex gap={{ base: 1, lg: 2 }}>
-          <ButtonTaggy
+          {/* <ButtonTaggy
             id={'reload-quotes'}
             handleClick={getCaption}
             disabled={user.credits < 1 && !user.is_subscribed}
@@ -165,7 +165,7 @@ export default function CaptionResult({ selectedTags, textCaptionTags, tabSelect
               color='#111'
             />
             {t('buttons.reloadCaption')}
-          </ButtonTaggy>
+          </ButtonTaggy> */}
 
           <PreviewCard
             typeText='caption'
@@ -174,11 +174,11 @@ export default function CaptionResult({ selectedTags, textCaptionTags, tabSelect
           />
         </Flex>
 
-        <TaggyCopyToClipboard
+        {/* <TaggyCopyToClipboard
           text={caption.text}
           tags={textCaptionTags}
           type='caption'
-        />
+        /> */}
       </Flex>
 
       {showError && (

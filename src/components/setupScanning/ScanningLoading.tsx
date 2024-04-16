@@ -1,7 +1,7 @@
 import { useTranslation } from 'next-i18next'
 
 import { Text, VStack } from '@chakra-ui/react'
-import IconTaggy from '../../assets/taggyIcons/IconTaggy'
+// import IconTaggy from '../../assets/taggyIcons/IconTaggy'
 
 import animations from '@/styles/animations.module.css'
 
@@ -13,10 +13,10 @@ export default function ScanningLoading() {
       padding={12}
       as='section'
     >
-      <IconTaggy
+      {/* <IconTaggy
         className={animations.iconLoading}
         width={'150px'}
-      />
+      /> */}
       <Text
         fontSize={22}
         textAlign={'center'}

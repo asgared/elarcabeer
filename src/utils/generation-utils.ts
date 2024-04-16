@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/restrict-plus-operands */
-
 export const updateLocalHIstory = (tab: string, newText: string, tags: string[]) => {
   let history = []
   const plainTags = tags.map(t => `#${t}`).join(' ')

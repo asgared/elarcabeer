@@ -15,8 +15,8 @@ import {
   useToast,
   VStack,
 } from '@chakra-ui/react'
-import ButtonTaggy from '../ui/ButtonTaggy'
-import ButtonTaggySimple from '../ui/ButtonTaggySimple'
+// import ButtonTaggy from '../ui/ButtonTaggy'
+// import ButtonTaggySimple from '../ui/ButtonTaggySimple'
 import CommunityCardV from '../community/CommunityCardV'
 
 import { useTaggyStore } from '@/store/taggyStore'
@@ -26,8 +26,8 @@ import { useUserContext } from '@/hooks/useAuthUser'
 
 import { FiSend } from 'react-icons/fi'
 import { FaEye, FaSave } from 'react-icons/fa'
-import ButtonTaggyGhost from '../ui/ButtonTaggyGhost'
-import Toast from '../ui/Toast'
+// import ButtonTaggyGhost from '../ui/ButtonTaggyGhost'
+// import Toast from '../ui/Toast'
 
 interface Props {
   typeText: string
@@ -74,10 +74,13 @@ export default function PreviewCard({ typeText, text, tags }: Props) {
       toast({
         position: 'bottom-right',
         render: () => (
-          <Toast
-            text={t('sendToCommunity.sent')}
-            success
-          />
+          // <Toast
+          //   text={t('sendToCommunity.sent')}
+          //   success
+          // />
+          <text>
+            test
+          </text>
         ),
       })
     }
@@ -103,10 +106,13 @@ export default function PreviewCard({ typeText, text, tags }: Props) {
       toast({
         position: 'bottom-right',
         render: () => (
-          <Toast
-            text={t('saveGeneration')}
-            success
-          />
+          // <Toast
+          //   text={t('saveGeneration')}
+          //   success
+          // />
+          <text>
+            test b
+          </text>
         ),
       })
     }
@@ -114,12 +120,12 @@ export default function PreviewCard({ typeText, text, tags }: Props) {
 
   return (
     <>
-      <ButtonTaggySimple
+      {/* <ButtonTaggySimple
         title='Preview'
         handleClick={onOpen}
       >
         <FaEye />
-      </ButtonTaggySimple>
+      </ButtonTaggySimple> */}
 
       <Modal
         isOpen={isOpen}
@@ -161,7 +167,7 @@ export default function PreviewCard({ typeText, text, tags }: Props) {
               mb={8}
               p={0}
             >
-              <VStack gap={4}>
+              {/* <VStack gap={4}>
                 <HStack>
                   {userContext?.user?.is_subscribed && (
                     <ButtonTaggyGhost
@@ -190,7 +196,7 @@ export default function PreviewCard({ typeText, text, tags }: Props) {
                     {t('sendToCommunity.sendedCaption')}
                   </Text>
                 </Box>
-              </VStack>
+              </VStack> */}
             </ModalFooter>
           )}
         </ModalContent>
