@@ -8,6 +8,7 @@ export default class Document extends NextDocument {
 				<Head>
 					<link rel='manifest' href='/manifest.json' />
 					<link rel='apple-touch-icon' href='/icons/icon.png'></link>
+					<meta name="facebook-domain-verification" content="58kky7jjir1hntcdyjmblpo07c96nu" />
 					<meta name='theme-color' content='#1A1A1A' />
 					<meta name="apple-mobile-web-app-capable" content="yes"/>
 					<meta name="mobile-web-app-capable" content="yes"/>
