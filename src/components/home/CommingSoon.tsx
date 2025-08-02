@@ -43,9 +43,9 @@ const CommingSoon = () => {
         >
           <Image
             src="/logos/beer_glasses.svg"
-            layout="fill"
-            objectFit="contain"
             alt="beer glasses"
+            fill
+            style={{ objectFit: 'contain' }}
           />
         </MotionBox>
       </Box>
