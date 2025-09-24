@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "@chakra-ui/icons": "^2.2.4",
-    "@chakra-ui/react": "^3.24.0",
+    "@chakra-ui/react": "^2.10.9",
     "@chakra-ui/system": "^2.6.2",
     "@chakra-ui/theme": "^3.4.6",
     "@emotion/react": "^11.14.0",
@@ -19,7 +19,7 @@
     "@types/react": "19.1.9",
     "@types/react-dom": "19.1.7",
     "@vercel/speed-insights": "^1.2.0",
-    "framer-motion": "^12.23.12",
+    "framer-motion": "^11.18.2",
     "i18next": "^25.3.2",
     "next": "^15.4.5",
     "next-i18next": "^15.4.2",
