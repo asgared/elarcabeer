@@ -1,0 +1,22 @@
+:root {
+  color-scheme: dark;
+}
+
+html,
+body {
+  max-width: 100%;
+  background-color: #0c1b1e;
+  color: #f0f6f8;
+  min-height: 100%;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}

@@ -1,0 +1,14 @@
+{
+  "navigation": {
+    "shop": "Shop",
+    "bars": "Bares",
+    "discover": "Discover",
+    "loyalty": "Lealtad",
+    "account": "Cuenta",
+    "cart": "Carrito"
+  },
+  "cta": {
+    "joinClub": "Únete al Arca Crew",
+    "shopNow": "Compra ahora"
+  }
+}
