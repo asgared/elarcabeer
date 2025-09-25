@@ -5,7 +5,6 @@ settings:
   excludeLinksFromLockfile: false
 
 importers:
-
   .:
     dependencies:
       '@chakra-ui/icons':
@@ -5275,3 +5274,4 @@ snapshots:
     optionalDependencies:
       '@types/react': 18.3.24
       react: 18.2.0
+# test comment
