@@ -1,5 +1,5 @@
 import {Box, Container, Grid, Heading, Stack, Text} from "@chakra-ui/react";
-import Link from "next-intl/link";
+import {Link} from '@/i18n/navigation';
 
 export const dynamic = "force-dynamic";
 

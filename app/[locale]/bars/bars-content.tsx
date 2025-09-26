@@ -11,7 +11,7 @@ import {
   Stack,
   Text
 } from "@chakra-ui/react";
-import Link from "next-intl/link";
+import {Link} from '@/i18n/navigation';
 import {useMemo, useState} from "react";
 
 import {StoreMap} from "@/components/ui/store-map";

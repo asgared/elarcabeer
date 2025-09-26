@@ -11,7 +11,7 @@ import {
   Stack,
   Text
 } from "@chakra-ui/react";
-import Link from "next-intl/link";
+import {Link} from '@/i18n/navigation';
 
 import {Product} from "../../types/catalog";
 import {formatCurrency} from "../../utils/currency";
