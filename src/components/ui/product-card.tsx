@@ -11,7 +11,7 @@ import {
   Stack,
   Text
 } from "@chakra-ui/react";
-import Link from "next/link";
+import Link from "next-intl/link";
 
 import {Product} from "../../types/catalog";
 import {formatCurrency} from "../../utils/currency";
@@ -33,6 +33,7 @@ export function ProductCard({product}: {product: Product}) {
             borderRadius="xl"
             h={240}
             objectFit="cover"
+            fallbackSrc="/images/beer-bg.jpg"
             src={product.heroImage}
             w="full"
           />

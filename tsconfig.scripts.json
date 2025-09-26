@@ -4,5 +4,5 @@
     "module": "commonjs",
     "target": "es2020"
   },
-  "include": ["prisma/**/*.ts"]
+  "include": ["prisma/**/*.ts", "scripts/**/*.ts", "src/**/*.ts", "src/**/*.tsx"]
 }

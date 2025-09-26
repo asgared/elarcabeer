@@ -3,6 +3,8 @@ import {NextRequest, NextResponse} from "next/server";
 import {posts} from "@/data/posts";
 import {products} from "@/data/products";
 
+export const dynamic = "force-dynamic";
+
 export async function GET(request: NextRequest) {
   const {searchParams} = new URL(request.url);
   const query = searchParams.get("q")?.toLowerCase() ?? "";

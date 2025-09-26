@@ -2,6 +2,8 @@ import {Box, Button, Container, Heading, Stack, Text} from "@chakra-ui/react";
 
 import {subscriptionPlans} from "@/data/subscriptions";
 
+export const dynamic = "force-dynamic";
+
 export default function AccountSubscriptionsPage() {
   const activePlan = subscriptionPlans[1];
 

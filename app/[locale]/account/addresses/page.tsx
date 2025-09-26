@@ -1,5 +1,7 @@
 import {Box, Button, Container, Heading, Stack, Text} from "@chakra-ui/react";
 
+export const dynamic = "force-dynamic";
+
 export default function AddressesPage() {
   return (
     <Container maxW="4xl">

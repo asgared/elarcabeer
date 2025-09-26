@@ -53,10 +53,23 @@ export default function ProductDetailPage({params}: {params: {slug: string}}) {
       <Grid gap={12} templateColumns={{base: "1fr", lg: "1.2fr 1fr"}}>
         <GridItem>
           <Stack spacing={4}>
-            <Image alt={product.name} borderRadius="3xl" src={product.heroImage} />
+            <Image
+              alt={product.name}
+              borderRadius="3xl"
+              fallbackSrc="/images/beer-bg.jpg"
+              src={product.heroImage}
+            />
             <Stack direction="row" spacing={4}>
               {product.gallery.map((image) => (
-                <Image key={image} alt={product.name} borderRadius="xl" h={120} objectFit="cover" src={image} />
+                <Image
+                  key={image}
+                  alt={product.name}
+                  borderRadius="xl"
+                  fallbackSrc="/images/beer-bg.jpg"
+                  h={120}
+                  objectFit="cover"
+                  src={image}
+                />
               ))}
             </Stack>
           </Stack>

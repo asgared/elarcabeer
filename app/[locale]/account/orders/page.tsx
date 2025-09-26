@@ -1,5 +1,7 @@
 import {Box, Container, Heading, Stack, Text} from "@chakra-ui/react";
 
+export const dynamic = "force-dynamic";
+
 export default function OrdersPage() {
   const sampleOrders = [
     {

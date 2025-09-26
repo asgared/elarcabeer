@@ -5,7 +5,7 @@ import {ReactNode} from "react";
 import {SiteShell} from "@/components/layout/site-shell";
 import {AppProviders} from "@/providers/app-providers";
 import {AppLocale, locales} from "@/i18n/locales";
-import {getMessages, getTranslations} from "next-intl/server";
+import {getMessages, setRequestLocale} from "next-intl/server";
 import {notFound} from "next/navigation";
 
 export function generateStaticParams() {
@@ -47,7 +47,7 @@ export default async function LocaleLayout({children, params}: LayoutProps) {
     notFound();
   }
 
-  getTranslations(locale);
+  setRequestLocale(locale);
   const messages = await getMessages();
 
   return (

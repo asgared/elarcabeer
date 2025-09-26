@@ -10,7 +10,7 @@ import {
   Stack,
   Text
 } from "@chakra-ui/react";
-import Link from "next/link";
+import Link from "next-intl/link";
 
 import {bundles} from "../../data/bundles";
 import {products} from "../../data/products";
@@ -27,7 +27,14 @@ export function BundleCard({bundle}: {bundle: Bundle}) {
   return (
     <Card as={Link} href={`/bundles/${bundle.slug}`} transition="all 0.2s" _hover={{transform: "translateY(-6px)"}}>
       <CardBody>
-        <Image alt={bundle.name} borderRadius="xl" h={240} objectFit="cover" src={bundle.image} />
+        <Image
+          alt={bundle.name}
+          borderRadius="xl"
+          fallbackSrc="/images/beer-bg.jpg"
+          h={240}
+          objectFit="cover"
+          src={bundle.image}
+        />
         <Stack spacing={3} mt={6}>
           <HStack justify="space-between">
             <Heading size="md">{bundle.name}</Heading>

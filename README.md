@@ -41,6 +41,26 @@ pnpm db:seed
 pnpm dev
 ```
 
+## Variables de entorno
+
+| Variable | Descripción | Cómo obtenerla |
+| --- | --- | --- |
+| `DATABASE_URL` | Cadena de conexión para Postgres (prod) o SQLite (dev) | Consola de tu proveedor o `file:./dev.db` para SQLite |
+| `DATABASE_PROVIDER` | Tipo de base de datos que usa Prisma (`postgresql` o `sqlite`) | Define manualmente según tu entorno |
+| `STRIPE_SECRET_KEY` | Llave secreta de Stripe para crear sesiones de pago | [Stripe Dashboard → Developers → API keys](https://dashboard.stripe.com/test/apikeys) (`sk_test_...`) |
+| `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` | Llave pública usada en el frontend de Stripe | Mismo panel de Stripe (`pk_test_...`) |
+| `STRIPE_WEBHOOK_SECRET` | Secreto del endpoint webhook configurado | `stripe listen --forward-to` o Dashboard → Webhooks (`whsec_...`) |
+| `NEXTAUTH_SECRET` | Secreto para firmar JWT de NextAuth | `openssl rand -base64 32` |
+| `NEXTAUTH_URL` | URL base de la app para callbacks de NextAuth | `http://localhost:3000` en desarrollo, dominio productivo en producción |
+| `MAPBOX_TOKEN` | Token público para Mapbox GL | [Cuenta Mapbox → Access tokens](https://account.mapbox.com/) (`pk....`) |
+| `RESEND_API_KEY` | Llave para envío de emails transaccionales | [Resend Dashboard](https://resend.com/) (`re_...`) |
+| `CLOUDINARY_URL` | Cadena de conexión para subir activos a Cloudinary | [Cloudinary Console → Programmable Media](https://console.cloudinary.com/) |
+
+## Healthcheck y utilidades
+
+- `pnpm health`: ejecuta las comprobaciones de base de datos, Stripe, NextAuth y servicios externos.
+- Endpoints JSON disponibles en `/api/health` y `/admin/health`.
+
 ## Scripts disponibles
 
 - `pnpm dev`: servidor de desarrollo en `http://localhost:3000`.
@@ -48,6 +68,8 @@ pnpm dev
 - `pnpm start`: servidor de producción.
 - `pnpm lint`: linting con ESLint.
 - `pnpm typecheck`: verificación TypeScript.
+- `pnpm health`: comprobaciones de dependencias externas.
+- `pnpm test`: pruebas E2E con Playwright (flujo Checkout, actualmente marcado como pendiente).
 - `pnpm db:migrate`: ejecuta migraciones en la base configurada.
 - `pnpm db:seed`: carga datos de ejemplo (cervezas, bundles, bares, posts).
 

@@ -8,6 +8,9 @@
     "start": "next start",
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
+    "health": "ts-node --project tsconfig.scripts.json --require tsconfig-paths/register scripts/health-check.ts",
+    "test:e2e": "playwright test",
+    "test": "pnpm test:e2e",
     "db:migrate": "prisma migrate deploy",
     "db:generate": "prisma generate",
     "db:seed": "ts-node --project tsconfig.scripts.json prisma/seed.ts"
@@ -59,5 +62,6 @@
     "ts-node": "^10.9.2",
     "tsconfig-paths": "^4.2.0",
     "typescript": "^5.3.3"
-  }
+  },
+  "packageManager": "pnpm@9.1.0"
 }
