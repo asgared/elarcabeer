@@ -3,40 +3,59 @@ generator client {
 }
 
 datasource db {
-  provider = env("DATABASE_PROVIDER")
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
 model Product {
-  id          String    @id
-  slug        String    @unique
+  id          String  @id @default(cuid())
+  slug        String  @unique
   name        String
   description String
-  category    String
+  // category  String                // si quieres mantener una etiqueta suelta, renómbrala p.ej. categoryLabel
   style       String
   rating      Float
   heroImage   String
-  limited     Boolean   @default(false)
-  variants    Variant[]
-  reviews     Review[]
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  limited     Boolean @default(false)
+
+  variants Variant[] // <- necesita el modelo Variant
+  reviews  Review[] // <- necesita el modelo Review
+
+  // lados opuestos
+  bundleItems BundleItem[]
+  categories  Category[]   @relation("ProductCategories")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Variant {
-  id        String  @id
-  name      String
-  abv       Float
-  ibu       Int
-  packSize  Int
-  price     Int
-  product   Product @relation(fields: [productId], references: [id])
+  id       String @id @default(cuid())
+  name     String
+  abv      Float
+  ibu      Int
+  packSize Int
+  price    Int
+
   productId String
+  product   Product @relation(fields: [productId], references: [id])
+}
+
+model Review {
+  id      String @id @default(cuid())
+  rating  Int
+  comment String
+  author  String
+
+  productId String
+  product   Product @relation(fields: [productId], references: [id])
+
+  createdAt DateTime @default(now())
 }
 
 model Bundle {
-  id          String @id
-  slug        String @unique
+  id          String       @id @default(cuid())
+  slug        String       @unique
   name        String
   description String
   price       Int
@@ -46,81 +65,76 @@ model Bundle {
 }
 
 model BundleItem {
-  id        String  @id @default(cuid())
-  quantity  Int
-  product   Product @relation(fields: [productId], references: [id])
+  id       String @id @default(cuid())
+  quantity Int
+
   productId String
-  bundle    Bundle  @relation(fields: [bundleId], references: [id])
   bundleId  String
+
+  product Product @relation(fields: [productId], references: [id])
+  bundle  Bundle  @relation(fields: [bundleId], references: [id])
+
+  @@unique([bundleId, productId])
 }
 
 model Category {
-  id    String   @id
-  name  String   @unique
-  slug  String   @unique
-  products Product[]
-}
-
-model Review {
-  id        String   @id
-  rating    Int
-  comment   String
-  author    String
-  product   Product  @relation(fields: [productId], references: [id])
-  productId String
-  createdAt DateTime @default(now())
+  id       String    @id @default(cuid())
+  name     String    @unique
+  slug     String    @unique
+  products Product[] @relation("ProductCategories")
 }
 
 model Store {
-  id            String   @id
-  slug          String   @unique
-  name          String
-  address       String
-  latitude      Float
-  longitude     Float
-  petFriendly   Boolean  @default(false)
-  kitchen       Boolean  @default(false)
-  events        Boolean  @default(false)
-  hours         String
-  menuUrl       String?
+  id             String  @id @default(cuid())
+  slug           String  @unique
+  name           String
+  address        String
+  latitude       Float
+  longitude      Float
+  petFriendly    Boolean @default(false)
+  kitchen        Boolean @default(false)
+  events         Boolean @default(false)
+  hours          String
+  menuUrl        String?
   upcomingEvents Event[]
 }
 
 model Event {
-  id        String   @id
-  title     String
-  date      DateTime
-  store     Store    @relation(fields: [storeId], references: [id])
-  storeId   String
+  id      String   @id @default(cuid())
+  title   String
+  date    DateTime
+  storeId String
+  store   Store    @relation(fields: [storeId], references: [id])
 }
 
 model User {
-  id          String         @id
-  email       String         @unique
-  name        String?
-  password    String?
-  addresses   Address[]
-  orders      Order[]
-  loyalty     LoyaltyLedger[]
+  id            String          @id @default(cuid())
+  email         String          @unique
+  name          String?
+  password      String?
+  addresses     Address[]
+  orders        Order[]
+  loyalty       LoyaltyLedger[]
   subscriptions Subscription[]
 }
 
 model Address {
-  id        String @id
-  label     String
-  street    String
-  city      String
-  country   String
-  postal    String
-  user      User   @relation(fields: [userId], references: [id])
-  userId    String
+  id      String @id @default(cuid())
+  label   String
+  street  String
+  city    String
+  country String
+  postal  String
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
 }
 
 model Order {
-  id        String      @id
+  id        String      @id @default(cuid())
   number    String      @unique
-  user      User?       @relation(fields: [userId], references: [id])
   userId    String?
+  user      User?       @relation(fields: [userId], references: [id])
   total     Int
   status    String
   items     OrderItem[]
@@ -128,42 +142,43 @@ model Order {
 }
 
 model OrderItem {
-  id        String @id
-  name      String
-  quantity  Int
-  price     Int
-  order     Order  @relation(fields: [orderId], references: [id])
-  orderId   String
+  id       String @id @default(cuid())
+  name     String
+  quantity Int
+  price    Int
+
+  orderId String
+  order   Order  @relation(fields: [orderId], references: [id])
 }
 
 model Subscription {
-  id        String   @id
+  id        String   @id @default(cuid())
   plan      String
   status    String
-  user      User    @relation(fields: [userId], references: [id])
   userId    String
+  user      User     @relation(fields: [userId], references: [id])
   createdAt DateTime @default(now())
 }
 
 model GiftCard {
-  id        String @id
-  code      String @unique
-  amount    Int
-  balance   Int
-  active    Boolean @default(true)
+  id      String  @id @default(cuid())
+  code    String  @unique
+  amount  Int
+  balance Int
+  active  Boolean @default(true)
 }
 
 model LoyaltyLedger {
-  id        String   @id
-  user      User     @relation(fields: [userId], references: [id])
+  id        String   @id @default(cuid())
   userId    String
+  user      User     @relation(fields: [userId], references: [id])
   points    Int
   reason    String
   createdAt DateTime @default(now())
 }
 
 model ContentPost {
-  id        String   @id
+  id        String   @id @default(cuid())
   slug      String   @unique
   title     String
   excerpt   String

@@ -13,7 +13,9 @@
     "test": "pnpm test:e2e",
     "db:migrate": "prisma migrate deploy",
     "db:generate": "prisma generate",
-    "db:seed": "ts-node --project tsconfig.scripts.json prisma/seed.ts"
+    "postinstall": "prisma generate",
+    "db:seed": "tsx prisma/seed.ts",
+    "db:push": "prisma db push"
   },
   "dependencies": {
     "@chakra-ui/icons": "^2.1.1",
@@ -42,8 +44,8 @@
     "react-icons": "^4.12.0",
     "resend": "^2.1.0",
     "stripe": "^13.11.0",
-    "zustand": "^4.5.2",
-    "zod": "^3.22.4"
+    "zod": "^3.22.4",
+    "zustand": "^4.5.2"
   },
   "devDependencies": {
     "@types/mapbox-gl": "^2.7.19",
@@ -61,6 +63,7 @@
     "prisma": "^5.11.0",
     "ts-node": "^10.9.2",
     "tsconfig-paths": "^4.2.0",
+    "tsx": "4",
     "typescript": "^5.3.3"
   },
   "packageManager": "pnpm@9.1.0"
