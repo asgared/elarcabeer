@@ -2,23 +2,18 @@ import {
   Badge,
   Box,
   Container,
-  Divider,
   Grid,
   GridItem,
   Heading,
   Image,
-  List,
-  ListIcon,
-  ListItem,
   Select,
   Stack,
   Text
 } from "@chakra-ui/react";
 import {Metadata} from "next";
 import {notFound} from "next/navigation";
-import {FaCheck} from "react-icons/fa6";
-
 import {AddToCartButton} from "@/components/cart/add-to-cart-button";
+import {CheckList} from "@/components/ui/check-list";
 import {Price} from "@/components/ui/price";
 import {products} from "@/data/products";
 import {Product} from "@/types/catalog";
@@ -120,25 +115,11 @@ export default function ProductDetailPage({params}: {params: {slug: string}}) {
               <Grid gap={6} templateColumns={{base: "1fr", md: "repeat(2, minmax(0, 1fr))"}}>
                 <Stack>
                   <Text fontWeight="semibold">Notas</Text>
-                  <List spacing={2}>
-                    {product.tastingNotes.map((note) => (
-                      <ListItem key={note} color="whiteAlpha.800">
-                        <ListIcon as={FaCheck} color="brand.400" />
-                        {note}
-                      </ListItem>
-                    ))}
-                  </List>
+                  <CheckList items={product.tastingNotes} />
                 </Stack>
                 <Stack>
                   <Text fontWeight="semibold">Maridaje sugerido</Text>
-                  <List spacing={2}>
-                    {product.pairings.map((pairing) => (
-                      <ListItem key={pairing} color="whiteAlpha.800">
-                        <ListIcon as={FaCheck} color="brand.400" />
-                        {pairing}
-                      </ListItem>
-                    ))}
-                  </List>
+                  <CheckList items={product.pairings} />
                 </Stack>
               </Grid>
             </Box>
