@@ -17,6 +17,7 @@ import {
 import Link from "next/link";
 import {useTranslations} from "next-intl";
 import {usePathname} from "next/navigation";
+import {useState} from "react";
 import {FaBars, FaCartShopping, FaChevronDown, FaUser} from "react-icons/fa6";
 
 import {bundles} from "../../data/bundles";
@@ -25,6 +26,8 @@ import {posts} from "../../data/posts";
 import {useCartDrawer} from "../../providers/cart-drawer-provider";
 import {selectCartCount, useCartStore} from "../../stores/cart-store";
 import {localeLabels, locales} from "../../i18n/locales";
+import {AuthModal} from "@/components/auth/auth-modal";
+import {useSupabase} from "@/providers/supabase-provider";
 
 function LocaleSwitcher() {
   const pathname = usePathname();
@@ -55,6 +58,8 @@ export function Navbar() {
   const t = useTranslations("navigation");
   const count = useCartStore(selectCartCount);
   const {open} = useCartDrawer();
+  const {session, supabase} = useSupabase();
+  const [isAuthModalOpen, setAuthModalOpen] = useState(false);
 
   return (
     <Box as="header" backdropFilter="blur(12px)" bg="rgba(12,27,30,0.85)" position="sticky" top={0} zIndex={1000}>
@@ -124,7 +129,29 @@ export function Navbar() {
                 {count}
               </Box>
             ) : null}
-            <IconButton aria-label={t("account") ?? "Cuenta"} as={Link} href="/account" icon={<FaUser />} variant="outline" />
+            {session ? (
+              <Menu isLazy>
+                <MenuButton
+                  as={Button}
+                  leftIcon={<FaUser />}
+                  rightIcon={<FaChevronDown />}
+                  size="sm"
+                  variant="outline"
+                >
+                  {session.user.email ?? t("account")}
+                </MenuButton>
+                <MenuList bg="background.800">
+                  <MenuItem as={Link} href="/account">
+                    {t("account")}
+                  </MenuItem>
+                  <MenuItem onClick={() => supabase.auth.signOut()}>{t("signOut")}</MenuItem>
+                </MenuList>
+              </Menu>
+            ) : (
+              <Button leftIcon={<FaUser />} size="sm" variant="outline" onClick={() => setAuthModalOpen(true)}>
+                {t("signIn")}
+              </Button>
+            )}
             <IconButton
               aria-label="Menu"
               display={{base: "flex", md: "none"}}
@@ -134,6 +161,7 @@ export function Navbar() {
           </HStack>
         </Flex>
       </Container>
+      <AuthModal isOpen={isAuthModalOpen} onClose={() => setAuthModalOpen(false)} />
     </Box>
   );
 }

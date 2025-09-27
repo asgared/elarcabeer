@@ -1,10 +1,18 @@
 import {Box, Button, Container, Heading, Stack, Text} from "@chakra-ui/react";
 
 import {subscriptionPlans} from "@/data/subscriptions";
+import type {AppLocale} from "@/i18n/locales";
+import {requireSupabaseSession} from "@/lib/supabase/require-session";
 
 export const dynamic = "force-dynamic";
 
-export default function AccountSubscriptionsPage() {
+type AccountSubscriptionsPageProps = {
+  params: {locale: AppLocale};
+};
+
+export default async function AccountSubscriptionsPage({params}: AccountSubscriptionsPageProps) {
+  await requireSupabaseSession(params.locale);
+
   const activePlan = subscriptionPlans[1];
 
   return (

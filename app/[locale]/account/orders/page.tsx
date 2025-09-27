@@ -1,8 +1,17 @@
 import {Box, Container, Heading, Stack, Text} from "@chakra-ui/react";
 
+import type {AppLocale} from "@/i18n/locales";
+import {requireSupabaseSession} from "@/lib/supabase/require-session";
+
 export const dynamic = "force-dynamic";
 
-export default function OrdersPage() {
+type OrdersPageProps = {
+  params: {locale: AppLocale};
+};
+
+export default async function OrdersPage({params}: OrdersPageProps) {
+  await requireSupabaseSession(params.locale);
+
   const sampleOrders = [
     {
       id: "order-1001",

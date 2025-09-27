@@ -50,15 +50,24 @@ pnpm dev
 | `STRIPE_SECRET_KEY` | Llave secreta de Stripe para crear sesiones de pago | [Stripe Dashboard → Developers → API keys](https://dashboard.stripe.com/test/apikeys) (`sk_test_...`) |
 | `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` | Llave pública usada en el frontend de Stripe | Mismo panel de Stripe (`pk_test_...`) |
 | `STRIPE_WEBHOOK_SECRET` | Secreto del endpoint webhook configurado | `stripe listen --forward-to` o Dashboard → Webhooks (`whsec_...`) |
-| `NEXTAUTH_SECRET` | Secreto para firmar JWT de NextAuth | `openssl rand -base64 32` |
-| `NEXTAUTH_URL` | URL base de la app para callbacks de NextAuth | `http://localhost:3000` en desarrollo, dominio productivo en producción |
 | `MAPBOX_TOKEN` | Token público para Mapbox GL | [Cuenta Mapbox → Access tokens](https://account.mapbox.com/) (`pk....`) |
 | `RESEND_API_KEY` | Llave para envío de emails transaccionales | [Resend Dashboard](https://resend.com/) (`re_...`) |
 | `CLOUDINARY_URL` | Cadena de conexión para subir activos a Cloudinary | [Cloudinary Console → Programmable Media](https://console.cloudinary.com/) |
+| `SUPABASE_URL` / `NEXT_PUBLIC_SUPABASE_URL` | URL del proyecto Supabase para llamadas server/client | [Supabase → Project settings → API](https://supabase.com/dashboard/project/_/settings/api) |
+| `SUPABASE_ANON_KEY` / `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Llave pública para clientes Supabase | Mismo panel de Supabase (`anon` key) |
+| `SUPABASE_SERVICE_ROLE_KEY` | Llave de servicio (solo uso server) para tareas privilegiadas | Panel Supabase (`service_role` key) |
+
+## Supabase Auth
+
+1. Crea un proyecto en [Supabase](https://supabase.com/) y copia las variables `SUPABASE_URL`, `SUPABASE_ANON_KEY` y `SUPABASE_SERVICE_ROLE_KEY` (además de sus equivalentes `NEXT_PUBLIC_*`).
+2. En la sección **Authentication → URL configuration** define `http://localhost:3000` como `Site URL` en desarrollo y añade `http://localhost:3000/api/auth/callback` en **Redirect URLs** (usa tus dominios reales en staging/producción).
+3. Apunta `DATABASE_URL` al Postgres gestionado por Supabase y ejecuta las migraciones y seed: `pnpm db:migrate && pnpm db:seed`.
+4. Actualiza las políticas de correo saliente si usarás el flujo de confirmación de email (`Authentication → Providers → Email`).
+5. En despliegues (p. ej. Vercel) replica todas las variables (`SUPABASE_*`, `NEXT_PUBLIC_SUPABASE_*`, `DATABASE_URL`) y añade el dominio público en la configuración de Supabase para que los enlaces mágicos funcionen.
 
 ## Healthcheck y utilidades
 
-- `pnpm health`: ejecuta las comprobaciones de base de datos, Stripe, NextAuth y servicios externos.
+- `pnpm health`: ejecuta las comprobaciones de base de datos, Stripe, Supabase Auth y servicios externos.
 - Endpoints JSON disponibles en `/api/health` y `/admin/health`.
 
 ## Scripts disponibles
@@ -84,6 +93,7 @@ pnpm dev
 ## Integraciones
 
 - **Stripe**: endpoints `/api/checkout/session`, `/api/checkout/subscription`, `/api/webhooks/stripe`.
+- **Supabase Auth**: login con email/contraseña, listeners en App Router y `/api/auth/callback` para sincronizar cookies.
 - **Mapbox GL JS**: componente `StoreMap`, requiere `NEXT_PUBLIC_MAPBOX_TOKEN`.
 - **Calendly**: iframe embed en ficha de bar.
 - **Resend**: preparado para emails transaccionales.

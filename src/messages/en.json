@@ -5,10 +5,25 @@
     "discover": "Discover",
     "loyalty": "Loyalty",
     "account": "Account",
-    "cart": "Cart"
+    "cart": "Cart",
+    "signIn": "Sign in",
+    "signOut": "Sign out"
   },
   "cta": {
     "joinClub": "Join the Arca Crew",
     "shopNow": "Shop now"
+  },
+  "auth": {
+    "title": "Access your account",
+    "description": "Sign in or create an account to manage your orders and subscriptions.",
+    "email": "Email",
+    "password": "Password",
+    "signIn": "Sign in",
+    "signUp": "Create account",
+    "switchToSignUp": "Don't have an account? Sign up",
+    "switchToSignIn": "Already have an account? Sign in",
+    "successSignIn": "Signed in successfully.",
+    "successSignUp": "Check your inbox to confirm your account.",
+    "errorGeneric": "Something went wrong. Try again."
   }
 }

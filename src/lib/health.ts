@@ -1,3 +1,4 @@
+import {createClient} from "@supabase/supabase-js";
 import {Prisma} from "@prisma/client";
 import Stripe from "stripe";
 
@@ -89,21 +90,43 @@ function checkStripeKeys(): HealthCheck {
   };
 }
 
-function checkNextAuth(): HealthCheck {
-  if (!process.env.NEXTAUTH_SECRET || !process.env.NEXTAUTH_URL) {
+async function checkSupabase(): Promise<HealthCheck> {
+  const supabaseUrl = process.env.SUPABASE_URL ?? process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supabaseAnonKey = process.env.SUPABASE_ANON_KEY ?? process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+  if (!supabaseUrl || !supabaseAnonKey) {
     return {
-      id: "nextauth",
-      label: "NextAuth",
+      id: "supabase",
+      label: "Supabase Auth",
       status: "error",
-      details: "NEXTAUTH_SECRET y NEXTAUTH_URL son obligatorios"
+      details: "Configura SUPABASE_URL y SUPABASE_ANON_KEY (y sus variantes NEXT_PUBLIC_*)"
     };
   }
 
-  return {
-    id: "nextauth",
-    label: "NextAuth",
-    status: "ok"
-  };
+  try {
+    const supabase = createClient(supabaseUrl, supabaseAnonKey);
+    const {error} = await supabase.auth.getSession();
+
+    if (error) {
+      throw error;
+    }
+
+    return {
+      id: "supabase",
+      label: "Supabase Auth",
+      status: "ok"
+    };
+  } catch (error) {
+    return {
+      id: "supabase",
+      label: "Supabase Auth",
+      status: "error",
+      details:
+        error instanceof Error
+          ? error.message
+          : "No fue posible obtener respuesta de Supabase"
+    };
+  }
 }
 
 function checkMapbox(): HealthCheck {
@@ -161,7 +184,7 @@ export async function runHealthChecks(): Promise<HealthReport> {
   const checks = [
     await checkDatabase(),
     checkStripeKeys(),
-    checkNextAuth(),
+    await checkSupabase(),
     checkMapbox(),
     checkResend(),
     checkCloudinary()

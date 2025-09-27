@@ -1,8 +1,17 @@
 import {Box, Button, Container, Heading, Stack, Text} from "@chakra-ui/react";
 
+import type {AppLocale} from "@/i18n/locales";
+import {requireSupabaseSession} from "@/lib/supabase/require-session";
+
 export const dynamic = "force-dynamic";
 
-export default function AddressesPage() {
+type AddressesPageProps = {
+  params: {locale: AppLocale};
+};
+
+export default async function AddressesPage({params}: AddressesPageProps) {
+  await requireSupabaseSession(params.locale);
+
   return (
     <Container maxW="4xl">
       <Stack spacing={6}>

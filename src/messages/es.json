@@ -5,10 +5,25 @@
     "discover": "Descúbre",
     "loyalty": "Lealtad",
     "account": "Cuenta",
-    "cart": "Carrito"
+    "cart": "Carrito",
+    "signIn": "Iniciar sesión",
+    "signOut": "Cerrar sesión"
   },
   "cta": {
     "joinClub": "Únete al Arca Crew",
     "shopNow": "Compra ahora"
+  },
+  "auth": {
+    "title": "Accede a tu cuenta",
+    "description": "Inicia sesión o crea una cuenta para gestionar tus pedidos y suscripciones.",
+    "email": "Correo electrónico",
+    "password": "Contraseña",
+    "signIn": "Iniciar sesión",
+    "signUp": "Crear cuenta",
+    "switchToSignUp": "¿No tienes cuenta? Regístrate",
+    "switchToSignIn": "¿Ya tienes cuenta? Inicia sesión",
+    "successSignIn": "Sesión iniciada correctamente.",
+    "successSignUp": "Revisa tu correo para confirmar la cuenta.",
+    "errorGeneric": "Ocurrió un error. Intenta de nuevo."
   }
 }
