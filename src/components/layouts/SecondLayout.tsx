@@ -29,10 +29,10 @@ export default function SecondLayout({
 				{imageUrl && <meta property='og:image' content={imageUrl} />}
 				<meta property='og:description' content={pageDescription} />
 				<meta property='og:type' content='website' />
-				<meta property='og:url' content='https://www.taggy.com.mx/' />
+				<meta property='og:url' content='https://www.elarcabeer.com/' />
 
 				<meta property='twitter:card' content='summary_large_image' />
-				<meta property='twitter:url' content='https://www.taggy.com.mx/' />
+				<meta property='twitter:url' content='https://www.elarcabeer.com/' />
 				<meta property='twitter:title' content={title} />
 				<meta property='twitter:description' content={pageDescription} />
 				{imageUrl && <meta property='twitter:image' content={imageUrl} />}
