@@ -80,7 +80,7 @@ export function CheckoutContent() {
                     <Text fontWeight="semibold">{product.name}</Text>
                     <Text color="whiteAlpha.700">{item.variant.name}</Text>
                     <Text>{item.quantity} unidades</Text>
-                    <Price amount={item.variant.price} currency={currency} />
+                    <Price amount={item.variant.price} />
                   </Box>
                 );
               })}
