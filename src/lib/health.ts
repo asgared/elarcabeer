@@ -1,7 +1,6 @@
 import {Prisma} from "@prisma/client";
-import Stripe from "stripe";
-
 import {prisma} from "./prisma";
+import {createStripeClient} from "./stripe";
 
 type CheckStatus = "ok" | "warn" | "error";
 
@@ -68,11 +67,7 @@ function checkStripeKeys(): HealthCheck {
   }
 
   try {
-    const stripe = new Stripe(stripeSecretKey, {apiVersion: "2023-10-16"});
-
-    if (!stripe) {
-      throw new Error("Stripe SDK no inicializado");
-    }
+    createStripeClient();
   } catch (error) {
     return {
       id: "stripe-client",
