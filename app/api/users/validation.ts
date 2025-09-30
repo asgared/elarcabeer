@@ -58,7 +58,7 @@ function readString(
   value: unknown,
   path: string,
   issues: ValidationIssue[],
-  {minLength, maxLength, email}: StringConstraints = {}
+  {minLength, maxLength, email, required}: ReadStringOptions = {}
 ): string | undefined {
   if (typeof value !== "string") {
     issues.push({path, message: "Debe ser una cadena de texto."});
@@ -66,6 +66,10 @@ function readString(
   }
 
   const trimmed = value.trim();
+
+  if (!required && trimmed.length === 0) {
+    return undefined;
+  }
 
   if (minLength !== undefined && trimmed.length < minLength) {
     issues.push({path, message: `Debe tener al menos ${minLength} caracteres.`});
