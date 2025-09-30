@@ -13,11 +13,12 @@ import {
   SimpleGrid,
   Stack
 } from "@chakra-ui/react";
+import type {AlertStatus} from "@chakra-ui/react";
 import {FormEvent, useEffect, useMemo, useState} from "react";
 
 import {useUser} from "@/providers/user-provider";
 
-type Feedback = {type: "success" | "error"; message: string};
+type Feedback = {type: Extract<AlertStatus, "success" | "error">; message: string};
 
 export function ProfileForm() {
   const {user, updateUser, status, error, logout, clearError} = useUser();
@@ -30,10 +31,12 @@ export function ProfileForm() {
   });
 
   useEffect(() => {
-    if (user) {
-      setForm((prev) => ({...prev, name: user.name ?? "", email: user.email}));
+    if (!user) {
+      return;
     }
-  }, [user?.name, user?.email, user?.id]);
+
+    setForm((prev) => ({...prev, name: user.name ?? "", email: user.email}));
+  }, [user]);
 
   const alert = useMemo(() => feedback ?? (error ? {type: "error", message: error} : null), [feedback, error]);
   const isLoading = status === "loading";

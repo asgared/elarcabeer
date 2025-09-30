@@ -16,7 +16,7 @@ import {
   Stack,
   Text
 } from "@chakra-ui/react";
-import {useEffect} from "react";
+import {useEffect, useRef} from "react";
 
 import {useUser} from "@/providers/user-provider";
 import {formatCurrency} from "@/utils/currency";
@@ -57,12 +57,17 @@ const dateFormatter = new Intl.DateTimeFormat("es-MX", {dateStyle: "long", timeS
 
 export default function OrdersPage() {
   const {user, status, refreshUser} = useUser();
+  const lastRefreshedUserId = useRef<string | null>(null);
+  const userId = user?.id ?? null;
 
   useEffect(() => {
-    if (user) {
-      void refreshUser();
+    if (!userId || lastRefreshedUserId.current === userId) {
+      return;
     }
-  }, [refreshUser, user?.id]);
+
+    lastRefreshedUserId.current = userId;
+    void refreshUser();
+  }, [refreshUser, userId]);
 
   const isLoading = status === "initializing" || (status === "loading" && !user);
 

@@ -16,11 +16,12 @@ import {
   TabPanels,
   Tabs
 } from "@chakra-ui/react";
+import type {AlertStatus} from "@chakra-ui/react";
 import {FormEvent, useMemo, useState} from "react";
 
 import {useUser} from "@/providers/user-provider";
 
-type Feedback = {type: "success" | "error"; message: string};
+type Feedback = {type: Extract<AlertStatus, "success" | "error">; message: string};
 
 export function AccountAccessPanel() {
   const {registerUser, login, status, error, clearError} = useUser();

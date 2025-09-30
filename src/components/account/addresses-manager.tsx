@@ -15,12 +15,13 @@ import {
   Stack,
   Text
 } from "@chakra-ui/react";
+import type {AlertStatus} from "@chakra-ui/react";
 import {useEffect, useMemo, useState} from "react";
 
 import {useUser} from "@/providers/user-provider";
 import type {AddressInput} from "@/types/user";
 
-type Feedback = {type: "success" | "error"; message: string};
+type Feedback = {type: Extract<AlertStatus, "success" | "error">; message: string};
 
 const emptyAddress: AddressInput = {
   label: "",
@@ -36,16 +37,21 @@ export function AddressesManager() {
   const [feedback, setFeedback] = useState<Feedback | null>(null);
 
   useEffect(() => {
-    if (user) {
-      setAddresses(user.addresses.map(({label, street, city, country, postal}) => ({
+    if (!user) {
+      setAddresses([]);
+      return;
+    }
+
+    setAddresses(
+      user.addresses.map(({label, street, city, country, postal}) => ({
         label,
         street,
         city,
         country,
         postal
-      })));
-    }
-  }, [user?.addresses, user?.id]);
+      }))
+    );
+  }, [user]);
 
   const alert = useMemo(() => feedback ?? (error ? {type: "error", message: error} : null), [feedback, error]);
   const isLoading = status === "loading";
