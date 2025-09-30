@@ -14,8 +14,8 @@ import {
   Stack,
   Text
 } from "@chakra-ui/react";
-import Link from "next/link";
-import {useTranslations} from "next-intl";
+import {Link} from "@/i18n/navigation";
+import {useTranslations, useLocale} from "@/i18n/client";
 import {usePathname} from "next/navigation";
 import {FaBars, FaCartShopping, FaChevronDown, FaUser} from "react-icons/fa6";
 
@@ -29,19 +29,19 @@ import {localeLabels, locales} from "../../i18n/locales";
 function LocaleSwitcher() {
   const pathname = usePathname();
   const segments = pathname.split("/").filter(Boolean);
-  const currentLocale = segments[0];
+  const activeLocale = useLocale();
 
   return (
     <Menu>
       <MenuButton as={Button} rightIcon={<FaChevronDown />} size="sm" variant="outline">
-        {localeLabels[currentLocale as keyof typeof localeLabels] ?? currentLocale}
+        {localeLabels[activeLocale]}
       </MenuButton>
       <MenuList>
         {locales.map((locale) => {
-          const nextHref = ["", locale, ...segments.slice(1)].join("/") || "/";
+          const nextHref = segments.length > 1 ? `/${segments.slice(1).join("/")}` : "/";
 
           return (
-            <MenuItem as={Link} href={nextHref} key={locale}>
+            <MenuItem as={Link} href={nextHref} key={locale} locale={locale}>
               {localeLabels[locale]}
             </MenuItem>
           );

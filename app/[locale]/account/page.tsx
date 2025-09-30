@@ -87,19 +87,19 @@ export default function AccountPage() {
             <Grid gap={6} templateColumns={{base: "1fr", md: "repeat(3, minmax(0, 1fr))"}}>
               <Box borderRadius="2xl" borderWidth="1px" p={6}>
                 <Heading size="md">
-                  <Link href="./orders">Órdenes y pagos</Link>
+                  <Link href="/account/orders">Órdenes y pagos</Link>
                 </Heading>
                 <Text color="whiteAlpha.700">Revisa el detalle de tus compras, pagos y entregas.</Text>
               </Box>
               <Box borderRadius="2xl" borderWidth="1px" p={6}>
                 <Heading size="md">
-                  <Link href="./subscriptions">Suscripciones</Link>
+                  <Link href="/account/subscriptions">Suscripciones</Link>
                 </Heading>
                 <Text color="whiteAlpha.700">Gestiona tus membresías del Beer Club.</Text>
               </Box>
               <Box borderRadius="2xl" borderWidth="1px" p={6}>
                 <Heading size="md">
-                  <Link href="./addresses">Direcciones</Link>
+                  <Link href="/account/addresses">Direcciones</Link>
                 </Heading>
                 <Text color="whiteAlpha.700">Mantén al día tus direcciones de entrega favoritas.</Text>
               </Box>
