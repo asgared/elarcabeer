@@ -1,28 +1,13 @@
 import {NextResponse} from "next/server";
 import {Prisma} from "@prisma/client";
-import {z, ZodError} from "zod";
 
 import {prisma} from "@/lib/prisma";
 import {hashPassword} from "@/utils/auth";
 
 import {getUserById, serializeUser, userInclude} from "../utils";
+import {ValidationError, validateUpdateUserPayload} from "../validation";
 
 export const dynamic = "force-dynamic";
-
-const addressSchema = z.object({
-  label: z.string().min(1),
-  street: z.string().min(1),
-  city: z.string().min(1),
-  country: z.string().min(1),
-  postal: z.string().min(1)
-});
-
-const updateUserSchema = z.object({
-  email: z.string().email().optional(),
-  name: z.string().min(2).max(120).nullable().optional(),
-  password: z.string().min(8).optional(),
-  addresses: z.array(addressSchema).optional()
-});
 
 type RouteContext = {
   params: {userId: string};
@@ -52,7 +37,7 @@ export async function PATCH(request: Request, {params}: RouteContext) {
   }
 
   try {
-    const payload = updateUserSchema.parse(await request.json());
+    const payload = validateUpdateUserPayload(await request.json());
 
     const updateData: Prisma.UserUpdateInput = {};
 
@@ -68,7 +53,7 @@ export async function PATCH(request: Request, {params}: RouteContext) {
       updateData.password = hashPassword(payload.password);
     }
 
-    if (payload.addresses) {
+    if (payload.addresses !== undefined) {
       updateData.addresses = {
         deleteMany: {userId},
         ...(payload.addresses.length
@@ -93,7 +78,7 @@ export async function PATCH(request: Request, {params}: RouteContext) {
 
     return NextResponse.json({user: serializeUser(user)});
   } catch (error) {
-    if (error instanceof ZodError) {
+    if (error instanceof ValidationError) {
       return NextResponse.json({error: error.flatten()}, {status: 400});
     }
 

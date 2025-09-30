@@ -56,8 +56,21 @@ export function UserProvider({children}: {children: React.ReactNode}) {
         throw new Error(payload.error);
       }
 
-      if (payload.error?.formErrors?.length) {
-        throw new Error(payload.error.formErrors.join("\n"));
+      const {formErrors, fieldErrors} = payload.error as {
+        formErrors?: string[];
+        fieldErrors?: Record<string, string[]>;
+      };
+
+      if (Array.isArray(formErrors) && formErrors.length > 0) {
+        throw new Error(formErrors.join("\n"));
+      }
+
+      if (fieldErrors && typeof fieldErrors === "object") {
+        for (const messages of Object.values(fieldErrors)) {
+          if (Array.isArray(messages) && messages.length > 0) {
+            throw new Error(messages[0]);
+          }
+        }
       }
     }
 

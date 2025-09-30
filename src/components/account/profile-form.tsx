@@ -11,7 +11,8 @@ import {
   Heading,
   Input,
   SimpleGrid,
-  Stack
+  Stack,
+  chakra
 } from "@chakra-ui/react";
 import type {AlertStatus} from "@chakra-ui/react";
 import {FormEvent, useEffect, useMemo, useState} from "react";
@@ -38,7 +39,10 @@ export function ProfileForm() {
     setForm((prev) => ({...prev, name: user.name ?? "", email: user.email}));
   }, [user]);
 
-  const alert = useMemo(() => feedback ?? (error ? {type: "error", message: error} : null), [feedback, error]);
+  const alert = useMemo<Feedback | null>(
+    () => feedback ?? (error ? {type: "error", message: error} : null),
+    [feedback, error]
+  );
   const isLoading = status === "loading";
 
   if (!user) {
@@ -88,59 +92,63 @@ export function ProfileForm() {
         </Alert>
       )}
 
-      <Stack as="form" onSubmit={handleSubmit} spacing={4}>
-        <SimpleGrid columns={{base: 1, md: 2}} spacing={4}>
-          <FormControl>
-            <FormLabel>Nombre completo</FormLabel>
-            <Input
-              placeholder="Cómo quieres que te llamemos"
-              value={form.name}
-              onChange={(event) => setForm((prev) => ({...prev, name: event.target.value}))}
-            />
-          </FormControl>
-          <FormControl isRequired>
-            <FormLabel>Correo electrónico</FormLabel>
-            <Input
-              type="email"
-              value={form.email}
-              onChange={(event) => setForm((prev) => ({...prev, email: event.target.value}))}
-              autoComplete="email"
-            />
-          </FormControl>
-        </SimpleGrid>
+      <chakra.form onSubmit={handleSubmit}>
+        <Stack spacing={4}>
+          <SimpleGrid columns={{base: 1, md: 2}} spacing={4}>
+            <FormControl>
+              <FormLabel>Nombre completo</FormLabel>
+              <Input
+                placeholder="Cómo quieres que te llamemos"
+                value={form.name}
+                onChange={(event) => setForm((prev) => ({...prev, name: event.target.value}))}
+              />
+            </FormControl>
+            <FormControl isRequired>
+              <FormLabel>Correo electrónico</FormLabel>
+              <Input
+                type="email"
+                value={form.email}
+                onChange={(event) => setForm((prev) => ({...prev, email: event.target.value}))}
+                autoComplete="email"
+              />
+            </FormControl>
+          </SimpleGrid>
 
-        <SimpleGrid columns={{base: 1, md: 2}} spacing={4}>
-          <FormControl>
-            <FormLabel>Nueva contraseña</FormLabel>
-            <Input
-              type="password"
-              placeholder="Actualiza tu contraseña"
-              value={form.password}
-              onChange={(event) => setForm((prev) => ({...prev, password: event.target.value}))}
-              autoComplete="new-password"
-            />
-          </FormControl>
-          <FormControl>
-            <FormLabel>Confirmar contraseña</FormLabel>
-            <Input
-              type="password"
-              placeholder="Repite la nueva contraseña"
-              value={form.confirmPassword}
-              onChange={(event) => setForm((prev) => ({...prev, confirmPassword: event.target.value}))}
-              autoComplete="new-password"
-            />
-          </FormControl>
-        </SimpleGrid>
+          <SimpleGrid columns={{base: 1, md: 2}} spacing={4}>
+            <FormControl>
+              <FormLabel>Nueva contraseña</FormLabel>
+              <Input
+                type="password"
+                placeholder="Actualiza tu contraseña"
+                value={form.password}
+                onChange={(event) => setForm((prev) => ({...prev, password: event.target.value}))}
+                autoComplete="new-password"
+              />
+            </FormControl>
+            <FormControl>
+              <FormLabel>Confirmar contraseña</FormLabel>
+              <Input
+                type="password"
+                placeholder="Repite la nueva contraseña"
+                value={form.confirmPassword}
+                onChange={(event) =>
+                  setForm((prev) => ({...prev, confirmPassword: event.target.value}))
+                }
+                autoComplete="new-password"
+              />
+            </FormControl>
+          </SimpleGrid>
 
-        <Stack direction={{base: "column", sm: "row"}} spacing={4} justify="flex-start">
-          <Button colorScheme="yellow" type="submit" isLoading={isLoading} loadingText="Guardando cambios">
-            Guardar cambios
-          </Button>
-          <Button variant="outline" onClick={logout} isDisabled={isLoading}>
-            Cerrar sesión
-          </Button>
+          <Stack direction={{base: "column", sm: "row"}} spacing={4} justify="flex-start">
+            <Button colorScheme="yellow" type="submit" isLoading={isLoading} loadingText="Guardando cambios">
+              Guardar cambios
+            </Button>
+            <Button variant="outline" onClick={logout} isDisabled={isLoading}>
+              Cerrar sesión
+            </Button>
+          </Stack>
         </Stack>
-      </Stack>
+      </chakra.form>
     </Stack>
   );
 }
