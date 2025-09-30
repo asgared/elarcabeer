@@ -138,6 +138,7 @@ model Order {
   total     Int
   status    String
   items     OrderItem[]
+  payments  Payment[]
   createdAt DateTime    @default(now())
 }
 
@@ -149,6 +150,16 @@ model OrderItem {
 
   orderId String
   order   Order  @relation(fields: [orderId], references: [id])
+}
+
+model Payment {
+  id          String   @id @default(cuid())
+  orderId     String
+  order       Order    @relation(fields: [orderId], references: [id])
+  amount      Int
+  method      String
+  status      String
+  processedAt DateTime @default(now())
 }
 
 model Subscription {
