@@ -7,6 +7,7 @@ import {ReactNode} from "react";
 
 import {AnalyticsProvider} from "./analytics-provider";
 import {CartDrawerProvider} from "./cart-drawer-provider";
+import {UserProvider} from "./user-provider";
 import {theme} from "../theme";
 import seoConfig from "../../next-seo.config";
 
@@ -22,7 +23,9 @@ export function AppProviders({children, locale}: Props) {
         <ColorModeScript initialColorMode={theme.config.initialColorMode} />
         <DefaultSeo {...seoConfig} />
         <AnalyticsProvider locale={locale}>
-          <CartDrawerProvider>{children}</CartDrawerProvider>
+          <UserProvider>
+            <CartDrawerProvider>{children}</CartDrawerProvider>
+          </UserProvider>
         </AnalyticsProvider>
       </ChakraProvider>
     </CacheProvider>

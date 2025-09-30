@@ -5,6 +5,7 @@ import {bundles} from "../src/data/bundles";
 import {posts} from "../src/data/posts";
 import {products} from "../src/data/products";
 import {stores} from "../src/data/stores";
+import {hashPassword} from "../src/utils/auth";
 
 const prisma = new PrismaClient();
 
@@ -16,6 +17,13 @@ async function main() {
   await prisma.product.deleteMany();
   await prisma.store.deleteMany();
   await prisma.contentPost.deleteMany();
+  await prisma.payment.deleteMany();
+  await prisma.orderItem.deleteMany();
+  await prisma.order.deleteMany();
+  await prisma.address.deleteMany();
+  await prisma.loyaltyLedger.deleteMany();
+  await prisma.subscription.deleteMany();
+  await prisma.user.deleteMany();
 
   await Promise.all(
     products.map((product) =>
@@ -110,6 +118,118 @@ async function main() {
       })
     )
   );
+
+  const sampleVariants = await prisma.variant.findMany({take: 3, include: {product: true}});
+
+  const [firstVariant, secondVariant] = sampleVariants;
+
+  const user = await prisma.user.create({
+    data: {
+      email: "sofia.martinez@example.com",
+      name: "Sofía Martínez",
+      password: hashPassword("Cerveza123"),
+      addresses: {
+        create: [
+          {
+            label: "Casa",
+            street: "Colima 200",
+            city: "Ciudad de México",
+            country: "México",
+            postal: "06100"
+          },
+          {
+            label: "Oficina",
+            street: "Av. Reforma 350",
+            city: "Ciudad de México",
+            country: "México",
+            postal: "06500"
+          }
+        ]
+      },
+      loyalty: {
+        create: [
+          {
+            points: 120,
+            reason: "Compra Beer Club"
+          },
+          {
+            points: 80,
+            reason: "Reseña de producto"
+          }
+        ]
+      },
+      subscriptions: {
+        create: [
+          {
+            plan: "beer-club-premium",
+            status: "active"
+          }
+        ]
+      }
+    }
+  });
+
+  if (firstVariant) {
+    const total = firstVariant.price * 2;
+
+    const order = await prisma.order.create({
+      data: {
+        number: "ORD-1001",
+        userId: user.id,
+        total,
+        status: "fulfilled",
+        items: {
+          create: [
+            {
+              name: `${firstVariant.product.name} - ${firstVariant.name}`,
+              quantity: 2,
+              price: firstVariant.price
+            }
+          ]
+        }
+      }
+    });
+
+    await prisma.payment.create({
+      data: {
+        orderId: order.id,
+        amount: total,
+        method: "tarjeta",
+        status: "paid"
+      }
+    });
+  }
+
+  if (secondVariant) {
+    const total = secondVariant.price;
+
+    const order = await prisma.order.create({
+      data: {
+        number: "ORD-1000",
+        userId: user.id,
+        total,
+        status: "processing",
+        items: {
+          create: [
+            {
+              name: `${secondVariant.product.name} - ${secondVariant.name}`,
+              quantity: 1,
+              price: secondVariant.price
+            }
+          ]
+        }
+      }
+    });
+
+    await prisma.payment.create({
+      data: {
+        orderId: order.id,
+        amount: total,
+        method: "oxxo",
+        status: "pending"
+      }
+    });
+  }
 }
 
 main()
