@@ -28,8 +28,7 @@
       ]
     },
     "types": [
-      "node",
-      "@types/mapbox-gl"
+      "node"
     ],
     "plugins": [
       {

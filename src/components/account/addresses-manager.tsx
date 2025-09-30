@@ -53,7 +53,10 @@ export function AddressesManager() {
     );
   }, [user]);
 
-  const alert = useMemo(() => feedback ?? (error ? {type: "error", message: error} : null), [feedback, error]);
+  const alert = useMemo<Feedback | null>(
+    () => feedback ?? (error ? {type: "error", message: error} : null),
+    [feedback, error]
+  );
   const isLoading = status === "loading";
 
   if (!user) {
@@ -198,13 +201,12 @@ export function AddressesManager() {
             </Stack>
           </Box>
         ))}
-      </Stack>
 
-      <Stack direction={{base: "column", sm: "row"}} spacing={4}>
-        <Button variant="outline" onClick={addAddress} isDisabled={isLoading}>
-          Agregar dirección
+        <Button onClick={addAddress} isDisabled={isLoading} variant="outline">
+          Añadir dirección
         </Button>
-        <Button colorScheme="yellow" onClick={handleSave} isLoading={isLoading} loadingText="Guardando">
+
+        <Button colorScheme="yellow" onClick={handleSave} isLoading={isLoading}>
           Guardar direcciones
         </Button>
       </Stack>

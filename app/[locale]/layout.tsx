@@ -1,11 +1,11 @@
 import type {Metadata} from "next";
-import {NextIntlClientProvider} from "next-intl";
 import {ReactNode} from "react";
 
 import {SiteShell} from "@/components/layout/site-shell";
 import {AppProviders} from "@/providers/app-providers";
 import {AppLocale, locales} from "@/i18n/locales";
-import {getMessages, setRequestLocale} from "next-intl/server";
+import {IntlProvider} from "@/i18n/client";
+import {loadMessages, resolveLocale} from "@/i18n/server";
 import {notFound} from "next/navigation";
 
 export function generateStaticParams() {
@@ -41,20 +41,14 @@ export async function generateMetadata({params}: LayoutProps): Promise<Metadata>
 }
 
 export default async function LocaleLayout({children, params}: LayoutProps) {
-  const locale = params.locale as AppLocale;
-
-  if (!locales.includes(locale)) {
-    notFound();
-  }
-
-  setRequestLocale(locale);
-  const messages = await getMessages();
+  const locale = resolveLocale(params.locale);
+  const messages = await loadMessages(locale);
 
   return (
-    <NextIntlClientProvider locale={locale} messages={messages}>
+    <IntlProvider locale={locale} messages={messages}>
       <AppProviders locale={locale}>
         <SiteShell>{children}</SiteShell>
       </AppProviders>
-    </NextIntlClientProvider>
+    </IntlProvider>
   );
 }

@@ -1,5 +1,7 @@
 :root {
   color-scheme: dark;
+  --font-inter: "Inter", "Helvetica Neue", Arial, sans-serif;
+  --font-playfair: "Playfair Display", "Times New Roman", serif;
 }
 
 html,
@@ -8,6 +10,7 @@ body {
   background-color: #0c1b1e;
   color: #f0f6f8;
   min-height: 100%;
+  font-family: var(--font-inter);
 }
 
 a {

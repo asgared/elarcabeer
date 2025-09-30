@@ -1,20 +1,15 @@
 import {NextResponse} from "next/server";
-import {z, ZodError} from "zod";
 
 import {verifyPassword} from "@/utils/auth";
 
 import {getUserByEmail, serializeUser} from "../utils";
+import {ValidationError, validateLoginPayload} from "../validation";
 
 export const dynamic = "force-dynamic";
 
-const loginSchema = z.object({
-  email: z.string().email(),
-  password: z.string().min(1)
-});
-
 export async function POST(request: Request) {
   try {
-    const payload = loginSchema.parse(await request.json());
+    const payload = validateLoginPayload(await request.json());
 
     const user = await getUserByEmail(payload.email);
 
@@ -24,7 +19,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({user: serializeUser(user)});
   } catch (error) {
-    if (error instanceof ZodError) {
+    if (error instanceof ValidationError) {
       return NextResponse.json({error: error.flatten()}, {status: 400});
     }
 
