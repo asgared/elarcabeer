@@ -6,6 +6,7 @@ import {AppProviders} from "@/providers/app-providers";
 import {AppLocale, locales} from "@/i18n/locales";
 import {IntlProvider} from "@/i18n/client";
 import {loadMessages, resolveLocale} from "@/i18n/server";
+import {getCmsContent} from "@/lib/cms";
 import {notFound} from "next/navigation";
 
 export function generateStaticParams() {
@@ -43,11 +44,19 @@ export async function generateMetadata({params}: LayoutProps): Promise<Metadata>
 export default async function LocaleLayout({children, params}: LayoutProps) {
   const locale = resolveLocale(params.locale);
   const messages = await loadMessages(locale);
+  const footerContent = await getCmsContent("site-footer");
 
   return (
     <IntlProvider locale={locale} messages={messages}>
       <AppProviders locale={locale}>
-        <SiteShell>{children}</SiteShell>
+        <SiteShell
+          footerContent={{
+            subtitle: footerContent?.subtitle,
+            socialLinks: footerContent?.socialLinks ?? []
+          }}
+        >
+          {children}
+        </SiteShell>
       </AppProviders>
     </IntlProvider>
   );

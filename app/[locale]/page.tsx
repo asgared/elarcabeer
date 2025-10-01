@@ -9,12 +9,24 @@ import {bundles} from "@/data/bundles";
 import {products} from "@/data/products";
 import {stores} from "@/data/stores";
 import {loyaltyProgress} from "@/data/subscriptions";
+import {getCmsContent} from "@/lib/cms";
 
-export default function HomePage() {
+export const dynamic = "force-dynamic";
+
+export default async function HomePage() {
+  const heroContent = await getCmsContent("home-hero");
+
   return (
     <Container maxW="7xl">
       <Stack spacing={16}>
-        <BrandHero />
+        <BrandHero
+          content={{
+            title: heroContent?.title,
+            subtitle: heroContent?.subtitle,
+            body: heroContent?.body,
+            imageUrl: heroContent?.imageUrl
+          }}
+        />
 
         <Stack spacing={6}>
           <Heading size="lg">Cervezas destacadas</Heading>

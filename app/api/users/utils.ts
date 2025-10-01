@@ -27,6 +27,7 @@ export function serializeUser(user: UserWithSensitive): UserWithRelations {
     id: user.id,
     email: user.email,
     name: user.name,
+    role: user.role,
     addresses: user.addresses.map(({id, label, street, city, country, postal}) => ({
       id,
       label,

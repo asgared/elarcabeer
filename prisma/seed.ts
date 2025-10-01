@@ -17,6 +17,8 @@ async function main() {
   await prisma.product.deleteMany();
   await prisma.store.deleteMany();
   await prisma.contentPost.deleteMany();
+  await prisma.cmsContent.deleteMany();
+  await prisma.adminSession.deleteMany();
   await prisma.payment.deleteMany();
   await prisma.orderItem.deleteMany();
   await prisma.order.deleteMany();
@@ -119,6 +121,28 @@ async function main() {
     )
   );
 
+  await prisma.cmsContent.createMany({
+    data: [
+      {
+        slug: "home-hero",
+        title: "Cervezas artesanales inspiradas en travesías náuticas",
+        subtitle: "Navega el sabor",
+        body: "Explora estilos premiados, descubre nuestras tabernas marinas y únete al club exclusivo Arca Crew.",
+        imageUrl: "https://images.unsplash.com/photo-1514361892635-6e122620e250?auto=format&fit=crop&w=1200&q=80"
+      },
+      {
+        slug: "site-footer",
+        title: "Footer",
+        subtitle: "Cervezas artesanales desde 2015",
+        socialLinks: [
+          {platform: "Instagram", url: "https://instagram.com/elarcabeer"},
+          {platform: "Facebook", url: "https://facebook.com/elarcabeer"},
+          {platform: "TikTok", url: "https://tiktok.com/@elarcabeer"}
+        ]
+      }
+    ]
+  });
+
   const sampleVariants = await prisma.variant.findMany({take: 3, include: {product: true}});
 
   const [firstVariant, secondVariant] = sampleVariants;
@@ -128,6 +152,7 @@ async function main() {
       email: "sofia.martinez@example.com",
       name: "Sofía Martínez",
       password: hashPassword("Cerveza123"),
+      role: "USER",
       addresses: {
         create: [
           {
@@ -166,6 +191,15 @@ async function main() {
           }
         ]
       }
+    }
+  });
+
+  await prisma.user.create({
+    data: {
+      email: "admin@elarca.mx",
+      name: "Equipo El Arca",
+      password: hashPassword("Admin123!"),
+      role: "ADMIN"
     }
   });
 

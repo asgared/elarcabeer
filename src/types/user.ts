@@ -50,6 +50,7 @@ export type UserWithRelations = {
   id: string;
   email: string;
   name: string | null;
+  role?: "USER" | "ADMIN";
   addresses: Address[];
   orders: Order[];
   loyalty: LoyaltyEntry[];

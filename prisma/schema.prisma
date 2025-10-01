@@ -107,15 +107,22 @@ model Event {
   store   Store    @relation(fields: [storeId], references: [id])
 }
 
+enum UserRole {
+  USER
+  ADMIN
+}
+
 model User {
   id            String          @id @default(cuid())
   email         String          @unique
   name          String?
   password      String?
+  role          UserRole        @default(USER)
   addresses     Address[]
   orders        Order[]
   loyalty       LoyaltyLedger[]
   subscriptions Subscription[]
+  adminSessions AdminSession[]
 }
 
 model Address {
@@ -197,4 +204,27 @@ model ContentPost {
   tags      String
   category  String
   published DateTime
+}
+
+model CmsContent {
+  id          String   @id @default(cuid())
+  slug        String   @unique
+  title       String
+  subtitle    String?
+  body        String?
+  imageUrl    String?
+  socialLinks Json?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model AdminSession {
+  id        String   @id @default(cuid())
+  tokenHash String   @unique
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now())
+  expiresAt DateTime
+
+  @@index([tokenHash])
 }

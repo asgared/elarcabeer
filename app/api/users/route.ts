@@ -23,6 +23,7 @@ export async function POST(request: Request) {
         email: payload.email,
         name: payload.name ?? null,
         password: hashPassword(payload.password),
+        role: "USER",
         addresses: payload.addresses
           ? {
               create: payload.addresses.map(({label, street, city, country, postal}) => ({

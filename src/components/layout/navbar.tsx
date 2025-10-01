@@ -4,6 +4,7 @@ import {
   Box,
   Button,
   Container,
+  Divider,
   Flex,
   HStack,
   IconButton,
@@ -12,7 +13,15 @@ import {
   MenuItem,
   MenuList,
   Stack,
-  Text
+  Text,
+  useDisclosure,
+  VStack,
+  Drawer,
+  DrawerOverlay,
+  DrawerContent,
+  DrawerHeader,
+  DrawerBody,
+  DrawerCloseButton
 } from "@chakra-ui/react";
 import {Link} from "@/i18n/navigation";
 import {useTranslations, useLocale} from "@/i18n/client";
@@ -55,6 +64,7 @@ export function Navbar() {
   const t = useTranslations("navigation");
   const count = useCartStore(selectCartCount);
   const {open} = useCartDrawer();
+  const {isOpen, onOpen, onClose} = useDisclosure();
 
   return (
     <Box as="header" backdropFilter="blur(12px)" bg="rgba(12,27,30,0.85)" position="sticky" top={0} zIndex={1000}>
@@ -130,10 +140,36 @@ export function Navbar() {
               display={{base: "flex", md: "none"}}
               icon={<FaBars />}
               variant="ghost"
+              onClick={onOpen}
             />
           </HStack>
         </Flex>
       </Container>
+      <Drawer isOpen={isOpen} placement="left" onClose={onClose} size="xs">
+        <DrawerOverlay />
+        <DrawerContent bg="background.900">
+          <DrawerCloseButton mt={2} />
+          <DrawerHeader>El Arca</DrawerHeader>
+          <DrawerBody>
+            <VStack align="stretch" spacing={4}>
+              <Button as={Link} href="/shop" justifyContent="flex-start" variant="ghost" onClick={onClose}>
+                {t("shop")}
+              </Button>
+              <Button as={Link} href="/bars" justifyContent="flex-start" variant="ghost" onClick={onClose}>
+                {t("bars")}
+              </Button>
+              <Button as={Link} href="/discover" justifyContent="flex-start" variant="ghost" onClick={onClose}>
+                {t("discover")}
+              </Button>
+              <Button as={Link} href="/loyalty" justifyContent="flex-start" variant="ghost" onClick={onClose}>
+                {t("loyalty")}
+              </Button>
+              <Divider borderColor="whiteAlpha.300" />
+              <LocaleSwitcher />
+            </VStack>
+          </DrawerBody>
+        </DrawerContent>
+      </Drawer>
     </Box>
   );
 }
