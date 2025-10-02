@@ -23,6 +23,7 @@ import {
   DrawerBody,
   DrawerCloseButton
 } from "@chakra-ui/react";
+import {useEffect, useState} from "react";
 import {Link} from "@/i18n/navigation";
 import {useTranslations, useLocale} from "@/i18n/client";
 import {usePathname} from "next/navigation";
@@ -65,6 +66,13 @@ export function Navbar() {
   const count = useCartStore(selectCartCount);
   const {open} = useCartDrawer();
   const {isOpen, onOpen, onClose} = useDisclosure();
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
+  const shouldShowCartCount = isClient && count > 0;
 
   return (
     <Box as="header" backdropFilter="blur(12px)" bg="rgba(12,27,30,0.85)" position="sticky" top={0} zIndex={1000}>
@@ -118,7 +126,7 @@ export function Navbar() {
               variant="outline"
               onClick={open}
             />
-            {count > 0 ? (
+            {shouldShowCartCount ? (
               <Box
                 aria-hidden
                 bg="gold.500"
