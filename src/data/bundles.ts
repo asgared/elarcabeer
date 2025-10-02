@@ -13,7 +13,7 @@ export const bundles: Bundle[] = [
     ],
     price: 5900,
     savingsPercentage: 12,
-    image: "/images/bundles/explorer.jpg"
+    image: "/images/bundles/explorer.png"
   },
   {
     id: "bundle-dark-treasures",
@@ -27,7 +27,7 @@ export const bundles: Bundle[] = [
     ],
     price: 8600,
     savingsPercentage: 15,
-    image: "/images/bundles/dark-treasures.jpg"
+    image: "/images/bundles/dark_treasures.png"
   },
   {
     id: "bundle-crew",
@@ -41,6 +41,6 @@ export const bundles: Bundle[] = [
     ],
     price: 7200,
     savingsPercentage: 10,
-    image: "/images/bundles/crew.jpg"
+    image: "/images/bundles/crew.png"
   }
 ];

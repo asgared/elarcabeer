@@ -13,9 +13,9 @@ export const products: Product[] = [
     pairings: ["tostadas de marlin", "ensalada cítrica"],
     ingredients: ["malta pilsner", "lúpulo cascade", "levadura belga", "agua de manantial"],
     rating: 4.6,
-    heroImage: "/images/products/nautilus.jpg",
+    heroImage: "/images/products/nautilus.png",
     gallery: [
-      "/images/products/nautilus.jpg",
+      "/images/products/nautilus.png",
       "/images/products/nautilus-detail.jpg"
     ],
     variants: [
@@ -35,9 +35,9 @@ export const products: Product[] = [
     pairings: ["tacos de camarón", "curry thai"],
     ingredients: ["malta pale", "lúpulo mosaic", "levadura americana", "agua mineral"],
     rating: 4.8,
-    heroImage: "/images/products/kraken.jpg",
+    heroImage: "/images/products/kraken.png",
     gallery: [
-      "/images/products/kraken.jpg",
+      "/images/products/kraken.png",
       "/images/products/kraken-detail.jpg"
     ],
     variants: [
@@ -58,9 +58,9 @@ export const products: Product[] = [
     ingredients: ["malta chocolate", "copos de avena", "ron añejo", "vainilla de papantla"],
     rating: 4.9,
     limitedEdition: true,
-    heroImage: "/images/products/leviathan.jpg",
+    heroImage: "/images/products/leviathan.png",
     gallery: [
-      "/images/products/leviathan.jpg",
+      "/images/products/leviathan.png",
       "/images/products/leviathan-detail.jpg"
     ],
     variants: [
@@ -80,9 +80,9 @@ export const products: Product[] = [
     pairings: ["pizza margarita", "tostadas de atún"],
     ingredients: ["malta vienna", "lúpulo amarillo", "levadura californiana"],
     rating: 4.3,
-    heroImage: "/images/products/albatross.jpg",
+    heroImage: "/images/products/albatross.png",
     gallery: [
-      "/images/products/albatross.jpg",
+      "/images/products/albatross.png",
       "/images/products/albatross-detail.jpg"
     ],
     variants: [
@@ -102,9 +102,9 @@ export const products: Product[] = [
     pairings: ["pulpo a las brasas", "tacos al pastor"],
     ingredients: ["malta munich", "lúpulo saaz", "levadura lager"],
     rating: 4.2,
-    heroImage: "/images/products/meridian.jpg",
+    heroImage: "/images/products/meridian.png",
     gallery: [
-      "/images/products/meridian.jpg"
+      "/images/products/meridian.png"
     ],
     variants: [
       {id: "meridian-6", name: "6-pack", abv: 4.9, ibu: 20, packSize: 6, price: 2100},
@@ -124,9 +124,9 @@ export const products: Product[] = [
     ingredients: ["sal de celestún", "maracuyá", "cilantro"],
     rating: 4.5,
     limitedEdition: true,
-    heroImage: "/images/products/sirena.jpg",
+    heroImage: "/images/products/sirena.png",
     gallery: [
-      "/images/products/sirena.jpg"
+      "/images/products/sirena.png"
     ],
     variants: [
       {id: "sirena-4", name: "4-pack", abv: 4.5, ibu: 10, packSize: 4, price: 2300},
@@ -145,9 +145,9 @@ export const products: Product[] = [
     pairings: ["queso gouda", "pollo rostizado"],
     ingredients: ["malta pilsner", "azúcar candi", "levadura trapense"],
     rating: 4.4,
-    heroImage: "/images/products/triton.jpg",
+    heroImage: "/images/products/triton.png",
     gallery: [
-      "/images/products/triton.jpg"
+      "/images/products/triton.png"
     ],
     variants: [
       {id: "triton-750", name: "Botella 750ml", abv: 8.5, ibu: 28, packSize: 1, price: 890},
@@ -166,9 +166,9 @@ export const products: Product[] = [
     pairings: ["bao de cerdo", "dumplings"],
     ingredients: ["malta trigo", "avena", "lúpulo galaxy"],
     rating: 4.7,
-    heroImage: "/images/products/orion.jpg",
+    heroImage: "/images/products/orion.png",
     gallery: [
-      "/images/products/orion.jpg"
+      "/images/products/orion.png"
     ],
     variants: [
       {id: "orion-4", name: "4-pack", abv: 6.2, ibu: 40, packSize: 4, price: 2500},
@@ -187,9 +187,9 @@ export const products: Product[] = [
     pairings: ["costillas BBQ", "brownies"],
     ingredients: ["malta chocolate", "miel de caña", "lúpulo northern brewer"],
     rating: 4.5,
-    heroImage: "/images/products/abyss.jpg",
+    heroImage: "/images/products/abyss.png",
     gallery: [
-      "/images/products/abyss.jpg"
+      "/images/products/abyss.png"
     ],
     variants: [
       {id: "abyss-6", name: "6-pack", abv: 7.2, ibu: 35, packSize: 6, price: 2600},
@@ -208,9 +208,9 @@ export const products: Product[] = [
     pairings: ["ensalada de queso de cabra", "tarta de frutos rojos"],
     ingredients: ["fresa", "jamaica", "lúpulo citra"],
     rating: 4.3,
-    heroImage: "/images/products/marea.jpg",
+    heroImage: "/images/products/marea.png",
     gallery: [
-      "/images/products/marea.jpg"
+      "/images/products/marea.png"
     ],
     variants: [
       {id: "marea-4", name: "4-pack", abv: 5.1, ibu: 12, packSize: 4, price: 2350},
@@ -229,9 +229,9 @@ export const products: Product[] = [
     pairings: ["tostadas de ceviche", "queso fresco"],
     ingredients: ["malta pilsner", "lúpulo hallertau", "levadura lager"],
     rating: 4.1,
-    heroImage: "/images/products/coral.jpg",
+    heroImage: "/images/products/coral.png",
     gallery: [
-      "/images/products/coral.jpg"
+      "/images/products/coral.png"
     ],
     variants: [
       {id: "coral-6", name: "6-pack", abv: 4.7, ibu: 18, packSize: 6, price: 2050},
@@ -251,9 +251,9 @@ export const products: Product[] = [
     ingredients: ["malta chocolate", "mezcal artesanal", "vainilla de papantla"],
     rating: 4.9,
     limitedEdition: true,
-    heroImage: "/images/products/temporal.jpg",
+    heroImage: "/images/products/temporal.png",
     gallery: [
-      "/images/products/temporal.jpg"
+      "/images/products/temporal.png"
     ],
     variants: [
       {id: "temporal-2", name: "2-pack", abv: 11.5, ibu: 45, packSize: 2, price: 2200},
