@@ -23,7 +23,8 @@ import {
   DrawerBody,
   DrawerCloseButton
 } from "@chakra-ui/react";
-import {useEffect, useState} from "react";
+import type {DrawerProps} from "@chakra-ui/react";
+import {useBreakpointValue, useEffect, useState} from "react";
 import {Link} from "@/i18n/navigation";
 import {useTranslations, useLocale} from "@/i18n/client";
 import {usePathname} from "next/navigation";
@@ -67,7 +68,9 @@ export function Navbar() {
   const {open} = useCartDrawer();
   const {isOpen, onOpen, onClose} = useDisclosure();
   const [isClient, setIsClient] = useState(false);
-    useEffect(() => {
+  const drawerSize = useBreakpointValue<DrawerProps["size"]>({base: "full", md: "xs"}) ?? "xs";
+
+  useEffect(() => {
     setIsClient(true);
   }, []);
   if (!isClient) {
@@ -78,9 +81,9 @@ export function Navbar() {
 
   return (
     <Box as="header" backdropFilter="blur(12px)" bg="rgba(12,27,30,0.85)" position="sticky" top={0} zIndex={1000}>
-      <Container py={4}>
-        <Flex align="center" justify="space-between" gap={4}>
-          <HStack spacing={6}>
+      <Container maxW="6xl" py={4}>
+        <Flex align="center" justify="space-between" flexWrap="wrap" gap={{base: 3, md: 4}}>
+          <HStack spacing={{base: 3, md: 6}}>
             <Link href="/" style={{fontWeight: 700, fontSize: "1.125rem"}}>
               El Arca
             </Link>
@@ -120,31 +123,45 @@ export function Navbar() {
               </Button>
             </HStack>
           </HStack>
-          <HStack spacing={3}>
+          <HStack spacing={{base: 2, md: 3}}>
             <LocaleSwitcher />
+            <Box position="relative">
+              <IconButton
+                aria-label={t("cart")}
+                icon={<FaCartShopping />}
+                minH={12}
+                minW={12}
+                variant="outline"
+                onClick={open}
+              />
+              {shouldShowCartCount ? (
+                <Box
+                  aria-hidden
+                  bg="gold.500"
+                  borderRadius="full"
+                  color="black"
+                  fontSize="xs"
+                  fontWeight="bold"
+                  minW={5}
+                  px={1.5}
+                  position="absolute"
+                  right={1}
+                  textAlign="center"
+                  top={1}
+                >
+                  {count}
+                </Box>
+              ) : null}
+            </Box>
             <IconButton
-              aria-label={t("cart")}
-              icon={<FaCartShopping />}
+              aria-label={t("account") ?? "Cuenta"}
+              as={Link}
+              href="/account"
+              icon={<FaUser />}
+              minH={12}
+              minW={12}
               variant="outline"
-              onClick={open}
             />
-            {shouldShowCartCount ? (
-              <Box
-                aria-hidden
-                bg="gold.500"
-                borderRadius="full"
-                color="black"
-                fontSize="xs"
-                fontWeight="bold"
-                minW={5}
-                px={2}
-                textAlign="center"
-                transform="translate(-18px, -10px)"
-              >
-                {count}
-              </Box>
-            ) : null}
-            <IconButton aria-label={t("account") ?? "Cuenta"} as={Link} href="/account" icon={<FaUser />} variant="outline" />
             <IconButton
               aria-label="Menu"
               display={{base: "flex", md: "none"}}
@@ -155,7 +172,7 @@ export function Navbar() {
           </HStack>
         </Flex>
       </Container>
-      <Drawer isOpen={isOpen} placement="left" onClose={onClose} size="xs">
+      <Drawer isOpen={isOpen} placement="left" size={drawerSize} onClose={onClose}>
         <DrawerOverlay />
         <DrawerContent bg="background.900">
           <DrawerCloseButton mt={2} />

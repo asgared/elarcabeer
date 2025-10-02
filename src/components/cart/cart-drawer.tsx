@@ -12,8 +12,10 @@ import {
   HStack,
   IconButton,
   Stack,
-  Text
+  Text,
+  useBreakpointValue
 } from "@chakra-ui/react";
+import type {DrawerProps} from "@chakra-ui/react";
 import Link from "next/link";
 import {FaMinus, FaPlus, FaTrash} from "react-icons/fa6";
 
@@ -31,9 +33,10 @@ export function CartDrawer({isOpen, onClose}: Props) {
   const {items, removeItem, updateQuantity, clear, currency} = useCartStore();
   const total = useCartStore(selectCartTotal);
   const analytics = useAnalyticsContext();
+  const drawerSize = useBreakpointValue<DrawerProps["size"]>({base: "full", md: "md"}) ?? "md";
 
   return (
-    <Drawer isOpen={isOpen} placement="right" size="md" onClose={onClose}>
+    <Drawer isOpen={isOpen} placement="right" size={drawerSize} onClose={onClose}>
       <DrawerOverlay backdropFilter="blur(4px)" />
       <DrawerContent bg="background.800">
         <DrawerHeader borderBottomWidth="1px">Tu Carrito</DrawerHeader>
@@ -53,11 +56,11 @@ export function CartDrawer({isOpen, onClose}: Props) {
                       {product.name}
                     </Text>
                     <Text color="whiteAlpha.600">{item.variant.name}</Text>
-                    <HStack mt={3} spacing={3}>
+                    <Stack align="center" direction="row" flexWrap="wrap" mt={3} spacing={3}>
                       <IconButton
                         aria-label="Disminuir"
                         icon={<FaMinus />}
-                        size="sm"
+                        size="md"
                         variant="outline"
                         onClick={() =>
                           updateQuantity(item.productId, item.variant.id, item.quantity - 1)
@@ -67,7 +70,7 @@ export function CartDrawer({isOpen, onClose}: Props) {
                       <IconButton
                         aria-label="Incrementar"
                         icon={<FaPlus />}
-                        size="sm"
+                        size="md"
                         variant="outline"
                         onClick={() =>
                           updateQuantity(item.productId, item.variant.id, item.quantity + 1)
@@ -76,12 +79,12 @@ export function CartDrawer({isOpen, onClose}: Props) {
                       <IconButton
                         aria-label="Eliminar"
                         icon={<FaTrash />}
-                        size="sm"
+                        size="md"
                         variant="ghost"
                         colorScheme="red"
                         onClick={() => removeItem(item.productId, item.variant.id)}
                       />
-                    </HStack>
+                    </Stack>
                     <Text mt={2} fontWeight="bold">
                       {formatCurrency(item.variant.price * item.quantity, currency)}
                     </Text>

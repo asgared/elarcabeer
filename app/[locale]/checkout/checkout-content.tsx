@@ -25,11 +25,11 @@ export function CheckoutContent() {
   const currency = useCartStore((state) => state.currency);
 
   return (
-    <Container maxW="6xl">
-      <Heading size="2xl" mb={8}>
+    <Container maxW="6xl" py={{base: 10, md: 16}}>
+      <Heading size="2xl" mb={8} textAlign={{base: "center", lg: "left"}}>
         Checkout
       </Heading>
-      <Grid gap={12} templateColumns={{base: "1fr", lg: "3fr 2fr"}}>
+      <Grid gap={{base: 10, lg: 12}} templateColumns={{base: "1fr", lg: "3fr 2fr"}}>
         <GridItem>
           <Stack spacing={6}>
             <Box borderRadius="2xl" borderWidth="1px" p={6}>
@@ -58,7 +58,7 @@ export function CheckoutContent() {
               <Text color="whiteAlpha.700">
                 Integración con Stripe lista. Configura STRIPE_SECRET_KEY y STRIPE_WEBHOOK_SECRET para habilitar pagos reales.
               </Text>
-              <Button mt={6} size="lg">
+              <Button mt={6} size="lg" w={{base: "full", sm: "auto"}}>
                 Pagar con Stripe
               </Button>
             </Box>
