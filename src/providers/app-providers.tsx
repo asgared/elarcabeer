@@ -1,7 +1,7 @@
 "use client";
 
 import {CacheProvider} from "@chakra-ui/next-js";
-import {ChakraProvider, ColorModeScript} from "@chakra-ui/react";
+import {ChakraProvider} from "@chakra-ui/react";
 import {DefaultSeo} from "next-seo";
 import {ReactNode} from "react";
 

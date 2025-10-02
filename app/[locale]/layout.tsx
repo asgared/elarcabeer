@@ -14,54 +14,54 @@ const ClientProviders = dynamic(() => import("@/providers/client-providers"), {
 });
 
 export function generateStaticParams() {
-  return locales.map((locale) => ({locale}));
+  return locales.map((locale) => ({locale}));
 }
 
 type LayoutProps = {
-  children: ReactNode;
-  params: {locale: string};
+  children: ReactNode;
+  params: {locale: string};
 };
 
 export async function generateMetadata({params}: LayoutProps): Promise<Metadata> {
-  const locale = params.locale as AppLocale;
+  const locale = params.locale as AppLocale;
 
-  if (!locales.includes(locale)) {
-    notFound();
-  }
+  if (!locales.includes(locale)) {
+    notFound();
+  }
 
-  return {
-    metadataBase: new URL("https://elarcabeer.com"),
-    title: {
-      default: "El Arca Cervecería",
-      template: "%s | El Arca"
-    },
-    description: "Cervezas artesanales inspiradas en travesías marítimas",
-    openGraph: {
-      title: "El Arca Cervecería",
-      description: "Cervezas artesanales inspiradas en travesías marítimas",
-      locale,
-      siteName: "El Arca Beer"
-    }
-  };
+  return {
+    metadataBase: new URL("https://elarcabeer.com"),
+    title: {
+      default: "El Arca Cervecería",
+      template: "%s | El Arca",
+    },
+    description: "Cervezas artesanales inspiradas en travesías marítimas",
+    openGraph: {
+      title: "El Arca Cervecería",
+      description: "Cervezas artesanales inspiradas en travesías marítimas",
+      locale,
+      siteName: "El Arca Beer",
+    },
+  };
 }
 
 export default async function LocaleLayout({children, params}: LayoutProps) {
-  const locale = resolveLocale(params.locale);
-  const messages = await loadMessages(locale);
-  const footerContent = await getCmsContent("site-footer");
+  const locale = resolveLocale(params.locale);
+  const messages = await loadMessages(locale);
+  const footerContent = await getCmsContent("site-footer");
 
-  return (
-    <IntlProvider locale={locale} messages={messages}>
-      <ClientProviders locale={locale}>
-        <SiteShell
-          footerContent={{
-            subtitle: footerContent?.subtitle,
-            socialLinks: footerContent?.socialLinks ?? []
-          }}
-        >
-          {children}
-        </SiteShell>
-      </ClientProviders>
-    </IntlProvider>
-  );
+  return (
+    <IntlProvider locale={locale} messages={messages}>
+      <ClientProviders locale={locale}>
+        <SiteShell
+          footerContent={{
+            subtitle: footerContent?.subtitle,
+            socialLinks: footerContent?.socialLinks ?? [],
+          }}
+        >
+          {children}
+        </SiteShell>
+      </ClientProviders>
+    </IntlProvider>
+  );
 }
