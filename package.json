@@ -19,11 +19,11 @@
   },
   "dependencies": {
     "@chakra-ui/icons": "^2.1.1",
-    "@chakra-ui/next-js": "^2.1.2",
-    "@chakra-ui/react": "^2.8.2",
+    "@chakra-ui/next-js": "^2.4.2",
+    "@chakra-ui/react": "^3.27.0",
     "@chakra-ui/system": "^2.6.2",
-    "@emotion/react": "^11.11.1",
-    "@emotion/styled": "^11.11.0",
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.1",
     "@internationalized/date": "^3.5.1",
     "@prisma/client": "^5.11.0",
     "@stripe/stripe-js": "^2.4.0",
@@ -31,7 +31,7 @@
     "@vercel/analytics": "^1.1.1",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.0",
-    "framer-motion": "^10.18.0",
+    "framer-motion": "^12.23.22",
     "next": "14.1.0",
     "next-intl": "^4.3.9",
     "next-seo": "^6.4.0",
@@ -64,5 +64,11 @@
     "tsx": "4",
     "typescript": "^5.3.3"
   },
-  "packageManager": "pnpm@9.1.0"
+  "packageManager": "pnpm@9.1.0",
+  "pnpm": {
+    "overrides": {
+      "@chakra-ui/react": "2.8.2",
+      "@chakra-ui/system": "2.6.2"
+    }
+  }
 }

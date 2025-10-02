@@ -20,7 +20,6 @@ export function AppProviders({children, locale}: Props) {
   return (
     <CacheProvider>
       <ChakraProvider theme={theme}>
-        <ColorModeScript initialColorMode={theme.config.initialColorMode} />
         <DefaultSeo {...seoConfig} />
         <AnalyticsProvider locale={locale}>
           <UserProvider>

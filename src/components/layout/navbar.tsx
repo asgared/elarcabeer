@@ -67,10 +67,12 @@ export function Navbar() {
   const {open} = useCartDrawer();
   const {isOpen, onOpen, onClose} = useDisclosure();
   const [isClient, setIsClient] = useState(false);
-
-  useEffect(() => {
+    useEffect(() => {
     setIsClient(true);
   }, []);
+  if (!isClient) {
+    return null;
+  }
 
   const shouldShowCartCount = isClient && count > 0;
 
