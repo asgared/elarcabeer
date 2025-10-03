@@ -21,10 +21,11 @@ import {
   DrawerContent,
   DrawerHeader,
   DrawerBody,
-  DrawerCloseButton
+  DrawerCloseButton,
+  useBreakpointValue 
 } from "@chakra-ui/react";
 import type {DrawerProps} from "@chakra-ui/react";
-import {useBreakpointValue, useEffect, useState} from "react";
+import {useEffect, useState} from "react";
 import {Link} from "@/i18n/navigation";
 import {useTranslations, useLocale} from "@/i18n/client";
 import {usePathname} from "next/navigation";
