@@ -54,19 +54,17 @@ export async function PATCH(request: Request, {params}: RouteContext) {
     }
 
     if (payload.addresses !== undefined) {
+      const nextAddresses = payload.addresses.map(({label, street, city, country, postal}) => ({
+        label,
+        street,
+        city,
+        country,
+        postal
+      }));
+
       updateData.addresses = {
-        deleteMany: {userId},
-        ...(payload.addresses.length
-          ? {
-              create: payload.addresses.map(({label, street, city, country, postal}) => ({
-                label,
-                street,
-                city,
-                country,
-                postal
-              }))
-            }
-          : {})
+        deleteMany: {},
+        ...(nextAddresses.length ? {create: nextAddresses} : {})
       };
     }
 
