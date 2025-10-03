@@ -4,7 +4,6 @@ import {
   Box,
   Container,
   Divider,
-  HStack,
   Heading,
   Input,
   InputGroup,
@@ -51,9 +50,19 @@ export default function ShopPage() {
           <Heading size="2xl">Shop</Heading>
           <Text color="whiteAlpha.700">Filtra por estilo, ABV y precio para encontrar tu tesoro líquido.</Text>
         </Stack>
-        <HStack align="flex-start" spacing={12}
+        <Stack
+          align="stretch"
+          direction={{base: "column", lg: "row"}}
+          spacing={{base: 10, lg: 12}}
         >
-          <Stack bg="rgba(19,58,67,0.65)" borderRadius="2xl" p={6} spacing={6} w={{base: "100%", md: "320px"}}>
+          <Stack
+            bg="rgba(19,58,67,0.65)"
+            borderRadius="2xl"
+            flexShrink={0}
+            p={6}
+            spacing={6}
+            w={{base: "full", md: "320px"}}
+          >
             <Stack>
               <Text fontWeight="semibold">Búsqueda</Text>
               <InputGroup>
@@ -99,12 +108,19 @@ export default function ShopPage() {
               <Text color="whiteAlpha.600">Hasta ${maxPrice} MXN</Text>
             </Stack>
           </Stack>
-          <SimpleGrid columns={{base: 1, md: 2, lg: 3}} flex="1" gap={8} w="full">
-            {filtered.map((product) => (
-              <ProductCard key={product.id} product={product} />
-            ))}
-          </SimpleGrid>
-        </HStack>
+          <Box flex="1" w="full">
+            <SimpleGrid columns={{base: 1, md: 2, lg: 3, xl: 4}} gap={{base: 6, md: 8}} w="full">
+              {filtered.map((product) => (
+                <ProductCard key={product.id} product={product} />
+              ))}
+            </SimpleGrid>
+            {filtered.length === 0 ? (
+              <Box mt={8} textAlign="center">
+                <Text color="whiteAlpha.700">No encontramos productos con los filtros seleccionados.</Text>
+              </Box>
+            ) : null}
+          </Box>
+        </Stack>
       </Stack>
     </Container>
   );

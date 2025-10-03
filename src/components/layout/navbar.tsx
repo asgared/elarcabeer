@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  Avatar,
   Box,
   Button,
   Container,
@@ -10,6 +11,7 @@ import {
   IconButton,
   Menu,
   MenuButton,
+  MenuDivider,
   MenuItem,
   MenuList,
   Stack,
@@ -22,7 +24,7 @@ import {
   DrawerHeader,
   DrawerBody,
   DrawerCloseButton,
-  useBreakpointValue 
+  useBreakpointValue
 } from "@chakra-ui/react";
 import type {DrawerProps} from "@chakra-ui/react";
 import {useEffect, useState} from "react";
@@ -37,6 +39,7 @@ import {posts} from "../../data/posts";
 import {useCartDrawer} from "../../providers/cart-drawer-provider";
 import {selectCartCount, useCartStore} from "../../stores/cart-store";
 import {localeLabels, locales} from "../../i18n/locales";
+import {useUser} from "@/providers/user-provider";
 
 function LocaleSwitcher() {
   const pathname = usePathname();
@@ -69,6 +72,7 @@ export function Navbar() {
   const {open} = useCartDrawer();
   const {isOpen, onOpen, onClose} = useDisclosure();
   const [isClient, setIsClient] = useState(false);
+  const {user, logout} = useUser();
   const drawerSize = useBreakpointValue<DrawerProps["size"]>({base: "full", md: "xs"}) ?? "xs";
 
   useEffect(() => {
@@ -154,15 +158,51 @@ export function Navbar() {
                 </Box>
               ) : null}
             </Box>
-            <IconButton
-              aria-label={t("account") ?? "Cuenta"}
-              as={Link}
-              href="/account"
-              icon={<FaUser />}
-              minH={12}
-              minW={12}
-              variant="outline"
-            />
+            {user ? (
+              <Menu placement="bottom-end" isLazy>
+                <MenuButton
+                  as={Button}
+                  borderRadius="full"
+                  minW={0}
+                  p={0}
+                  variant="outline"
+                >
+                  <Avatar
+                    size="sm"
+                    name={user.name ?? user.email}
+                    bg="gold.500"
+                    color="black"
+                  />
+                </MenuButton>
+                <MenuList bg="background.800" minW="220px">
+                  <Box px={4} py={3} borderBottomWidth="1px" borderColor="whiteAlpha.200">
+                    <Text fontWeight="semibold" noOfLines={1}>
+                      {user.name ?? user.email}
+                    </Text>
+                    {user.name ? (
+                      <Text color="whiteAlpha.700" fontSize="sm" noOfLines={1}>
+                        {user.email}
+                      </Text>
+                    ) : null}
+                  </Box>
+                  <MenuDivider borderColor="whiteAlpha.200" />
+                  <MenuItem as={Link} href="/account">
+                    Perfil
+                  </MenuItem>
+                  <MenuItem onClick={logout}>Cerrar sesión</MenuItem>
+                </MenuList>
+              </Menu>
+            ) : (
+              <IconButton
+                aria-label={t("account") ?? "Cuenta"}
+                as={Link}
+                href="/account"
+                icon={<FaUser />}
+                minH={12}
+                minW={12}
+                variant="outline"
+              />
+            )}
             <IconButton
               aria-label="Menu"
               display={{base: "flex", md: "none"}}

@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  AspectRatio,
   Badge,
   Box,
   Card,
@@ -26,30 +27,41 @@ export function ProductCard({product}: {product: Product}) {
       as={Link}
       href={`/shop/${product.slug}`}
       _hover={{transform: "translateY(-6px)"}}
+      borderRadius="2xl"
       h="full"
       transition="all 0.2s"
     >
-      <CardBody display="flex" flexDirection="column" gap={6}>
+      <CardBody display="flex" flexDirection="column" gap={{base: 4, md: 6}} p={{base: 5, md: 6}}>
         <Box position="relative">
           {product.limitedEdition ? (
             <Badge colorScheme="yellow" position="absolute" top={3} right={3}>
               Edición limitada
             </Badge>
           ) : null}
-          <Image
-            alt={product.name}
-            borderRadius="xl"
-            h={{base: 200, md: 240}}
-            objectFit="cover"
-            fallbackSrc="/images/beer-bg.jpg"
-            src={product.heroImage}
-            w="full"
-          />
+          <AspectRatio ratio={4 / 5}>
+            <Image
+              alt={product.name}
+              borderRadius="xl"
+              fallbackSrc="/images/beer-bg.jpg"
+              objectFit="cover"
+              src={product.heroImage}
+              w="full"
+            />
+          </AspectRatio>
         </Box>
         <Stack spacing={3} flex="1">
-          <Heading size="md">{product.name}</Heading>
-          <Text color="whiteAlpha.700">{product.style}</Text>
-          <HStack align={{base: "flex-start", md: "center"}} justify="space-between" spacing={3}>
+          <Heading size="md" noOfLines={2}>
+            {product.name}
+          </Heading>
+          <Text color="whiteAlpha.700" fontSize="sm" noOfLines={2}>
+            {product.style}
+          </Text>
+          <HStack
+            align={{base: "flex-start", md: "center"}}
+            justify="space-between"
+            spacing={3}
+            flexWrap="wrap"
+          >
             {hasVariants && minPrice !== null ? (
               <Text fontWeight="semibold">{formatCurrency(minPrice)}</Text>
             ) : (
