@@ -54,19 +54,17 @@ export async function PATCH(request: Request, {params}: RouteContext) {
     }
 
     if (payload.addresses !== undefined) {
+      const sanitizedAddresses = payload.addresses.map(({label, street, city, country, postal}) => ({
+        label: label.trim(),
+        street: street.trim(),
+        city: city.trim(),
+        country: country.trim(),
+        postal: postal.trim()
+      }));
+
       updateData.addresses = {
         deleteMany: {userId},
-        ...(payload.addresses.length
-          ? {
-              create: payload.addresses.map(({label, street, city, country, postal}) => ({
-                label,
-                street,
-                city,
-                country,
-                postal
-              }))
-            }
-          : {})
+        ...(sanitizedAddresses.length ? {create: sanitizedAddresses} : {})
       };
     }
 

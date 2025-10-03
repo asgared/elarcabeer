@@ -40,6 +40,20 @@ const initialFormState = {
   postal: ""
 };
 
+const toAddressPayload = ({label, street, city, country, postal}: {
+  label: string;
+  street: string;
+  city: string;
+  country: string;
+  postal: string;
+}) => ({
+  label: label.trim(),
+  street: street.trim(),
+  city: city.trim(),
+  country: country.trim(),
+  postal: postal.trim()
+});
+
 export function CheckoutContent() {
   const items = useCartStore((state) => state.items);
   const total = useCartStore(selectCartTotal);
@@ -160,40 +174,36 @@ export function CheckoutContent() {
 
     try {
       if (user && saveAddress) {
-        const sanitizedAddress = {
+        const sanitizedAddress = toAddressPayload({
           label:
             form.label.trim() ||
             (selectedAddressId === "new"
               ? "Dirección de envío"
               : addresses.find((address) => address.id === selectedAddressId)?.label ?? "Dirección de envío"),
-          street: form.street.trim(),
-          city: form.city.trim(),
-          country: form.country.trim(),
-          postal: form.postal.trim()
-        };
+          street: form.street,
+          city: form.city,
+          country: form.country,
+          postal: form.postal
+        });
 
         const nextAddresses =
           selectedAddressId === "new"
             ? [
-                ...addresses.map(({label, street, city, country, postal}) => ({
-                  label,
-                  street,
-                  city,
-                  country,
-                  postal
-                })),
+                ...addresses.map(({label, street, city, country, postal}) =>
+                  toAddressPayload({label, street, city, country, postal})
+                ),
                 sanitizedAddress
               ]
             : addresses.map((address) =>
                 address.id === selectedAddressId
                   ? sanitizedAddress
-                  : {
+                  : toAddressPayload({
                       label: address.label,
                       street: address.street,
                       city: address.city,
                       country: address.country,
                       postal: address.postal
-                    }
+                    })
               );
 
         const updatedUser = await updateUser({addresses: nextAddresses});
