@@ -6,11 +6,11 @@ import type {UserWithRelations} from "@/types/user";
 export const userInclude = {
   addresses: true,
   orders: {
+    orderBy: {createdAt: "desc"},
     include: {
       items: true,
-      payments: true
-    },
-    orderBy: {createdAt: "desc"}
+      payment: true
+    }
   },
   loyalty: {
     orderBy: {createdAt: "desc"}
@@ -36,26 +36,33 @@ export function serializeUser(user: UserWithSensitive): UserWithRelations {
       country,
       postal
     })),
-    orders: user.orders.map((order) => ({
-      id: order.id,
-      number: order.number,
-      total: order.total,
-      status: order.status,
-      createdAt: order.createdAt.toISOString(),
-      items: order.items.map(({id, name, quantity, price}) => ({
-        id,
-        name,
-        quantity,
-        price
-      })),
-      payments: order.payments.map(({id, amount, method, status, processedAt}) => ({
-        id,
-        amount,
-        method,
-        status,
-        processedAt: processedAt.toISOString()
-      }))
-    })),
+    orders: user.orders.map((order) => {
+      const orderNumber = "number" in order ? (order as {number?: string | null}).number ?? null : null;
+
+      return {
+        id: order.id,
+        number: orderNumber,
+        total: order.total,
+        status: order.status,
+        createdAt: order.createdAt.toISOString(),
+        items: order.items.map(({id, name, quantity, price, productId, variantId}) => ({
+          id,
+          name,
+          quantity,
+          price,
+          productId,
+          variantId
+        })),
+        payment: order.payment
+          ? {
+              id: order.payment.id,
+              amount: order.payment.amount,
+              status: order.payment.status,
+              stripeSessionId: order.payment.stripeSessionId
+            }
+          : null
+      };
+    }),
     loyalty: user.loyalty.map(({id, points, reason, createdAt}) => ({
       id,
       points,

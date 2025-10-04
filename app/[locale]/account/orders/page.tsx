@@ -8,6 +8,7 @@ import {
   AccordionPanel,
   Badge,
   Box,
+  Button,
   Container,
   Divider,
   Flex,
@@ -19,6 +20,7 @@ import {
 import {useEffect, useRef} from "react";
 
 import {useUser} from "@/providers/user-provider";
+import {Link} from "@/i18n/navigation";
 import {formatCurrency} from "@/utils/currency";
 
 export const dynamic = "force-dynamic";
@@ -110,6 +112,7 @@ export default function OrdersPage() {
         ) : (
           <Accordion allowMultiple defaultIndex={[0]}>
             {orders.map((order) => {
+              const orderNumber = order.number ?? `#${order.id.slice(-8).toUpperCase()}`;
               const statusKey = order.status.toLowerCase();
               const statusLabel = ORDER_STATUS_LABELS[statusKey] ?? order.status;
               const statusColor = ORDER_STATUS_COLORS[statusKey] ?? "gray";
@@ -119,7 +122,7 @@ export default function OrdersPage() {
                   <h3>
                     <AccordionButton px={0} py={4}>
                       <Flex flex="1" direction="column" alignItems="flex-start" gap={1} textAlign="left">
-                        <Text fontWeight="bold">{order.number}</Text>
+                        <Text fontWeight="bold">{orderNumber}</Text>
                         <Text color="whiteAlpha.700">{dateFormatter.format(new Date(order.createdAt))}</Text>
                       </Flex>
                       <Stack align="flex-end" direction="column" spacing={2} pr={2}>
@@ -147,34 +150,43 @@ export default function OrdersPage() {
                       <Divider />
 
                       <Stack spacing={2}>
-                        <Heading size="sm">Pagos</Heading>
-                        {order.payments.length === 0 ? (
+                        <Heading size="sm">Pago</Heading>
+                        {!order.payment ? (
                           <Text color="whiteAlpha.700">Pago pendiente por procesar.</Text>
                         ) : (
-                          order.payments.map((payment) => {
-                            const paymentKey = payment.status.toLowerCase();
-                            const paymentLabel = PAYMENT_STATUS_LABELS[paymentKey] ?? payment.status;
+                          (() => {
+                            const paymentKey = order.payment.status.toLowerCase();
+                            const paymentLabel = PAYMENT_STATUS_LABELS[paymentKey] ?? order.payment.status;
                             const paymentColor = PAYMENT_STATUS_COLORS[paymentKey] ?? "gray";
 
                             return (
-                              <Box key={payment.id} borderRadius="lg" borderWidth="1px" p={4}>
+                              <Box borderRadius="lg" borderWidth="1px" p={4}>
                                 <Stack direction={{base: "column", md: "row"}} justify="space-between" spacing={3}>
                                   <Stack spacing={1}>
-                                    <Text fontWeight="medium">{formatCurrency(payment.amount)}</Text>
-                                    <Text color="whiteAlpha.700">{dateFormatter.format(new Date(payment.processedAt))}</Text>
+                                    <Text fontWeight="medium">{formatCurrency(order.payment.amount)}</Text>
+                                    <Text color="whiteAlpha.700">
+                                      Referencia: {order.payment.stripeSessionId.slice(0, 8)}…
+                                    </Text>
                                   </Stack>
-                                  <Stack align={{base: "flex-start", md: "flex-end"}} spacing={1}>
-                                    <Badge alignSelf="flex-start" colorScheme={paymentColor}>
-                                      {paymentLabel}
-                                    </Badge>
-                                    <Text color="whiteAlpha.700">Método: {payment.method}</Text>
-                                  </Stack>
+                                  <Badge alignSelf={{base: "flex-start", md: "center"}} colorScheme={paymentColor}>
+                                    {paymentLabel}
+                                  </Badge>
                                 </Stack>
                               </Box>
                             );
-                          })
+                          })()
                         )}
                       </Stack>
+
+                      <Button
+                        alignSelf="flex-start"
+                        as={Link}
+                        colorScheme="orange"
+                        href={`/account/orders/${order.id}`}
+                        size="sm"
+                      >
+                        Ver detalle
+                      </Button>
                     </Stack>
                   </AccordionPanel>
                 </AccordionItem>
