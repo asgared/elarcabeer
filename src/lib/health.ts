@@ -65,9 +65,7 @@ function checkStripeKeys(): HealthCheck {
       details: "Configura STRIPE_WEBHOOK_SECRET con el valor whsec_ de tu endpoint",
     };
   }
-
-  // <<<--- CORRECCIÓN #2: Se elimina el bloque try/catch que llamaba a createStripeClient()
-  // La importación de 'stripe' ya valida la existencia de la clave secreta.
+  
   if (!stripe) {
     return {
       id: "stripe-client",
