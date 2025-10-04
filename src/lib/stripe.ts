@@ -1,33 +1,11 @@
 import Stripe from "stripe";
 
-const DEFAULT_STRIPE_API_VERSION: Stripe.LatestApiVersion = "2023-08-16";
+const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
 
-function resolveApiVersion(
-  apiVersion: string | undefined
-): Stripe.LatestApiVersion {
-  if (!apiVersion) {
-    return DEFAULT_STRIPE_API_VERSION;
-  }
-
-  if (apiVersion === DEFAULT_STRIPE_API_VERSION) {
-    return apiVersion;
-  }
-
-  throw new Error(
-    `Stripe API version "${apiVersion}" no es compatible con el SDK instalado.`
-  );
+if (!stripeSecretKey) {
+  throw new Error("STRIPE_SECRET_KEY no está definida en las variables de entorno");
 }
-
-export function createStripeClient(): Stripe {
-  const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
-
-  if (!stripeSecretKey) {
-    throw new Error("STRIPE_SECRET_KEY no está definida");
-  }
-
-  const apiVersion = resolveApiVersion(process.env.STRIPE_API_VERSION);
-
-  return new Stripe(stripeSecretKey, {apiVersion});
-}
-
-export type {Stripe};
+export const stripe = new Stripe(stripeSecretKey, {
+  apiVersion: "2023-08-16",
+  typescript: true,
+});
