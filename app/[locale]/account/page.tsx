@@ -27,10 +27,11 @@ export default function AccountPage() {
 
   const isLoading = status === "initializing" || (status === "loading" && !user);
 
-  const totalOrders = user?.orders.length ?? 0;
-  const totalSpent = user?.orders.reduce((sum, order) => sum + order.total, 0) ?? 0;
-  const loyaltyPoints = user?.loyalty.reduce((sum, entry) => sum + entry.points, 0) ?? 0;
-  const activeSubscriptions = user?.subscriptions.filter((subscription) => subscription.status === "active").length ?? 0;
+  const totalOrders = user?.orders?.length ?? 0;
+  const totalSpent = user?.orders?.reduce((sum, order) => sum + order.total, 0) ?? 0;
+  const loyaltyPoints = user?.loyalty?.reduce((sum, entry) => sum + entry.points, 0) ?? 0;
+  const activeSubscriptions =
+    user?.subscriptions?.filter((subscription) => subscription.status === "active")?.length ?? 0;
 
   return (
     <Container maxW="5xl">
