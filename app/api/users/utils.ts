@@ -7,6 +7,7 @@ import type { UserWithRelations } from "@/types/user";
 export const userInclude = {
   addresses: true,
   orders: {
+    orderBy: {createdAt: "desc"},
     include: {
       items: true,
       payment: true, // Corregido a 'payment' (singular) y sin 'orderBy'
@@ -27,25 +28,42 @@ export function serializeUser(user: UserWithSensitive): UserWithRelations {
     email: user.email,
     name: user.name,
     role: user.role,
-    addresses: user.addresses,
-    orders: user.orders.map((order) => ({
-      id: order.id,
-      number: order.id.slice(-6).toUpperCase(), // Generamos un número de orden a partir del ID
-      total: order.total,
-      status: order.status,
-      createdAt: order.createdAt.toISOString(),
-      items: order.items,
-      payments: order.payment // Comprobamos si el pago (singular) existe
-        ? [ // Si existe, lo envolvemos en un array para mantener la estructura
-            {
+    addresses: user.addresses.map(({id, label, street, city, country, postal}) => ({
+      id,
+      label,
+      street,
+      city,
+      country,
+      postal
+    })),
+    orders: user.orders.map((order) => {
+      const orderNumber = "number" in order ? (order as {number?: string | null}).number ?? null : null;
+
+      return {
+        id: order.id,
+        number: orderNumber,
+        total: order.total,
+        status: order.status,
+        createdAt: order.createdAt.toISOString(),
+        items: order.items.map(({id, name, quantity, price, productId, variantId}) => ({
+          id,
+          name,
+          quantity,
+          price,
+          productId,
+          variantId
+        })),
+        payment: order.payment
+          ? {
               id: order.payment.id,
               amount: order.payment.amount,
               status: order.payment.status,
-            },
-          ]
-        : [], // Si no existe, devolvemos un array vacío
-    })),
-    loyalty: user.loyalty.map(({ id, points, reason, createdAt }) => ({
+              stripeSessionId: order.payment.stripeSessionId
+            }
+          : null
+      };
+    }),
+    loyalty: user.loyalty.map(({id, points, reason, createdAt}) => ({
       id,
       points,
       reason,

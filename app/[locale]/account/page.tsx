@@ -27,8 +27,16 @@ export default function AccountPage() {
 
   const isLoading = status === "initializing" || (status === "loading" && !user);
 
+  const completedStatuses = new Set(["fulfilled", "delivered", "completed"]);
   const totalOrders = user?.orders?.length ?? 0;
-  const totalSpent = user?.orders?.reduce((sum, order) => sum + order.total, 0) ?? 0;
+  const totalSpent =
+    user?.orders?.reduce((sum, order) => {
+      if (completedStatuses.has(order.status.toLowerCase())) {
+        return sum + order.total;
+      }
+
+      return sum;
+    }, 0) ?? 0;
   const loyaltyPoints = user?.loyalty?.reduce((sum, entry) => sum + entry.points, 0) ?? 0;
   const activeSubscriptions =
     user?.subscriptions?.filter((subscription) => subscription.status === "active")?.length ?? 0;

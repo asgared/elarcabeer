@@ -25,6 +25,7 @@ export type Payment = {
 
 export type Order = {
   id: string;
+  number?: string | null;
   total: number;
   status: string;
   createdAt: string;
