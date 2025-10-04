@@ -91,8 +91,6 @@ export default function AccountPage() {
               </Box>
             </SimpleGrid>
 
-            <ProfileForm />
-
             <Grid gap={6} templateColumns={{base: "1fr", md: "repeat(3, minmax(0, 1fr))"}}>
               <Box borderRadius="2xl" borderWidth="1px" p={6}>
                 <Heading size="md">
@@ -113,6 +111,9 @@ export default function AccountPage() {
                 <Text color="whiteAlpha.700">Mantén al día tus direcciones de entrega favoritas.</Text>
               </Box>
             </Grid>
+
+            <ProfileForm />
+          
           </Stack>
         )}
       </Stack>
