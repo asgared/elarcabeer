@@ -1,6 +1,6 @@
-import {Prisma} from "@prisma/client";
-import {prisma} from "./prisma";
-import {createStripeClient} from "./stripe";
+import { Prisma } from "@prisma/client";
+import { prisma } from "./prisma";
+import { stripe } from "./stripe";
 
 type CheckStatus = "ok" | "warn" | "error";
 
@@ -26,14 +26,14 @@ async function checkDatabase(): Promise<HealthCheck> {
     return {
       id: "database",
       label: "Base de datos",
-      status: "ok"
+      status: "ok",
     };
   } catch (error) {
     return {
       id: "database",
       label: "Base de datos",
       status: "error",
-      details: error instanceof Error ? error.message : "Error desconocido"
+      details: error instanceof Error ? error.message : "Error desconocido",
     };
   }
 }
@@ -44,7 +44,7 @@ function checkStripeKeys(): HealthCheck {
       id: "stripe-secret",
       label: "Stripe secret key",
       status: "error",
-      details: "Define STRIPE_SECRET_KEY con una clave sk_test_"
+      details: "Define STRIPE_SECRET_KEY con una clave sk_test_",
     };
   }
 
@@ -53,7 +53,7 @@ function checkStripeKeys(): HealthCheck {
       id: "stripe-publishable",
       label: "Stripe publishable key",
       status: "error",
-      details: "Define NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY con una clave pk_test_"
+      details: "Define NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY con una clave pk_test_",
     };
   }
 
@@ -62,25 +62,26 @@ function checkStripeKeys(): HealthCheck {
       id: "stripe-webhook",
       label: "Stripe webhook",
       status: "error",
-      details: "Configura STRIPE_WEBHOOK_SECRET con el valor whsec_ de tu endpoint"
+      details: "Configura STRIPE_WEBHOOK_SECRET con el valor whsec_ de tu endpoint",
     };
   }
 
-  try {
-    createStripeClient();
-  } catch (error) {
+  // <<<--- CORRECCIÓN #2: Se elimina el bloque try/catch que llamaba a createStripeClient()
+  // La importación de 'stripe' ya valida la existencia de la clave secreta.
+  if (!stripe) {
     return {
       id: "stripe-client",
       label: "Stripe SDK",
       status: "error",
-      details: error instanceof Error ? error.message : "No fue posible inicializar Stripe"
+      details: "No fue posible inicializar Stripe",
     };
   }
+
 
   return {
     id: "stripe",
     label: "Stripe",
-    status: "ok"
+    status: "ok",
   };
 }
 
@@ -90,14 +91,14 @@ function checkNextAuth(): HealthCheck {
       id: "nextauth",
       label: "NextAuth",
       status: "error",
-      details: "NEXTAUTH_SECRET y NEXTAUTH_URL son obligatorios"
+      details: "NEXTAUTH_SECRET y NEXTAUTH_URL son obligatorios",
     };
   }
 
   return {
     id: "nextauth",
     label: "NextAuth",
-    status: "ok"
+    status: "ok",
   };
 }
 
@@ -107,14 +108,14 @@ function checkMapbox(): HealthCheck {
       id: "mapbox",
       label: "Mapbox",
       status: "error",
-      details: "Configura MAPBOX_TOKEN con un token público pk."
+      details: "Configura MAPBOX_TOKEN con un token público pk.",
     };
   }
 
   return {
     id: "mapbox",
     label: "Mapbox",
-    status: "ok"
+    status: "ok",
   };
 }
 
@@ -124,14 +125,14 @@ function checkResend(): HealthCheck {
       id: "resend",
       label: "Resend",
       status: "warn",
-      details: "RESEND_API_KEY es recomendable para emails transaccionales"
+      details: "RESEND_API_KEY es recomendable para emails transaccionales",
     };
   }
 
   return {
     id: "resend",
     label: "Resend",
-    status: "ok"
+    status: "ok",
   };
 }
 
@@ -141,14 +142,14 @@ function checkCloudinary(): HealthCheck {
       id: "cloudinary",
       label: "Cloudinary",
       status: "warn",
-      details: "CLOUDINARY_URL no configurada"
+      details: "CLOUDINARY_URL no configurada",
     };
   }
 
   return {
     id: "cloudinary",
     label: "Cloudinary",
-    status: "ok"
+    status: "ok",
   };
 }
 
@@ -159,7 +160,7 @@ export async function runHealthChecks(): Promise<HealthReport> {
     checkNextAuth(),
     checkMapbox(),
     checkResend(),
-    checkCloudinary()
+    checkCloudinary(),
   ];
 
   const hasError = checks.some((check) => check.status === "error");
@@ -167,6 +168,6 @@ export async function runHealthChecks(): Promise<HealthReport> {
 
   return {
     status: hasError ? "error" : hasWarning ? "warn" : "ok",
-    checks
+    checks,
   };
 }

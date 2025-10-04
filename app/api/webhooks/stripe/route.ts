@@ -2,7 +2,17 @@ import { NextRequest, NextResponse } from "next/server";
 import { headers } from "next/headers";
 import Stripe from "stripe";
 import { prisma } from "@/lib/prisma";
-import { stripe } from "@/lib/stripe";
+import { stripe } from "@/lib/stripe"; // Correcto: Se importa la constante 'stripe'
+
+// Define el tipo para los items del carrito que vienen en la metadata
+type CartItem = {
+    productId: string;
+    variantId: string;
+    name: string;
+    quantity: number;
+    price: number; // Asegúrate que 'price' venga en la metadata, si no, es 'unitAmount'
+};
+
 
 export async function POST(request: NextRequest) {
   const body = await request.text();
@@ -17,38 +27,40 @@ export async function POST(request: NextRequest) {
       process.env.STRIPE_WEBHOOK_SECRET!
     );
   } catch (err: any) {
-    console.error(`❌ Error message: ${err.message}`);
+    console.error(`❌ Error de validación del webhook: ${err.message}`);
     return new NextResponse(`Webhook Error: ${err.message}`, { status: 400 });
   }
 
-  // Handle the event
+  // Maneja el evento específico
   switch (event.type) {
     case "checkout.session.completed":
       const session = event.data.object as Stripe.Checkout.Session;
 
-      if (!session?.metadata?.userId || !session?.metadata?.cartItems) {
-        console.error("❌ Metadata is missing from the checkout session.");
+      // Valida que la metadata necesaria exista
+      if (!session?.metadata?.user_id || !session?.metadata?.cart_items) {
+        console.error("❌ Metadata (user_id o cart_items) faltante en la sesión de checkout.");
         return new NextResponse("Webhook Error: Metadata is missing", { status: 400 });
       }
 
-      const userId = session.metadata.userId;
-      const cartItems = JSON.parse(session.metadata.cartItems);
+      const userId = session.metadata.user_id;
+      const cartItems = JSON.parse(session.metadata.cart_items) as CartItem[];
 
       try {
         const amount = session.amount_total ? session.amount_total / 100 : 0;
 
+        // Crea la orden y sus relaciones en una sola transacción
         await prisma.order.create({
           data: {
             userId: userId,
             total: amount,
             status: "COMPLETED",
             items: {
-              create: cartItems.map((item: any) => ({
+              create: cartItems.map((item) => ({
                 productId: item.productId,
                 variantId: item.variantId,
                 name: item.name,
                 quantity: item.quantity,
-                price: item.price,
+                price: item.price, 
               })),
             },
             payment: {
@@ -61,14 +73,17 @@ export async function POST(request: NextRequest) {
           },
         });
       } catch (err) {
-        console.error("❌ Error creating order in database:", err);
-        // Do not return a 400 to Stripe, as it will keep retrying.
-        // Log the error for monitoring.
+        console.error("❌ Error al crear la orden en la base de datos:", err);
+        // No devuelvas un error 400 a Stripe, ya que seguirá reintentando.
+        // Simplemente registra el error para monitoreo.
+        // Devolvemos 500 para indicar un fallo de nuestro lado.
+        return new NextResponse("Error del servidor al crear la orden.", { status: 500 });
       }
       break;
     default:
-      console.log(`Unhandled event type ${event.type}`);
+      console.log(`Evento no manejado: ${event.type}`);
   }
 
+  // Responde a Stripe para confirmar que el evento fue recibido
   return NextResponse.json({ received: true });
 }
