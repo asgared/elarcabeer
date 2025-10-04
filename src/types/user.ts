@@ -9,6 +9,8 @@ export type Address = {
 
 export type OrderItem = {
   id: string;
+  productId: string;
+  variantId: string;
   name: string;
   quantity: number;
   price: number;
@@ -17,19 +19,17 @@ export type OrderItem = {
 export type Payment = {
   id: string;
   amount: number;
-  method: string;
   status: string;
-  processedAt: string;
+  stripeSessionId: string;
 };
 
 export type Order = {
   id: string;
-  number: string;
   total: number;
   status: string;
   createdAt: string;
   items: OrderItem[];
-  payments: Payment[];
+  payment?: Payment | null;
 };
 
 export type LoyaltyEntry = {

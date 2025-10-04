@@ -140,34 +140,33 @@ model Address {
 
 model Order {
   id        String      @id @default(cuid())
-  number    String      @unique
-  userId    String?
-  user      User?       @relation(fields: [userId], references: [id])
-  total     Int
-  status    String
+  userId    String
+  user      User        @relation(fields: [userId], references: [id])
+  total     Float
+  status    String      @default("PENDING")
   items     OrderItem[]
-  payments  Payment[]
+  payment   Payment?
   createdAt DateTime    @default(now())
 }
 
 model OrderItem {
-  id       String @id @default(cuid())
-  name     String
-  quantity Int
-  price    Int
-
-  orderId String
-  order   Order  @relation(fields: [orderId], references: [id])
+  id        String  @id @default(cuid())
+  orderId   String
+  order     Order   @relation(fields: [orderId], references: [id])
+  productId String
+  variantId String
+  name      String
+  quantity  Int
+  price     Float
 }
 
 model Payment {
-  id          String   @id @default(cuid())
-  orderId     String
-  order       Order    @relation(fields: [orderId], references: [id])
-  amount      Int
-  method      String
-  status      String
-  processedAt DateTime @default(now())
+  id              String @id @default(cuid())
+  orderId         String @unique
+  order           Order  @relation(fields: [orderId], references: [id])
+  stripeSessionId String @unique
+  amount          Float
+  status          String
 }
 
 model Subscription {

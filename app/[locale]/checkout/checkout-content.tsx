@@ -185,6 +185,7 @@ export function CheckoutContent() {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
+            userId: user.id,
             items: items.map((item) => ({ productId: item.productId, variantId: item.variant.id, quantity: item.quantity })),
             currency,
             customer: { email: formData.email, name: formData.name },

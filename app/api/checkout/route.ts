@@ -8,6 +8,7 @@ export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 
 type CheckoutRequest = {
+  userId: string;
   items: {productId: string; variantId: string; quantity: number}[];
   currency?: string;
   customer?: {email?: string; name?: string | null};
@@ -19,6 +20,14 @@ type CheckoutRequest = {
     postal?: string;
   };
   locale?: string;
+};
+
+type NormalizedCheckoutItem = {
+  productId: string;
+  variantId: string;
+  name: string;
+  quantity: number;
+  unitAmount: number;
 };
 
 type ValidatedCheckout = {
@@ -35,6 +44,8 @@ type ValidatedCheckout = {
   currency: string;
   locale: string;
   origin: string;
+  userId: string;
+  normalizedItems: NormalizedCheckoutItem[];
 };
 
 function normalizeOrigin(request: Request) {
@@ -46,6 +57,10 @@ function normalizeOrigin(request: Request) {
 function validateCheckoutPayload(payload: CheckoutRequest, request: Request): ValidatedCheckout | NextResponse {
   if (!payload || typeof payload !== "object") {
     return NextResponse.json({error: "Cuerpo de la petición inválido."}, {status: 400});
+  }
+
+  if (typeof payload.userId !== "string" || payload.userId.trim().length === 0) {
+    return NextResponse.json({error: "Falta el identificador del usuario."}, {status: 400});
   }
 
   if (!Array.isArray(payload.items) || payload.items.length === 0) {
@@ -106,6 +121,7 @@ function validateCheckoutPayload(payload: CheckoutRequest, request: Request): Va
       : "mxn";
 
   const items: Stripe.Checkout.SessionCreateParams.LineItem[] = [];
+  const normalizedItems: NormalizedCheckoutItem[] = [];
 
   for (const entry of payload.items) {
     if (!entry || typeof entry !== "object") {
@@ -144,11 +160,13 @@ function validateCheckoutPayload(payload: CheckoutRequest, request: Request): Va
 
     const imageUrl = product.heroImage ? new URL(product.heroImage, origin).toString() : undefined;
 
+    const itemName = `${product.name} · ${variant.name}`;
+
     const lineItem: Stripe.Checkout.SessionCreateParams.LineItem = {
       price_data: {
         currency,
         product_data: {
-          name: `${product.name} · ${variant.name}`,
+          name: itemName,
           metadata: {
             productId: product.id,
             variantId: variant.id
@@ -161,6 +179,13 @@ function validateCheckoutPayload(payload: CheckoutRequest, request: Request): Va
     };
 
     items.push(lineItem);
+    normalizedItems.push({
+      productId,
+      variantId,
+      name: itemName,
+      quantity: numericQuantity,
+      unitAmount: price
+    });
   }
 
   return {
@@ -173,7 +198,9 @@ function validateCheckoutPayload(payload: CheckoutRequest, request: Request): Va
     shippingAddress,
     currency,
     locale,
-    origin
+    origin,
+    userId: payload.userId.trim(),
+    normalizedItems
   } satisfies ValidatedCheckout;
 }
 
@@ -192,7 +219,17 @@ export async function POST(request: Request) {
     return validationResult;
   }
 
-  const {items, customerEmail, customerName, shippingAddress, currency, locale, origin} = validationResult;
+  const {
+    items,
+    customerEmail,
+    customerName,
+    shippingAddress,
+    currency,
+    locale,
+    origin,
+    userId,
+    normalizedItems
+  } = validationResult;
 
   try {
     const stripe = createStripeClient();
@@ -201,7 +238,10 @@ export async function POST(request: Request) {
       line_items: items,
       customer_email: customerEmail,
       billing_address_collection: "auto",
-      success_url: new URL(`/${locale}/checkout?status=success`, origin).toString(),
+      success_url: new URL(
+        `/${locale}/order/success?session_id={CHECKOUT_SESSION_ID}`,
+        origin
+      ).toString(),
       cancel_url: new URL(`/${locale}/checkout?status=cancelled`, origin).toString(),
       metadata: {
         ...(customerName ? {customer_name: customerName} : {}),
@@ -209,7 +249,21 @@ export async function POST(request: Request) {
         shipping_street: shippingAddress.street,
         shipping_city: shippingAddress.city,
         shipping_country: shippingAddress.country,
-        shipping_postal: shippingAddress.postal
+        shipping_postal: shippingAddress.postal,
+        user_id: userId,
+        currency_code: currency.toUpperCase(),
+        cart_items: JSON.stringify(
+          normalizedItems.map((item) => ({
+            productId: item.productId,
+            variantId: item.variantId,
+            name: item.name,
+            quantity: item.quantity,
+            unitAmount: item.unitAmount
+          }))
+        ),
+        order_total: normalizedItems
+          .reduce((total, item) => total + item.unitAmount * item.quantity, 0)
+          .toString()
       }
     });
 

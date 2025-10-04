@@ -18,6 +18,7 @@ type CartActions = {
   removeItem: (productId: string, variantId: string) => void;
   updateQuantity: (productId: string, variantId: string, quantity: number) => void;
   clear: () => void;
+  clearCart: () => void;
   setCurrency: (currency: string) => void;
 };
 
@@ -88,6 +89,9 @@ const store: CartStore = {
     });
   },
   clear() {
+    updateState((current) => ({...current, items: []}));
+  },
+  clearCart() {
     updateState((current) => ({...current, items: []}));
   },
   setCurrency(currency) {
