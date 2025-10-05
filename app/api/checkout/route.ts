@@ -271,7 +271,6 @@ export async function POST(request: Request) {
   } = validationResult;
 
   try {
-    // <<<--- CORRECCIÓN #2: Se elimina la llamada a createStripeClient()
     const session = await stripe.checkout.sessions.create({
       mode: "payment",
       line_items: items,
