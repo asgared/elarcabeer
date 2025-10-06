@@ -25,7 +25,7 @@ export function ProductCard({product}: {product: Product}) {
   return (
     <Card
       as={Link}
-      href={`/shop/${product.slug}`}
+      href={`/products/${product.slug}`}
       _hover={{transform: "translateY(-6px)"}}
       borderRadius="2xl"
       h="full"
@@ -44,7 +44,7 @@ export function ProductCard({product}: {product: Product}) {
               borderRadius="xl"
               fallbackSrc="/images/beer-bg.jpg"
               objectFit="cover"
-              src={product.heroImage}
+              src={product.imageUrl ?? product.heroImage}
               w="full"
             />
           </AspectRatio>

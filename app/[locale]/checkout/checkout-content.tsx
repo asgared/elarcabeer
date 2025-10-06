@@ -26,7 +26,6 @@ import { loadStripe } from "@stripe/stripe-js";
 import type { Stripe } from "@stripe/stripe-js";
 
 import { Price } from "@/components/ui/price";
-import { products } from "@/data/products";
 import { selectCartTotal, useCartStore } from "@/stores/cart-store";
 import { Link } from "@/i18n/navigation";
 import { useLocale } from "@/i18n/client";
@@ -84,17 +83,13 @@ export function CheckoutContent() {
 
   const cartLines = useMemo(
     () =>
-      items.map((item) => {
-        const product = products.find((entry) => entry.id === item.productId);
-        const name = product?.name ?? item.variant.name;
-        return {
-          id: `${item.productId}-${item.variant.id}`,
-          name,
-          variantName: item.variant.name,
-          quantity: item.quantity,
-          subtotal: item.variant.price * item.quantity,
-        };
-      }),
+      items.map((item) => ({
+        id: `${item.productId}-${item.variant.id}`,
+        name: item.variant.name,
+        variantName: `${item.variant.packSize} piezas · ${item.variant.abv}% ABV`,
+        quantity: item.quantity,
+        subtotal: item.variant.price * item.quantity,
+      })),
     [items]
   );
 
@@ -300,7 +295,7 @@ export function CheckoutContent() {
                   {cartLines.length === 0 ? (
                     <Stack spacing={3}>
                       <Text color="whiteAlpha.700">Tu carrito está vacío.</Text>
-                      <Button as={Link} href="/shop" variant="outline">Descubrir cervezas</Button>
+                      <Button as={Link} href="/products" variant="outline">Descubrir cervezas</Button>
                     </Stack>
                   ) : (
                     <Stack spacing={4}>

@@ -21,40 +21,42 @@ import {useMemo, useState} from "react";
 import {FaMagnifyingGlass} from "react-icons/fa6";
 
 import {ProductCard} from "@/components/ui/product-card";
-import {products} from "@/data/products";
 import type {Product} from "@/types/catalog";
 
-const styles: string[] = Array.from(new Set(products.map((product) => product.style)));
+type ProductsCatalogProps = {
+  products: Product[];
+};
 
-export default function ShopPage() {
+export function ProductsCatalog({products}: ProductsCatalogProps) {
   const [selectedStyle, setSelectedStyle] = useState<string>("");
   const [search, setSearch] = useState("");
   const [maxPrice, setMaxPrice] = useState(9000);
 
-  const filtered = useMemo<Product[]>(() => {
+  const styles = useMemo(() => {
+    return Array.from(new Set(products.map((product) => product.style).filter(Boolean)));
+  }, [products]);
+
+  const filtered = useMemo(() => {
     return products.filter((product) => {
       const matchStyle = !selectedStyle || product.style === selectedStyle;
       const matchSearch =
         product.name.toLowerCase().includes(search.toLowerCase()) ||
         product.description.toLowerCase().includes(search.toLowerCase());
-      const minVariant = Math.min(...product.variants.map((variant) => variant.price));
+      const minVariant =
+        product.variants.length > 0 ? Math.min(...product.variants.map((variant) => variant.price)) : Infinity;
       const matchPrice = minVariant <= maxPrice * 100;
       return matchStyle && matchSearch && matchPrice;
     });
-  }, [selectedStyle, search, maxPrice]);
+  }, [products, selectedStyle, search, maxPrice]);
 
   return (
     <Container maxW="7xl">
-      <Stack spacing={10}>
+      <Stack spacing={10} py={{base: 6, md: 10}}>
         <Stack spacing={2}>
-          <Heading size="2xl">Shop</Heading>
-          <Text color="whiteAlpha.700">Filtra por estilo, ABV y precio para encontrar tu tesoro líquido.</Text>
+          <Heading size="2xl">Productos</Heading>
+          <Text color="whiteAlpha.700">Filtra por estilo y precio para encontrar tu tesoro líquido.</Text>
         </Stack>
-        <Stack
-          align="stretch"
-          direction={{base: "column", lg: "row"}}
-          spacing={{base: 10, lg: 12}}
-        >
+        <Stack align="stretch" direction={{base: "column", lg: "row"}} spacing={{base: 10, lg: 12}}>
           <Stack
             bg="rgba(19,58,67,0.65)"
             borderRadius="2xl"
@@ -69,11 +71,7 @@ export default function ShopPage() {
                 <InputLeftElement pointerEvents="none">
                   <FaMagnifyingGlass />
                 </InputLeftElement>
-                <Input
-                  placeholder="Buscar cervezas"
-                  value={search}
-                  onChange={(event) => setSearch(event.target.value)}
-                />
+                <Input placeholder="Buscar cervezas" value={search} onChange={(event) => setSearch(event.target.value)} />
               </InputGroup>
             </Stack>
             <Divider borderColor="whiteAlpha.200" />
@@ -125,3 +123,4 @@ export default function ShopPage() {
     </Container>
   );
 }
+

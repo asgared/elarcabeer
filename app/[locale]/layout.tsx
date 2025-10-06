@@ -7,6 +7,7 @@ import {AppLocale, locales} from "@/i18n/locales";
 import {IntlProvider} from "@/i18n/client";
 import {loadMessages, resolveLocale} from "@/i18n/server";
 import {getCmsContent} from "@/lib/cms";
+import {createServerSupabaseClient} from "@/lib/supabase/server";
 import {notFound} from "next/navigation";
 
 const ClientProviders = dynamic(() => import("@/providers/client-providers"), {
@@ -49,10 +50,14 @@ export default async function LocaleLayout({children, params}: LayoutProps) {
   const locale = resolveLocale(params.locale);
   const messages = await loadMessages(locale);
   const footerContent = await getCmsContent("site-footer");
+  const supabase = createServerSupabaseClient();
+  const {
+    data: {session}
+  } = await supabase.auth.getSession();
 
   return (
     <IntlProvider locale={locale} messages={messages}>
-      <ClientProviders locale={locale}>
+      <ClientProviders locale={locale} initialSession={session}>
         <SiteShell
           footerContent={{
             subtitle: footerContent?.subtitle,

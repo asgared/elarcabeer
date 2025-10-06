@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
 
-import { products } from "@/data/products";
 import { defaultLocale, locales as supportedLocales } from "@/i18n/locales";
 import { stripe } from "@/lib/stripe"; // <<<--- CORRECCIÓN #1: Se importa la constante 'stripe'
 import type { Stripe } from "stripe"; // Se importa el tipo 'Stripe' directamente de la librería
+import {prisma} from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -55,10 +55,10 @@ function normalizeOrigin(request: Request) {
   return originHeader ?? `${url.protocol}//${url.host}`;
 }
 
-function validateCheckoutPayload(
+async function validateCheckoutPayload(
   payload: CheckoutRequest,
   request: Request
-): ValidatedCheckout | NextResponse {
+): Promise<ValidatedCheckout | NextResponse> {
   if (!payload || typeof payload !== "object") {
     return NextResponse.json(
       { error: "Cuerpo de la petición inválido." },
@@ -138,8 +138,7 @@ function validateCheckoutPayload(
       ? payload.currency.trim().toLowerCase()
       : "mxn";
 
-  const items: Stripe.Checkout.SessionCreateParams.LineItem[] = [];
-  const normalizedItems: NormalizedCheckoutItem[] = [];
+  const sanitizedItems: Array<{productId: string; variantId: string; quantity: number}> = [];
 
   for (const entry of payload.items) {
     if (!entry || typeof entry !== "object") {
@@ -167,13 +166,32 @@ function validateCheckoutPayload(
       );
     }
 
-    const product = products.find((item) => item.id === productId);
+    sanitizedItems.push({ productId, variantId, quantity: numericQuantity });
+  }
+
+  const productIds = Array.from(new Set(sanitizedItems.map((item) => item.productId)));
+  const productRecords = await prisma.product.findMany({
+    where: { id: { in: productIds } },
+    include: { variants: true },
+  });
+
+  const productMap = new Map(productRecords.map((record) => [record.id, record]));
+
+  if (productMap.size !== productIds.length) {
+    return NextResponse.json({ error: "Producto no encontrado." }, { status: 400 });
+  }
+
+  const items: Stripe.Checkout.SessionCreateParams.LineItem[] = [];
+  const normalizedItems: NormalizedCheckoutItem[] = [];
+
+  for (const entry of sanitizedItems) {
+    const product = productMap.get(entry.productId);
 
     if (!product) {
       return NextResponse.json({ error: "Producto no encontrado." }, { status: 400 });
     }
 
-    const variant = product.variants.find((item) => item.id === variantId);
+    const variant = product.variants.find((item) => item.id === entry.variantId);
 
     if (!variant) {
       return NextResponse.json(
@@ -191,9 +209,8 @@ function validateCheckoutPayload(
       );
     }
 
-    const imageUrl = product.heroImage
-      ? new URL(product.heroImage, origin).toString()
-      : undefined;
+    const heroImage = product.imageUrl ?? product.heroImage ?? undefined;
+    const imageUrl = heroImage ? new URL(heroImage, origin).toString() : undefined;
 
     const itemName = `${product.name} · ${variant.name}`;
 
@@ -210,15 +227,15 @@ function validateCheckoutPayload(
         },
         unit_amount: price,
       },
-      quantity: numericQuantity,
+      quantity: entry.quantity,
     };
 
     items.push(lineItem);
     normalizedItems.push({
-      productId,
-      variantId,
+      productId: product.id,
+      variantId: variant.id,
       name: itemName,
-      quantity: numericQuantity,
+      quantity: entry.quantity,
       unitAmount: price,
     });
   }
@@ -252,7 +269,7 @@ export async function POST(request: Request) {
     );
   }
 
-  const validationResult = validateCheckoutPayload(payload, request);
+  const validationResult = await validateCheckoutPayload(payload, request);
 
   if (validationResult instanceof NextResponse) {
     return validationResult;

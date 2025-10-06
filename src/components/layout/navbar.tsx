@@ -99,7 +99,7 @@ export function Navbar() {
                 </MenuButton>
                 <MenuList bg="background.800">
                   {products.slice(0, 4).map((product) => (
-                    <MenuItem key={product.id} as={Link} href={`/shop/${product.slug}`}>
+                    <MenuItem key={product.id} as={Link} href={`/products/${product.slug}`}>
                       {product.name}
                     </MenuItem>
                   ))}

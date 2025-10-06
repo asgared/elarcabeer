@@ -1,7 +1,7 @@
 import {NextResponse} from "next/server";
 
 import {prisma} from "@/lib/prisma";
-import {hashPassword} from "@/utils/auth";
+import {createRouteSupabaseClient} from "@/lib/supabase/route";
 
 import {serializeUser, userInclude} from "./utils";
 import {ValidationError, validateCreateUserPayload} from "./validation";
@@ -11,18 +11,34 @@ export const dynamic = "force-dynamic";
 export async function POST(request: Request) {
   try {
     const payload = validateCreateUserPayload(await request.json());
+    const supabase = createRouteSupabaseClient();
+    const {data, error} = await supabase.auth.signUp({
+      email: payload.email,
+      password: payload.password,
+      options: {
+        data: {
+          name: payload.name ?? undefined
+        }
+      }
+    });
 
-    const existingUser = await prisma.user.findUnique({where: {email: payload.email}});
-
-    if (existingUser) {
-      return NextResponse.json({error: "El correo ya está registrado."}, {status: 409});
+    if (error) {
+      return NextResponse.json({error: error.message}, {status: 400});
     }
 
-    const user = await prisma.user.create({
-      data: {
-        email: payload.email,
-        name: payload.name ?? null,
-        password: hashPassword(payload.password),
+    const authUser = data.user;
+
+    if (!authUser) {
+      return NextResponse.json({error: "No se pudo crear la cuenta."}, {status: 500});
+    }
+
+    const user = await prisma.user.upsert({
+      where: {id: authUser.id},
+      create: {
+        id: authUser.id,
+        email: authUser.email ?? payload.email,
+        name: payload.name ?? authUser.user_metadata?.name ?? null,
+        password: null,
         role: "USER",
         addresses: payload.addresses
           ? {
@@ -36,10 +52,14 @@ export async function POST(request: Request) {
             }
           : undefined
       },
+      update: {
+        email: authUser.email ?? payload.email,
+        name: payload.name ?? authUser.user_metadata?.name ?? null
+      },
       include: userInclude
     });
 
-    return NextResponse.json({user: serializeUser(user)}, {status: 201});
+    return NextResponse.json({session: data.session, user: serializeUser(user)}, {status: 201});
   } catch (error) {
     if (error instanceof ValidationError) {
       return NextResponse.json({error: error.flatten()}, {status: 400});

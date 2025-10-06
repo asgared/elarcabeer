@@ -20,6 +20,7 @@ export type Product = {
   rating: number;
   limitedEdition?: boolean;
   heroImage: string;
+  imageUrl?: string;
   gallery: string[];
   variants: Variant[];
 };

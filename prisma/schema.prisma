@@ -17,6 +17,7 @@ model Product {
   style       String
   rating      Float
   heroImage   String
+  imageUrl    String?
   limited     Boolean @default(false)
 
   variants Variant[] // <- necesita el modelo Variant
