@@ -4,16 +4,8 @@ import Stripe from "stripe";
 import { prisma } from "@/lib/prisma";
 import { stripe } from "@/lib/stripe";
 
-type CartItemMetadata = {
-  productId: string;
-  variantId: string;
-  name: string;
-  quantity: number;
-  unitAmount: number;
-};
-
 export async function POST(request: NextRequest) {
-  console.log("[Webhook] Petición POST recibida.");
+  console.log("[PRUEBA] Webhook recibido.");
   const body = await request.text();
   const signature = headers().get("stripe-signature") ?? "";
 
@@ -25,63 +17,59 @@ export async function POST(request: NextRequest) {
       signature,
       process.env.STRIPE_WEBHOOK_SECRET!
     );
-    console.log(`[Webhook] Firma verificada. Evento recibido: ${event.type}`);
   } catch (err: any) {
-    console.error(`[Webhook] ❌ FALLO DE VALIDACIÓN DE FIRMA: ${err.message}`);
+    console.error(`[PRUEBA] ❌ FALLO DE FIRMA: ${err.message}`);
     return new NextResponse(`Webhook Error: ${err.message}`, { status: 400 });
   }
 
   if (event.type === "checkout.session.completed") {
+    console.log("[PRUEBA] Evento 'checkout.session.completed' detectado.");
     const session = event.data.object as Stripe.Checkout.Session;
-    console.log(`[Webhook] Procesando evento 'checkout.session.completed' para sesión: ${session.id}`);
 
-    if (!session?.metadata?.user_id || !session?.metadata?.cart_items) {
-      console.warn("[Webhook] ⚠️ ADVERTENCIA: Metadata 'user_id' o 'cart_items' faltante. Abortando.");
-      return new NextResponse("Webhook Error: Metadata is missing", { status: 400 });
-    }
-
-    const userId = session.metadata.user_id;
-    const cartItems = JSON.parse(session.metadata.cart_items) as CartItemMetadata[];
-    const totalAmount = session.amount_total ? session.amount_total / 100 : 0;
-
-    console.log(`[Webhook] Datos extraídos: userId=${userId}, total=${totalAmount}, items=${cartItems.length}`);
+    // A diferencia del código anterior, NO dependemos de la metadata por ahora.
+    // Usaremos un userId de prueba. Asegúrate de que este ID de usuario exista en tu tabla 'User'.
+    // Puedes obtener uno de tu tabla 'User' en Supabase.
+    const testUserId = "cmg7kxh5i0000128u00ziypv5"; // REEMPLAZA CON UN ID DE USUARIO VÁLIDO DE TU DB
 
     try {
-      const dataToCreate = {
-        userId: userId,
-        total: totalAmount,
-        status: "COMPLETED",
-        items: {
-          create: cartItems.map((item) => ({
-            productId: item.productId,
-            variantId: item.variantId,
-            name: item.name,
-            quantity: item.quantity,
-            price: item.unitAmount / 100,
-          })),
-        },
-        payment: {
-          create: {
-            stripeSessionId: session.id,
-            amount: totalAmount,
-            status: session.payment_status,
+      console.log(`[PRUEBA] Intentando crear una orden de prueba para el usuario: ${testUserId}`);
+      
+      await prisma.order.create({
+        data: {
+          userId: testUserId,
+          total: 99.99, // Valor de prueba
+          status: "TEST_SUCCESS",
+          items: {
+            create: [
+              {
+                productId: "test-product",
+                variantId: "test-variant",
+                name: "Producto de Prueba",
+                quantity: 1,
+                price: 99.99,
+              },
+            ],
+          },
+          payment: {
+            create: {
+              stripeSessionId: session.id,
+              amount: 99.99,
+              status: "paid",
+            },
           },
         },
-      };
+      });
 
-      console.log("[Webhook] Intentando ejecutar prisma.order.create() con los siguientes datos:", JSON.stringify(dataToCreate, null, 2));
-      
-      await prisma.order.create({ data: dataToCreate });
-
-      console.log(`[Webhook] ✅ ÉXITO: Orden creada en la base de datos para el usuario: ${userId}`);
+      console.log(`[PRUEBA] ✅ ÉXITO: La orden de prueba fue creada en la base de datos.`);
 
     } catch (err) {
-      console.error("[Webhook] ❌ ERROR CATASTRÓFICO: La escritura en la base de datos falló.", err);
-      return new NextResponse("Error interno del servidor al intentar crear la orden.", { status: 500 });
+      console.error("[PRUEBA] ❌ ERROR CATASTRÓFICO AL ESCRIBIR EN DB:", err);
+      return new NextResponse("Error interno al crear la orden de prueba.", { status: 500 });
     }
   } else {
-    console.log(`[Webhook] Evento no manejado: ${event.type}`);
+    console.log(`[PRUEBA] Evento no manejado: ${event.type}`);
   }
 
   return NextResponse.json({ received: true });
 }
+
