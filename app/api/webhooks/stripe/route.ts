@@ -76,7 +76,6 @@ export async function POST(request: NextRequest) {
       console.log(`[Webhook] ✅ ÉXITO: Orden creada en la base de datos para el usuario: ${userId}`);
 
     } catch (err) {
-      // ESTE ES EL LOG MÁS IMPORTANTE
       console.error("[Webhook] ❌ ERROR CATASTRÓFICO: La escritura en la base de datos falló.", err);
       return new NextResponse("Error interno del servidor al intentar crear la orden.", { status: 500 });
     }
