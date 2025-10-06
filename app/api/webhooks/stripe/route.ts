@@ -115,6 +115,9 @@ export async function POST(request: NextRequest) {
   }
 
   if (event.type === "checkout.session.completed") {
+    console.error(
+        "[webhooks/stripe] Stripe webhook recibido checkout.session.completed 1."
+      );
     const session = event.data.object as Stripe.Checkout.Session;
     const metadata = (session.metadata ?? {}) as CheckoutMetadata;
 
