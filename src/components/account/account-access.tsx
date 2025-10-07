@@ -20,12 +20,14 @@ import {
 import type {AlertStatus} from "@chakra-ui/react";
 import {FormEvent, useMemo, useState} from "react";
 
+import {createSupabaseBrowserClient} from "@/lib/supabase/client";
 import {useUser} from "@/providers/user-provider";
 
 type Feedback = {type: Extract<AlertStatus, "success" | "error">; message: string};
 
 export function AccountAccessPanel() {
-  const {registerUser, login, status, error, clearError} = useUser();
+  const supabase = useMemo(() => createSupabaseBrowserClient(), []);
+  const {status, error, clearError, refreshUser} = useUser();
   const [tabIndex, setTabIndex] = useState(0);
   const [feedback, setFeedback] = useState<Feedback | null>(null);
   const [registerForm, setRegisterForm] = useState({
@@ -38,8 +40,11 @@ export function AccountAccessPanel() {
     email: "",
     password: ""
   });
+  const [isRegistering, setIsRegistering] = useState(false);
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
 
-  const isLoading = status === "loading";
+  const isRegisterLoading = isRegistering || status === "loading";
+  const isLoginLoading = isLoggingIn || status === "loading";
 
   const alert = useMemo<Feedback | null>(
     () => feedback ?? (error ? {type: "error", message: error} : null),
@@ -49,6 +54,38 @@ export function AccountAccessPanel() {
   const resetFeedback = () => {
     setFeedback(null);
     clearError();
+  };
+
+  const parseApiError = async (response: Response) => {
+    if (response.headers.get("content-type")?.includes("application/json")) {
+      const payload = await response.json();
+
+      if (payload?.error) {
+        if (typeof payload.error === "string") {
+          return payload.error;
+        }
+
+        const {formErrors, fieldErrors} = payload.error as {
+          formErrors?: string[];
+          fieldErrors?: Record<string, string[]>;
+        };
+
+        if (Array.isArray(formErrors) && formErrors.length > 0) {
+          return formErrors.join("\n");
+        }
+
+        if (fieldErrors && typeof fieldErrors === "object") {
+          for (const messages of Object.values(fieldErrors)) {
+            if (Array.isArray(messages) && messages.length > 0) {
+              return messages[0];
+            }
+          }
+        }
+      }
+    }
+
+    const message = await response.text();
+    return message || "Ocurrió un error inesperado";
   };
 
   const handleRegister = async (event: FormEvent<HTMLFormElement>) => {
@@ -61,19 +98,58 @@ export function AccountAccessPanel() {
     }
 
     try {
-      await registerUser({
+      setIsRegistering(true);
+      const {data, error} = await supabase.auth.signUp({
         email: registerForm.email,
         password: registerForm.password,
-        name: registerForm.name || undefined
+        options: {
+          data: registerForm.name ? {name: registerForm.name} : undefined
+        }
       });
 
-      setFeedback({type: "success", message: "Cuenta creada correctamente. Ya puedes administrar tu perfil."});
+      if (error) {
+        throw new Error(error.message);
+      }
+
+      try {
+        const response = await fetch("/api/users", {
+          method: "POST",
+          headers: {"Content-Type": "application/json"},
+          body: JSON.stringify({
+            email: registerForm.email,
+            password: registerForm.password,
+            name: registerForm.name || undefined
+          })
+        });
+
+        if (!response.ok) {
+          const message = await parseApiError(response);
+          throw new Error(message);
+        }
+      } catch (apiError) {
+        await supabase.auth.signOut();
+        throw apiError;
+      }
+
+      if (data.session) {
+        await refreshUser();
+      }
+
+      setFeedback({
+        type: "success",
+        message:
+          data.session
+            ? "Cuenta creada correctamente. Ya puedes administrar tu perfil."
+            : "Cuenta creada correctamente. Revisa tu correo para confirmar tu cuenta."
+      });
       setRegisterForm({name: "", email: "", password: "", confirmPassword: ""});
     } catch (error) {
       setFeedback({
         type: "error",
         message: error instanceof Error ? error.message : "No se pudo registrar la cuenta"
       });
+    } finally {
+      setIsRegistering(false);
     }
   };
 
@@ -82,7 +158,20 @@ export function AccountAccessPanel() {
     resetFeedback();
 
     try {
-      await login({email: loginForm.email, password: loginForm.password});
+      setIsLoggingIn(true);
+      const {data, error} = await supabase.auth.signInWithPassword({
+        email: loginForm.email,
+        password: loginForm.password
+      });
+
+      if (error) {
+        throw new Error(error.message);
+      }
+
+      if (data.session) {
+        await refreshUser();
+      }
+
       setFeedback({type: "success", message: "Sesión iniciada. Cargando tu historial..."});
       setLoginForm({email: "", password: ""});
     } catch (error) {
@@ -90,6 +179,8 @@ export function AccountAccessPanel() {
         type: "error",
         message: error instanceof Error ? error.message : "No se pudo iniciar sesión"
       });
+    } finally {
+      setIsLoggingIn(false);
     }
   };
 
@@ -162,7 +253,12 @@ export function AccountAccessPanel() {
                     autoComplete="new-password"
                   />
                 </FormControl>
-                <Button colorScheme="yellow" type="submit" isLoading={isLoading} loadingText="Creando cuenta">
+                <Button
+                  colorScheme="yellow"
+                  type="submit"
+                  isLoading={isRegisterLoading}
+                  loadingText="Creando cuenta"
+                >
                   Crear cuenta
                 </Button>
               </Stack>
@@ -191,7 +287,12 @@ export function AccountAccessPanel() {
                     autoComplete="current-password"
                   />
                 </FormControl>
-                <Button colorScheme="yellow" type="submit" isLoading={isLoading} loadingText="Iniciando sesión">
+                <Button
+                  colorScheme="yellow"
+                  type="submit"
+                  isLoading={isLoginLoading}
+                  loadingText="Iniciando sesión"
+                >
                   Iniciar sesión
                 </Button>
               </Stack>
