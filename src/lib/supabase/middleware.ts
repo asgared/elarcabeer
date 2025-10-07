@@ -1,4 +1,5 @@
-import {cookies} from "next/headers";
+import type {NextRequest} from "next/server";
+import type {NextResponse} from "next/server";
 import {createServerClient, type CookieOptions} from "@supabase/ssr";
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -8,23 +9,21 @@ if (!supabaseUrl || !supabaseAnonKey) {
   throw new Error("Missing Supabase environment variables");
 }
 
-export function createSupabaseServerClient() {
-  const cookieStore = cookies();
-
+export function createSupabaseMiddlewareClient(request: NextRequest, response: NextResponse) {
   return createServerClient(supabaseUrl, supabaseAnonKey, {
     cookies: {
       get(name: string) {
-        return cookieStore.get(name)?.value;
+        return request.cookies.get(name)?.value;
       },
       set(name: string, value: string, options?: CookieOptions) {
-        cookieStore.set({
+        response.cookies.set({
           name,
           value,
           ...options
         });
       },
       remove(name: string, options?: CookieOptions) {
-        cookieStore.set({
+        response.cookies.set({
           name,
           value: "",
           ...options,

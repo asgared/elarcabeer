@@ -1,11 +1,44 @@
 import {NextResponse} from "next/server";
 import type {NextRequest} from "next/server";
 
+import {createSupabaseMiddlewareClient} from "@/lib/supabase/middleware";
 import {defaultLocale, locales} from "@/i18n/locales";
 
 const PUBLIC_FILE = /\.[^/]+$/;
 
-export function middleware(request: NextRequest) {
+type AppLocale = (typeof locales)[number];
+
+function resolveLocaleFromCookie(request: NextRequest): AppLocale {
+  const locale = request.cookies.get("NEXT_LOCALE")?.value as AppLocale | undefined;
+
+  if (locale && locales.includes(locale)) {
+    return locale;
+  }
+
+  return defaultLocale;
+}
+
+function getCurrentLocale(pathname: string, fallback: AppLocale): AppLocale {
+  const segments = pathname.split("/").filter(Boolean);
+  const potentialLocale = segments[0];
+
+  if (potentialLocale && locales.includes(potentialLocale as AppLocale)) {
+    return potentialLocale as AppLocale;
+  }
+
+  return fallback;
+}
+
+function stripLocaleFromPath(pathname: string, locale: AppLocale) {
+  if (pathname.startsWith(`/${locale}`)) {
+    const remainder = pathname.slice(locale.length + 1);
+    return `/${remainder}`.replace(/\/+/g, "/");
+  }
+
+  return pathname;
+}
+
+export async function middleware(request: NextRequest) {
   const {pathname} = request.nextUrl;
 
   if (
@@ -18,19 +51,46 @@ export function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
+  const localeFromCookie = resolveLocaleFromCookie(request);
   const hasLocalePrefix = locales.some((locale) => pathname === `/${locale}` || pathname.startsWith(`/${locale}/`));
 
-  if (hasLocalePrefix) {
-    return NextResponse.next();
+  if (!hasLocalePrefix) {
+    const redirectURL = request.nextUrl.clone();
+    redirectURL.pathname = `/${localeFromCookie}${pathname === "/" ? "" : pathname}`;
+
+    const redirectResponse = NextResponse.redirect(redirectURL);
+    const supabase = createSupabaseMiddlewareClient(request, redirectResponse);
+    await supabase.auth.getUser();
+
+    return redirectResponse;
   }
 
-  const locale = request.cookies.get("NEXT_LOCALE")?.value as (typeof locales)[number] | undefined;
-  const targetLocale = locale && locales.includes(locale) ? locale : defaultLocale;
+  const response = NextResponse.next({
+    request: {
+      headers: request.headers
+    }
+  });
 
-  const redirectURL = request.nextUrl.clone();
-  redirectURL.pathname = `/${targetLocale}${pathname === "/" ? "" : pathname}`;
+  const supabase = createSupabaseMiddlewareClient(request, response);
+  const {
+    data: {user}
+  } = await supabase.auth.getUser();
 
-  return NextResponse.redirect(redirectURL);
+  const currentLocale = getCurrentLocale(pathname, localeFromCookie);
+  const normalizedPath = stripLocaleFromPath(pathname, currentLocale);
+
+  if (!user && normalizedPath.startsWith("/dashboard")) {
+    const redirectURL = request.nextUrl.clone();
+    redirectURL.pathname = `/${currentLocale}/account`;
+
+    const redirectResponse = NextResponse.redirect(redirectURL);
+    const redirectSupabase = createSupabaseMiddlewareClient(request, redirectResponse);
+    await redirectSupabase.auth.getUser();
+
+    return redirectResponse;
+  }
+
+  return response;
 }
 
 export const config = {
