@@ -6,18 +6,24 @@ import {
   useContext,
   useEffect,
   useMemo,
-  useState
+  useState,
 } from "react";
-import type {ReactNode} from "react";
-import type {Session, SupabaseClient, User as SupabaseUser} from "@supabase/supabase-js";
+import type { ReactNode } from "react";
+// <-- CAMBIO 1: Se añade "AuthChangeEvent" a la importación de tipos.
+import type {
+  AuthChangeEvent,
+  Session,
+  SupabaseClient,
+  User as SupabaseUser,
+} from "@supabase/supabase-js";
 
-import {createSupabaseBrowserClient} from "@/lib/supabase/client";
-import type {UserUpdatePayload, UserWithRelations} from "@/types/user";
+import { createSupabaseBrowserClient } from "@/lib/supabase/client";
+import type { UserUpdatePayload, UserWithRelations } from "@/types/user";
 
 type UserStatus = "initializing" | "idle" | "loading";
 
 type UserContextValue = {
-  session: Session;
+  session: Session | null;
   authUser: SupabaseUser | null;
   user: UserWithRelations | null;
   status: UserStatus;
@@ -43,9 +49,12 @@ async function parseResponse(response: Response) {
   return response.text();
 }
 
-export function UserProvider({children, supabaseClient}: Props) {
-  const supabase = useMemo(() => supabaseClient ?? createSupabaseBrowserClient(), [supabaseClient]);
-  const [session, setSession] = useState<Session>(null);
+export function UserProvider({ children, supabaseClient }: Props) {
+  const supabase = useMemo(
+    () => supabaseClient ?? createSupabaseBrowserClient(),
+    [supabaseClient]
+  );
+  const [session, setSession] = useState<Session | null>(null);
   const [authUser, setAuthUser] = useState<SupabaseUser | null>(null);
   const [user, setUser] = useState<UserWithRelations | null>(null);
   const [status, setStatus] = useState<UserStatus>("initializing");
@@ -59,7 +68,7 @@ export function UserProvider({children, supabaseClient}: Props) {
         throw new Error(payload.error);
       }
 
-      const {formErrors, fieldErrors} = payload.error as {
+      const { formErrors, fieldErrors } = payload.error as {
         formErrors?: string[];
         fieldErrors?: Record<string, string[]>;
       };
@@ -94,10 +103,15 @@ export function UserProvider({children, supabaseClient}: Props) {
       }
 
       try {
-        setStatus((current) => (current === "initializing" ? "initializing" : "loading"));
-        const response = await fetch(`/api/users/by-email?email=${encodeURIComponent(nextUser.email)}`, {
-          cache: "no-store"
-        });
+        setStatus((current) =>
+          current === "initializing" ? "initializing" : "loading"
+        );
+        const response = await fetch(
+          `/api/users/by-email?email=${encodeURIComponent(nextUser.email)}`,
+          {
+            cache: "no-store",
+          }
+        );
 
         if (!response.ok) {
           if (response.status === 404) {
@@ -109,14 +123,16 @@ export function UserProvider({children, supabaseClient}: Props) {
           await handleError(response);
         }
 
-        const data = (await response.json()) as {user: UserWithRelations};
+        const data = (await response.json()) as { user: UserWithRelations };
         setUser(data.user);
         setStatus("idle");
         setError(null);
       } catch (error) {
         console.error(error);
         setStatus("idle");
-        setError(error instanceof Error ? error.message : "Error desconocido");
+        setError(
+          error instanceof Error ? error.message : "Error desconocido"
+        );
       }
     },
     [handleError]
@@ -127,7 +143,7 @@ export function UserProvider({children, supabaseClient}: Props) {
 
     const initialize = async () => {
       try {
-        const {data, error} = await supabase.auth.getSession();
+        const { data, error } = await supabase.auth.getSession();
 
         if (error) {
           throw new Error(error.message);
@@ -149,7 +165,11 @@ export function UserProvider({children, supabaseClient}: Props) {
         }
 
         setStatus("idle");
-        setError(error instanceof Error ? error.message : "No se pudo obtener la sesión");
+        setError(
+          error instanceof Error
+            ? error.message
+            : "No se pudo obtener la sesión"
+        );
       }
     };
 
@@ -161,12 +181,14 @@ export function UserProvider({children, supabaseClient}: Props) {
   }, [supabase, fetchProfile]);
 
   useEffect(() => {
-    const {data} = supabase.auth.onAuthStateChange(async (_event, nextSession) => {
-      setSession(nextSession);
-      const nextUser = nextSession?.user ?? null;
-      setAuthUser(nextUser);
-      await fetchProfile(nextUser);
-    });
+    const { data } = supabase.auth.onAuthStateChange(
+      async (_event: AuthChangeEvent, nextSession: Session | null) => {
+        setSession(nextSession);
+        const nextUser = nextSession?.user ?? null;
+        setAuthUser(nextUser);
+        await fetchProfile(nextUser);
+      }
+    );
 
     return () => {
       data.subscription.unsubscribe();
@@ -175,7 +197,7 @@ export function UserProvider({children, supabaseClient}: Props) {
 
   const refreshUser = useCallback(async () => {
     try {
-      const {data, error} = await supabase.auth.getSession();
+      const { data, error } = await supabase.auth.getSession();
 
       if (error) {
         throw new Error(error.message);
@@ -187,7 +209,10 @@ export function UserProvider({children, supabaseClient}: Props) {
       await fetchProfile(nextUser);
     } catch (error) {
       console.error(error);
-      const message = error instanceof Error ? error.message : "No se pudo actualizar la sesión";
+      const message =
+        error instanceof Error
+          ? error.message
+          : "No se pudo actualizar la sesión";
       setStatus("idle");
       setError(message);
     }
@@ -204,17 +229,17 @@ export function UserProvider({children, supabaseClient}: Props) {
         setError(null);
 
         if (payload.email || payload.password || payload.name !== undefined) {
-          const {error: authError} = await supabase.auth.updateUser({
-            ...(payload.email ? {email: payload.email} : {}),
-            ...(payload.password ? {password: payload.password} : {}),
+          const { error: authError } = await supabase.auth.updateUser({
+            ...(payload.email ? { email: payload.email } : {}),
+            ...(payload.password ? { password: payload.password } : {}),
             ...(payload.name !== undefined
               ? {
                   data: {
                     ...authUser.user_metadata,
-                    name: payload.name ?? null
-                  }
+                    name: payload.name ?? null,
+                  },
                 }
-              : {})
+              : {}),
           });
 
           if (authError) {
@@ -224,15 +249,15 @@ export function UserProvider({children, supabaseClient}: Props) {
 
         const response = await fetch(`/api/users/${user.id}`, {
           method: "PATCH",
-          headers: {"Content-Type": "application/json"},
-          body: JSON.stringify(payload)
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
         });
 
         if (!response.ok) {
           await handleError(response);
         }
 
-        const data = (await response.json()) as {user: UserWithRelations};
+        const data = (await response.json()) as { user: UserWithRelations };
         setUser(data.user);
         setStatus("idle");
         setError(null);
@@ -240,7 +265,10 @@ export function UserProvider({children, supabaseClient}: Props) {
       } catch (error) {
         console.error(error);
         setStatus("idle");
-        const message = error instanceof Error ? error.message : "No se pudo actualizar el perfil";
+        const message =
+          error instanceof Error
+            ? error.message
+            : "No se pudo actualizar el perfil";
         setError(message);
         throw new Error(message);
       }
@@ -252,7 +280,7 @@ export function UserProvider({children, supabaseClient}: Props) {
     try {
       setStatus("loading");
       setError(null);
-      const {error: signOutError} = await supabase.auth.signOut();
+      const { error: signOutError } = await supabase.auth.signOut();
 
       if (signOutError) {
         throw new Error(signOutError.message);
@@ -265,7 +293,8 @@ export function UserProvider({children, supabaseClient}: Props) {
     } catch (error) {
       console.error(error);
       setStatus("idle");
-      const message = error instanceof Error ? error.message : "No se pudo cerrar sesión";
+      const message =
+        error instanceof Error ? error.message : "No se pudo cerrar sesión";
       setError(message);
       throw new Error(message);
     }
@@ -274,11 +303,33 @@ export function UserProvider({children, supabaseClient}: Props) {
   const clearError = useCallback(() => setError(null), []);
 
   const value = useMemo(
-    () => ({session, authUser, user, status, error, refreshUser, updateUser, logout, clearError}),
-    [session, authUser, user, status, error, refreshUser, updateUser, logout, clearError]
+    () => ({
+      session,
+      authUser,
+      user,
+      status,
+      error,
+      refreshUser,
+      updateUser,
+      logout,
+      clearError,
+    }),
+    [
+      session,
+      authUser,
+      user,
+      status,
+      error,
+      refreshUser,
+      updateUser,
+      logout,
+      clearError,
+    ]
   );
 
-  return <UserContext.Provider value={value}>{children}</UserContext.Provider>;
+  return (
+    <UserContext.Provider value={value}>{children}</UserContext.Provider>
+  );
 }
 
 export function useUser() {
