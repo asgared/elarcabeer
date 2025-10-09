@@ -1,8 +1,8 @@
 "use client";
 
+import {Container} from "@/components/ui/container";
 import {
   Box,
-  Container,
   Divider,
   Heading,
   Input,

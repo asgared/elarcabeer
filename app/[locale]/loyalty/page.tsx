@@ -1,4 +1,5 @@
-import {Container, Heading, List, ListItem, SimpleGrid, Stack, Text} from "@chakra-ui/react";
+import {Container} from "@/components/ui/container";
+import {Heading, List, ListItem, SimpleGrid, Stack, Text} from "@chakra-ui/react";
 
 import {LoyaltyProgress as LoyaltyProgressComponent} from "@/components/ui/loyalty-progress";
 import {loyaltyProgress, subscriptionPlans} from "@/data/subscriptions";

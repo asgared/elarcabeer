@@ -1,4 +1,5 @@
-import { Box, Container, Flex, Heading, Text, VStack } from "@chakra-ui/react";
+import { Container } from "@/components/ui/container";
+import { Box, Flex, Heading, Text, VStack } from "@chakra-ui/react";
 import Image from "next/image";
 import { motion } from "framer-motion";
 

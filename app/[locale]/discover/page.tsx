@@ -1,4 +1,5 @@
-import {Container, Heading, SimpleGrid, Stack, Text} from "@chakra-ui/react";
+import {Container} from "@/components/ui/container";
+import {Heading, SimpleGrid, Stack, Text} from "@chakra-ui/react";
 
 import {posts} from "@/data/posts";
 import Link from "next/link";

@@ -1,10 +1,10 @@
 "use client";
 
+import {Container} from "@/components/ui/container";
 import {
   Box,
   Button,
   Checkbox,
-  Container,
   FormControl,
   FormErrorMessage,
   FormHelperText,

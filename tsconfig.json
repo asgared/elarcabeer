@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
-    // --- CAMBIO CLAVE ---
-    "moduleResolution": "node16", // Recuperamos la resolución de módulos de Node para compatibilidad con los typings actuales
+    // Alineamos la resolución de módulos con la configuración recomendada por Next.js.
+    "moduleResolution": "bundler",
 
     // --- El resto de tus opciones están bien, solo ajustamos y simplificamos ---
     "target": "es5", // "es5" es más compatible para navegadores

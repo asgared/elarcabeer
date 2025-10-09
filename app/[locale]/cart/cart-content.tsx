@@ -1,6 +1,7 @@
 "use client";
 
-import {Button, Container, Heading, Stack, Text} from "@chakra-ui/react";
+import {Container} from "@/components/ui/container";
+import {Button, Heading, Stack, Text} from "@chakra-ui/react";
 
 import {useCartDrawer} from "@/providers/cart-drawer-provider";
 

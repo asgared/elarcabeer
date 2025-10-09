@@ -1,6 +1,7 @@
 "use client";
 
-import {Badge, Box, Button, Container, Heading, Spinner, Stack, Text} from "@chakra-ui/react";
+import {Container} from "@/components/ui/container";
+import {Badge, Box, Button, Heading, Spinner, Stack, Text} from "@chakra-ui/react";
 
 import {useUser} from "@/providers/user-provider";
 

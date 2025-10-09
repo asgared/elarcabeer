@@ -1,10 +1,10 @@
 "use client";
 
+import {Container} from "@/components/ui/container";
 import {
   Avatar,
   Box,
   Button,
-  Container,
   Divider,
   Flex,
   HStack,

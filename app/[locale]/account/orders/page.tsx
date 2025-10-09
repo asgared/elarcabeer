@@ -1,5 +1,6 @@
 "use client";
 
+import {Container} from "@/components/ui/container";
 import {
   Accordion,
   AccordionButton,
@@ -9,7 +10,6 @@ import {
   Badge,
   Box,
   Button,
-  Container,
   Divider,
   Flex,
   Heading,

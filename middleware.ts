@@ -1,6 +1,6 @@
-import { NextResponse } from "next/server";
-import type { NextRequest } from "next/server";
-import { createSupabaseMiddlewareClient } from "@/lib/supabase/middleware";
+import {NextResponse} from "next/server";
+import type {NextRequest} from "next/server";
+import {getSupabaseUserFromRequest} from "@/lib/supabase/middleware";
 import { defaultLocale, locales } from "@/i18n/locales";
 
 // --- Lógica de Internacionalización (la mantenemos) ---
@@ -47,10 +47,7 @@ export async function middleware(request: NextRequest) {
   }
 
   const response = NextResponse.next();
-  const supabase = createSupabaseMiddlewareClient(request, response);
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = getSupabaseUserFromRequest(request);
 
   // --- INICIO: LÓGICA DE PROTECCIÓN DE DASHBOARD (la nueva parte) ---
   const isAdminRoute = locales.some((locale) =>
@@ -66,9 +63,14 @@ export async function middleware(request: NextRequest) {
     }
 
     // Leemos el rol desde los metadatos de la sesión, no de la base de datos
-    if (user.app_metadata.role !== "ADMIN") {
+    const role =
+      user.app_metadata && typeof user.app_metadata.role === "string"
+        ? (user.app_metadata.role as string)
+        : undefined;
+
+    if (role !== "ADMIN") {
       const redirectUrl = request.nextUrl.clone();
-      redirectUrl.pathname = `/${localeFromCookie}/account`; // Asumo que tienes la variable localeFromCookie
+      redirectUrl.pathname = `/${localeFromCookie}/account`;
       return NextResponse.redirect(redirectUrl);
     }
   }

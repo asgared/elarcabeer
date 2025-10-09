@@ -1,10 +1,10 @@
 "use client";
 
+import {Container} from "@/components/ui/container";
 import {
   Badge,
   Box,
   Checkbox,
-  Container,
   HStack,
   Heading,
   SimpleGrid,

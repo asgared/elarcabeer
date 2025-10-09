@@ -1,6 +1,7 @@
 "use client";
 
-import {Box, Button, Container, Heading, Stack, Text} from "@chakra-ui/react";
+import {Container} from "@/components/ui/container";
+import {Box, Button, Heading, Stack, Text} from "@chakra-ui/react";
 import Link from "next/link";
 
 import {useAnalyticsContext} from "../../providers/analytics-provider";

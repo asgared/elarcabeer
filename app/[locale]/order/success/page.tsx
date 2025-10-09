@@ -2,7 +2,8 @@
 
 import {useEffect} from "react";
 
-import {Box, Button, Container, Heading, Stack, Text} from "@chakra-ui/react";
+import {Container} from "@/components/ui/container";
+import {Box, Button, Heading, Stack, Text} from "@chakra-ui/react";
 import {useSearchParams} from "next/navigation";
 
 import {Link} from "@/i18n/navigation";

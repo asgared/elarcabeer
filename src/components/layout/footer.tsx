@@ -1,6 +1,7 @@
 "use client";
 
-import {Box, Container, HStack, Icon, Link, Stack, Text} from "@chakra-ui/react";
+import {Container} from "@/components/ui/container";
+import {Box, HStack, Icon, Link, Stack, Text} from "@chakra-ui/react";
 import {FaFacebookF, FaInstagram, FaTiktok, FaTwitter, FaYoutube} from "react-icons/fa6";
 
 import type {SocialLink} from "@/types/cms";

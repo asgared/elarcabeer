@@ -1,7 +1,7 @@
+import {Container} from "@/components/ui/container";
 import {
   Badge,
   Box,
-  Container,
   Grid,
   GridItem,
   Heading,

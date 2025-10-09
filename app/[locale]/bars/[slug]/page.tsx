@@ -1,4 +1,5 @@
-import {Box, Container, Heading, Stack, Text} from "@chakra-ui/react";
+import {Container} from "@/components/ui/container";
+import {Box, Heading, Stack, Text} from "@chakra-ui/react";
 import {Metadata} from "next";
 import {notFound} from "next/navigation";
 

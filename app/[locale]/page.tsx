@@ -1,4 +1,5 @@
-import {Container, Grid, GridItem, Heading, SimpleGrid, Stack, Text} from "@chakra-ui/react";
+import {Container} from "@/components/ui/container";
+import {Grid, GridItem, Heading, SimpleGrid, Stack, Text} from "@chakra-ui/react";
 
 import {BrandHero} from "@/components/ui/brand-hero";
 import {BundleCard} from "@/components/ui/bundle-card";

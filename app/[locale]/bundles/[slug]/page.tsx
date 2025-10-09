@@ -1,6 +1,6 @@
+import {Container} from "@/components/ui/container";
 import {
   Box,
-  Container,
   Grid,
   GridItem,
   Heading,

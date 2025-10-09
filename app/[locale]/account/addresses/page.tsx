@@ -1,6 +1,7 @@
 "use client";
 
-import {Container, Spinner, Stack, Text} from "@chakra-ui/react";
+import {Container} from "@/components/ui/container";
+import {Spinner, Stack, Text} from "@chakra-ui/react";
 
 import {AddressesManager} from "@/components/account/addresses-manager";
 import {useUser} from "@/providers/user-provider";
