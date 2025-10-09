@@ -1,8 +1,8 @@
-import {cookies} from "next/headers";
-import {redirect} from "next/navigation";
-import {createHash, randomBytes} from "node:crypto";
+import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
+import { createHash, randomBytes } from "node:crypto";
 
-import {prisma} from "@/lib/prisma";
+import { prisma } from "@/lib/prisma";
 
 const SESSION_COOKIE = "elarca_admin";
 const SESSION_TTL_MS = 1000 * 60 * 60 * 24 * 7; // 7 días
@@ -24,8 +24,8 @@ export async function createAdminSession(userId: string) {
     data: {
       tokenHash,
       userId,
-      expiresAt
-    }
+      expiresAt,
+    },
   });
 
   cookies().set(SESSION_COOKIE, token, {
@@ -33,7 +33,7 @@ export async function createAdminSession(userId: string) {
     sameSite: "lax",
     secure: process.env.NODE_ENV === "production",
     path: "/",
-    expires: expiresAt
+    expires: expiresAt,
   });
 }
 
@@ -46,7 +46,7 @@ export async function deleteAdminSession() {
 
   const tokenHash = hashToken(cookie.value);
 
-  await prisma.adminSession.deleteMany({where: {tokenHash}});
+  await prisma.adminSession.deleteMany({ where: { tokenHash } });
 
   cookies().delete(SESSION_COOKIE);
 }
@@ -60,16 +60,18 @@ export async function getAdminSession() {
 
   const tokenHash = hashToken(cookie.value);
   const session = await prisma.adminSession.findUnique({
-    where: {tokenHash},
-    include: {user: true}
+    where: { tokenHash },
+    include: { user: true },
   });
 
   if (!session) {
+    // YA NO INTENTAMOS BORRAR LA COOKIE AQUÍ
     return null;
   }
 
   if (session.expiresAt.getTime() < Date.now()) {
-    await prisma.adminSession.delete({where: {id: session.id}});
+    await prisma.adminSession.delete({ where: { id: session.id } });
+    // YA NO INTENTAMOS BORRAR LA COOKIE AQUÍ
     return null;
   }
 

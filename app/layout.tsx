@@ -1,7 +1,7 @@
-import type {Metadata} from "next";
-import {ReactNode} from "react";
-
-import {ChakraColorModeScript} from "@/components/chakra-color-mode-script";
+import type { Metadata } from "next";
+import { ReactNode } from "react";
+import { ChakraColorModeScript } from "@/components/chakra-color-mode-script";
+import AppWrapper from "@/providers/app-wrapper";
 import ClientProviders from "@/providers/client-providers";
 
 import "./globals.css";
@@ -16,17 +16,21 @@ export const metadata: Metadata = {
   openGraph: {
     title: "El Arca Cervecería",
     description: "Cervezas artesanales inspiradas en travesías marítimas",
-    locale: "es_ES",
+    locale: "es",
+    type: "website",
+    url: "https://elarcabeer.com",
     siteName: "El Arca Beer",
   },
 };
 
-export default function RootLayout({children}: {children: ReactNode}) {
+export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="es">
       <body>
         <ChakraColorModeScript />
-        <ClientProviders>{children}</ClientProviders>
+        <ClientProviders>
+          <AppWrapper>{children}</AppWrapper>
+        </ClientProviders>
       </body>
     </html>
   );
