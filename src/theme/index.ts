@@ -1,4 +1,7 @@
-import {StyleFunctionProps, extendTheme} from "@chakra-ui/react";
+import {extendTheme} from "@chakra-ui/react";
+import type {StyleFunctionProps} from "@chakra-ui/react";
+
+import {themeConfig} from "./config";
 
 const brandPalette = {
   50: "#0C1B1E",
@@ -14,10 +17,7 @@ const brandPalette = {
 };
 
 export const theme = extendTheme({
-  config: {
-    initialColorMode: "dark",
-    useSystemColorMode: false
-  },
+  config: themeConfig,
   fonts: {
     heading: "var(--font-playfair)",
     body: "var(--font-inter)"

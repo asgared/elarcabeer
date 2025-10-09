@@ -9,18 +9,19 @@ type CreateBrowserClientFn = (
 ) => SupabaseClient;
 
 const ssrBrowserFactory: CreateBrowserClientFn | undefined = (() => {
-  const candidate = (SupabaseSSR as {
-    createBrowserClient?: unknown;
-    createBrowserSupabaseClient?: unknown;
-  }).createBrowserClient;
+  const candidate = Reflect.get(
+    SupabaseSSR as Record<string, unknown>,
+    "createBrowserClient"
+  );
 
   if (typeof candidate === "function") {
     return candidate as CreateBrowserClientFn;
   }
 
-  const legacyCandidate = (SupabaseSSR as {
-    createBrowserSupabaseClient?: unknown;
-  }).createBrowserSupabaseClient;
+  const legacyCandidate = Reflect.get(
+    SupabaseSSR as Record<string, unknown>,
+    "createBrowserSupabaseClient"
+  );
 
   if (typeof legacyCandidate === "function") {
     return legacyCandidate as CreateBrowserClientFn;

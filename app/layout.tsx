@@ -1,9 +1,8 @@
 import type {Metadata} from "next";
 import {ReactNode} from "react";
-import {ColorModeScript} from "@chakra-ui/react";
 
+import {ChakraColorModeScript} from "@/components/chakra-color-mode-script";
 import ClientProviders from "@/providers/client-providers";
-import {theme} from "@/theme";
 
 import "./globals.css";
 
@@ -26,7 +25,7 @@ export default function RootLayout({children}: {children: ReactNode}) {
   return (
     <html lang="es">
       <body>
-        <ColorModeScript initialColorMode={theme.config.initialColorMode} />
+        <ChakraColorModeScript />
         <ClientProviders>{children}</ClientProviders>
       </body>
     </html>
