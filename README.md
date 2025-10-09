@@ -48,7 +48,7 @@ pnpm dev
 | `DATABASE_URL` | Cadena de conexión para Postgres (prod) o SQLite (dev) | Consola de tu proveedor o `file:./dev.db` para SQLite |
 | `DATABASE_PROVIDER` | Tipo de base de datos que usa Prisma (`postgresql` o `sqlite`) | Define manualmente según tu entorno |
 | `STRIPE_SECRET_KEY` | Llave secreta de Stripe para crear sesiones de pago | [Stripe Dashboard → Developers → API keys](https://dashboard.stripe.com/test/apikeys) (`sk_test_...`) |
-| `STRIPE_API_VERSION` | Versión de la API de Stripe usada por el SDK del servidor | Define `2023-08-16` (valor predeterminado) o una versión compatible con el paquete `stripe` instalado |
+| `STRIPE_API_VERSION` | Versión de la API de Stripe usada por el SDK del servidor | Define `2024-04-10` (valor predeterminado) o una versión compatible con el paquete `stripe` instalado |
 | `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` | Llave pública usada en el frontend de Stripe | Mismo panel de Stripe (`pk_test_...`) |
 | `STRIPE_WEBHOOK_SECRET` | Secreto del endpoint webhook configurado | `stripe listen --forward-to` o Dashboard → Webhooks (`whsec_...`) |
 | `NEXTAUTH_SECRET` | Secreto para firmar JWT de NextAuth | `openssl rand -base64 32` |
