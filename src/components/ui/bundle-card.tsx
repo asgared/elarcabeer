@@ -10,7 +10,7 @@ import {
   Stack,
   Text
 } from "@chakra-ui/react";
-import {Link} from '@/i18n/navigation';
+import NextLink from "next/link";
 
 import {bundles} from "../../data/bundles";
 import {products} from "../../data/products";
@@ -25,7 +25,7 @@ export function BundleCard({bundle}: {bundle: Bundle}) {
     .join(" · ");
 
   return (
-    <Card as={Link} href={`/bundles/${bundle.slug}`} transition="all 0.2s" _hover={{transform: "translateY(-6px)"}}>
+    <Card as={NextLink} href={`/bundles/${bundle.slug}`} transition="all 0.2s" _hover={{transform: "translateY(-6px)"}}>
       <CardBody>
         <Image
           alt={bundle.name}

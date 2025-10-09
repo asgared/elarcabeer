@@ -11,7 +11,7 @@ import {
   Stack,
   Text
 } from "@chakra-ui/react";
-import {Link} from '@/i18n/navigation';
+import NextLink from "next/link";
 import {useMemo, useState} from "react";
 
 import {StoreMap} from "@/components/ui/store-map";
@@ -79,7 +79,7 @@ export function BarsContent() {
                       Ver menú
                     </Text>
                   ) : null}
-                  <Text as={Link} href={`/bars/${store.slug}`}>
+                  <Text as={NextLink} href={`/bars/${store.slug}`}>
                     Reservar
                   </Text>
                 </HStack>

@@ -6,7 +6,7 @@ import {Container} from "@/components/ui/container";
 import {Box, Button, Heading, Stack, Text} from "@chakra-ui/react";
 import {useSearchParams} from "next/navigation";
 
-import {Link} from "@/i18n/navigation";
+import NextLink from "next/link";
 import {useCartStore} from "@/stores/cart-store";
 
 export default function OrderSuccessPage() {
@@ -35,7 +35,7 @@ export default function OrderSuccessPage() {
             </Text>
           </Box>
         ) : null}
-        <Button as={Link} href="/shop" colorScheme="teal" size="lg">
+        <Button as={NextLink} href="/shop" colorScheme="teal" size="lg">
           Seguir explorando cervezas
         </Button>
       </Stack>

@@ -20,7 +20,7 @@ import {
 import {useEffect, useRef} from "react";
 
 import {useUser} from "@/providers/user-provider";
-import {Link} from "@/i18n/navigation";
+import NextLink from "next/link";
 import {formatCurrency} from "@/utils/currency";
 
 export const dynamic = "force-dynamic";
@@ -180,7 +180,7 @@ export default function OrdersPage() {
 
                       <Button
                         alignSelf="flex-start"
-                        as={Link}
+                        as={NextLink}
                         colorScheme="orange"
                         href={`/account/orders/${order.id}`}
                         size="sm"

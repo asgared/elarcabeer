@@ -12,7 +12,7 @@ import {
   Stack,
   Text
 } from "@chakra-ui/react";
-import {Link} from "@/i18n/navigation";
+import NextLink from "next/link";
 
 import {Product} from "../../types/catalog";
 import {formatCurrency} from "../../utils/currency";
@@ -24,7 +24,7 @@ export function ProductCard({product}: {product: Product}) {
 
   return (
     <Card
-      as={Link}
+      as={NextLink}
       href={`/shop/${product.slug}`}
       _hover={{transform: "translateY(-6px)"}}
       borderRadius="2xl"

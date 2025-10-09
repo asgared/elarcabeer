@@ -13,18 +13,16 @@ const AnalyticsContext = createContext<AnalyticsContextValue | undefined>(undefi
 
 type Props = {
   children: ReactNode;
-  locale: string;
 };
 
-export function AnalyticsProvider({children, locale}: Props) {
-  const analytics = useMemo(() => createAnalytics(locale), [locale]);
+export function AnalyticsProvider({children}: Props) {
+  const analytics = useMemo(() => createAnalytics(), []);
 
   useEffect(() => {
     analytics.push({
       event: "page_view",
-      locale
     });
-  }, [analytics, locale]);
+  }, [analytics]);
 
   return (
     <AnalyticsContext.Provider value={analytics}>

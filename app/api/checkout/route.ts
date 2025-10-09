@@ -1,9 +1,8 @@
-import { NextResponse } from "next/server";
+import {NextResponse} from "next/server";
 
-import { products } from "@/data/products";
-import { defaultLocale, locales as supportedLocales } from "@/i18n/locales";
-import { stripe } from "@/lib/stripe"; // <<<--- CORRECCIÓN #1: Se importa la constante 'stripe'
-import type { Stripe } from "stripe"; // Se importa el tipo 'Stripe' directamente de la librería
+import {products} from "@/data/products";
+import {stripe} from "@/lib/stripe"; // <<<--- CORRECCIÓN #1: Se importa la constante 'stripe'
+import type {Stripe} from "stripe"; // Se importa el tipo 'Stripe' directamente de la librería
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -20,7 +19,6 @@ type CheckoutRequest = {
     country?: string;
     postal?: string;
   };
-  locale?: string;
 };
 
 type NormalizedCheckoutItem = {
@@ -43,7 +41,6 @@ type ValidatedCheckout = {
     postal: string;
   };
   currency: string;
-  locale: string;
   origin: string;
   userId: string;
   normalizedItems: NormalizedCheckoutItem[];
@@ -124,12 +121,6 @@ function validateCheckoutPayload(
 
     shippingAddress[field] = value.trim();
   }
-
-  const allowedLocales = [...supportedLocales] as string[];
-  const locale =
-    typeof payload.locale === "string" && allowedLocales.includes(payload.locale)
-      ? payload.locale
-      : defaultLocale;
 
   const origin = normalizeOrigin(request);
 
@@ -233,7 +224,6 @@ function validateCheckoutPayload(
         : undefined,
     shippingAddress,
     currency,
-    locale,
     origin,
     userId: payload.userId.trim(),
     normalizedItems,
@@ -264,7 +254,6 @@ export async function POST(request: Request) {
     customerName,
     shippingAddress,
     currency,
-    locale,
     origin,
     userId,
     normalizedItems,
@@ -277,10 +266,10 @@ export async function POST(request: Request) {
       customer_email: customerEmail,
       billing_address_collection: "auto",
       success_url: new URL(
-        `/${locale}/order/success?session_id={CHECKOUT_SESSION_ID}`,
+        `/order/success?session_id={CHECKOUT_SESSION_ID}`,
         origin
       ).toString(),
-      cancel_url: new URL(`/${locale}/checkout?status=cancelled`, origin).toString(),
+      cancel_url: new URL(`/checkout?status=cancelled`, origin).toString(),
       metadata: {
         ...(customerName ? { customer_name: customerName } : {}),
         shipping_label: shippingAddress.label,

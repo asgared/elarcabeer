@@ -1,13 +1,25 @@
 import type {Metadata} from "next";
 import {ReactNode} from "react";
-import { ColorModeScript } from "@chakra-ui/react"; 
-import { theme } from "@/theme";
+import {ColorModeScript} from "@chakra-ui/react";
+
+import ClientProviders from "@/providers/client-providers";
+import {theme} from "@/theme";
 
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "El Arca Cervecería",
-  description: "Experiencia digital inmersiva para la cervecería El Arca"
+  metadataBase: new URL("https://elarcabeer.com"),
+  title: {
+    default: "El Arca Cervecería",
+    template: "%s | El Arca",
+  },
+  description: "Cervezas artesanales inspiradas en travesías marítimas",
+  openGraph: {
+    title: "El Arca Cervecería",
+    description: "Cervezas artesanales inspiradas en travesías marítimas",
+    locale: "es_ES",
+    siteName: "El Arca Beer",
+  },
 };
 
 export default function RootLayout({children}: {children: ReactNode}) {
@@ -15,7 +27,7 @@ export default function RootLayout({children}: {children: ReactNode}) {
     <html lang="es">
       <body>
         <ColorModeScript initialColorMode={theme.config.initialColorMode} />
-        {children}
+        <ClientProviders>{children}</ClientProviders>
       </body>
     </html>
   );

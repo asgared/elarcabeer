@@ -27,47 +27,17 @@ import {
   useBreakpointValue
 } from "@chakra-ui/react";
 import type {DrawerProps} from "@chakra-ui/react";
+import NextLink from "next/link";
 import {useEffect, useState} from "react";
-import {Link} from "@/i18n/navigation";
-import {useTranslations, useLocale} from "@/i18n/client";
-import {usePathname} from "next/navigation";
 import {FaBars, FaCartShopping, FaChevronDown, FaUser} from "react-icons/fa6";
 
-import {bundles} from "../../data/bundles";
 import {products} from "../../data/products";
 import {posts} from "../../data/posts";
 import {useCartDrawer} from "../../providers/cart-drawer-provider";
 import {selectCartCount, useCartStore} from "../../stores/cart-store";
-import {localeLabels, locales} from "../../i18n/locales";
 import {useUser} from "@/providers/user-provider";
 
-function LocaleSwitcher() {
-  const pathname = usePathname();
-  const segments = pathname.split("/").filter(Boolean);
-  const activeLocale = useLocale();
-
-  return (
-    <Menu>
-      <MenuButton as={Button} rightIcon={<FaChevronDown />} size="sm" variant="outline">
-        {localeLabels[activeLocale]}
-      </MenuButton>
-      <MenuList>
-        {locales.map((locale) => {
-          const nextHref = segments.length > 1 ? `/${segments.slice(1).join("/")}` : "/";
-
-          return (
-            <MenuItem as={Link} href={nextHref} key={locale} locale={locale}>
-              {localeLabels[locale]}
-            </MenuItem>
-          );
-        })}
-      </MenuList>
-    </Menu>
-  );
-}
-
 export function Navbar() {
-  const t = useTranslations("navigation");
   const count = useCartStore(selectCartCount);
   const {open} = useCartDrawer();
   const {isOpen, onOpen, onClose} = useDisclosure();
@@ -89,50 +59,49 @@ export function Navbar() {
       <Container maxW="6xl" py={4}>
         <Flex align="center" justify="space-between" flexWrap="wrap" gap={{base: 3, md: 4}}>
           <HStack spacing={{base: 3, md: 6}}>
-            <Link href="/" style={{fontWeight: 700, fontSize: "1.125rem"}}>
+            <NextLink href="/" style={{fontWeight: 700, fontSize: "1.125rem"}}>
               El Arca
-            </Link>
+            </NextLink>
             <HStack display={{base: "none", md: "flex"}} spacing={6}>
               <Menu isLazy>
                 <MenuButton as={Button} rightIcon={<FaChevronDown />} variant="ghost">
-                  {t("shop")}
+                  Tienda
                 </MenuButton>
                 <MenuList bg="background.800">
                   {products.slice(0, 4).map((product) => (
-                    <MenuItem key={product.id} as={Link} href={`/shop/${product.slug}`}>
+                    <MenuItem key={product.id} as={NextLink} href={`/shop/${product.slug}`}>
                       {product.name}
                     </MenuItem>
                   ))}
-                  <MenuItem as={Link} href="/bundles/crew-welcome-pack">
+                  <MenuItem as={NextLink} href="/bundles/crew-welcome-pack">
                     Bundles destacados
                   </MenuItem>
                 </MenuList>
               </Menu>
-              <Button as={Link} href="/bars" variant="ghost">
-                {t("bars")}
+              <Button as={NextLink} href="/bars" variant="ghost">
+                Bares
               </Button>
               <Menu isLazy>
                 <MenuButton as={Button} rightIcon={<FaChevronDown />} variant="ghost">
-                  {t("discover")}
+                  Descubre
                 </MenuButton>
                 <MenuList bg="background.800">
                   {posts.map((post) => (
-                    <MenuItem key={post.id} as={Link} href={`/discover/${post.slug}`}>
+                    <MenuItem key={post.id} as={NextLink} href={`/discover/${post.slug}`}>
                       {post.title}
                     </MenuItem>
                   ))}
                 </MenuList>
               </Menu>
-              <Button as={Link} href="/loyalty" variant="ghost">
-                {t("loyalty")}
+              <Button as={NextLink} href="/loyalty" variant="ghost">
+                Lealtad
               </Button>
             </HStack>
           </HStack>
           <HStack spacing={{base: 2, md: 3}}>
-            <LocaleSwitcher />
             <Box position="relative">
               <IconButton
-                aria-label={t("cart")}
+                aria-label="Abrir carrito"
                 icon={<FaCartShopping />}
                 minH={12}
                 minW={12}
@@ -186,7 +155,7 @@ export function Navbar() {
                     ) : null}
                   </Box>
                   <MenuDivider borderColor="whiteAlpha.200" />
-                  <MenuItem as={Link} href="/account">
+                  <MenuItem as={NextLink} href="/account">
                     Perfil
                   </MenuItem>
                   <MenuItem onClick={logout}>Cerrar sesión</MenuItem>
@@ -194,8 +163,8 @@ export function Navbar() {
               </Menu>
             ) : (
               <IconButton
-                aria-label={t("account") ?? "Cuenta"}
-                as={Link}
+                aria-label="Cuenta"
+                as={NextLink}
                 href="/account"
                 icon={<FaUser />}
                 minH={12}
@@ -220,20 +189,22 @@ export function Navbar() {
           <DrawerHeader>El Arca</DrawerHeader>
           <DrawerBody>
             <VStack align="stretch" spacing={4}>
-              <Button as={Link} href="/shop" justifyContent="flex-start" variant="ghost" onClick={onClose}>
-                {t("shop")}
+              <Button as={NextLink} href="/shop" justifyContent="flex-start" variant="ghost" onClick={onClose}>
+                Tienda
               </Button>
-              <Button as={Link} href="/bars" justifyContent="flex-start" variant="ghost" onClick={onClose}>
-                {t("bars")}
+              <Button as={NextLink} href="/bars" justifyContent="flex-start" variant="ghost" onClick={onClose}>
+                Bares
               </Button>
-              <Button as={Link} href="/discover" justifyContent="flex-start" variant="ghost" onClick={onClose}>
-                {t("discover")}
+              <Button as={NextLink} href="/discover" justifyContent="flex-start" variant="ghost" onClick={onClose}>
+                Descubre
               </Button>
-              <Button as={Link} href="/loyalty" justifyContent="flex-start" variant="ghost" onClick={onClose}>
-                {t("loyalty")}
+              <Button as={NextLink} href="/loyalty" justifyContent="flex-start" variant="ghost" onClick={onClose}>
+                Lealtad
               </Button>
               <Divider borderColor="whiteAlpha.300" />
-              <LocaleSwitcher />
+              <Button as={NextLink} href="/account" justifyContent="flex-start" variant="ghost" onClick={onClose}>
+                Cuenta
+              </Button>
             </VStack>
           </DrawerBody>
         </DrawerContent>

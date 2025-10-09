@@ -7,7 +7,7 @@ type Analytics = {
   push: (event: AnalyticsEvent) => void;
 };
 
-export function createAnalytics(locale: string): Analytics {
+export function createAnalytics(): Analytics {
   const ensureDataLayer = () => {
     if (typeof window === "undefined") return;
 
@@ -21,8 +21,7 @@ export function createAnalytics(locale: string): Analytics {
       if (typeof window === "undefined") return;
 
       ensureDataLayer();
-      const payload = {...event, locale};
-      (window as typeof window & {dataLayer: AnalyticsEvent[]}).dataLayer.push(payload);
+      (window as typeof window & {dataLayer: AnalyticsEvent[]}).dataLayer.push(event);
     }
   };
 }

@@ -6,7 +6,7 @@ Experiencia eCommerce inspirada en brewdog.com pero con identidad náutica de **
 
 - **Front-end**: Next.js App Router + TypeScript + Chakra UI.
 - **State management**: Zustand (carrito persistente con localStorage y sincronización preparada para server).
-- **Internacionalización**: next-intl con `es-MX` y `en-US`.
+- **Idioma**: experiencia disponible en español.
 - **Pagos y suscripciones**: endpoints stub preparados para Stripe (checkout, billing, webhooks).
 - **Contenido dinámico**: páginas Shop, PDP, Bundles, Bars con mapa Mapbox, Discover/blog, Loyalty y Account.
 - **Analytics**: hook `useAnalytics` que envía eventos a `window.dataLayer` y carga Vercel Analytics.

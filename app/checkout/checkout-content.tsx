@@ -25,12 +25,11 @@ import { FormProvider, useForm } from "react-hook-form";
 import { loadStripe } from "@stripe/stripe-js";
 import type { Stripe } from "@stripe/stripe-js";
 
-import { Price } from "@/components/ui/price";
-import { products } from "@/data/products";
-import { selectCartTotal, useCartStore } from "@/stores/cart-store";
-import { Link } from "@/i18n/navigation";
-import { useLocale } from "@/i18n/client";
-import { useUser } from "@/providers/user-provider";
+import {Price} from "@/components/ui/price";
+import {products} from "@/data/products";
+import {selectCartTotal, useCartStore} from "@/stores/cart-store";
+import NextLink from "next/link";
+import {useUser} from "@/providers/user-provider";
 import type { Address, UserUpdatePayload } from "@/types/user";
 
 let stripePromise: Promise<Stripe | null> | undefined;
@@ -57,7 +56,6 @@ type CheckoutFormData = {
 };
 
 export function CheckoutContent() {
-  const locale = useLocale();
   const items = useCartStore((state) => state.items);
   const total = useCartStore(selectCartTotal);
   const currency = useCartStore((state) => state.currency);
@@ -190,7 +188,6 @@ export function CheckoutContent() {
             currency,
             customer: { email: formData.email, name: formData.name },
             shippingAddress,
-            locale,
           }),
         });
 
@@ -211,7 +208,7 @@ export function CheckoutContent() {
         toast({ title: "Error al procesar el checkout", description: error instanceof Error ? error.message : "Ocurrió un error inesperado.", status: "error", isClosable: true });
       }
     },
-    [user, hasItems, toast, saveAddress, addresses, selectedAddressId, updateUser, items, currency, locale]
+    [user, hasItems, toast, saveAddress, addresses, selectedAddressId, updateUser, items, currency]
   );
 
   return (
@@ -300,7 +297,7 @@ export function CheckoutContent() {
                   {cartLines.length === 0 ? (
                     <Stack spacing={3}>
                       <Text color="whiteAlpha.700">Tu carrito está vacío.</Text>
-                      <Button as={Link} href="/shop" variant="outline">Descubrir cervezas</Button>
+                      <Button as={NextLink} href="/shop" variant="outline">Descubrir cervezas</Button>
                     </Stack>
                   ) : (
                     <Stack spacing={4}>

@@ -14,17 +14,16 @@ import seoConfig from "../../next-seo.config";
 
 type Props = {
   children: ReactNode;
-  locale: string;
 };
 
-export function AppProviders({children, locale}: Props) {
+export function AppProviders({children}: Props) {
   const supabaseClient = useMemo(() => createSupabaseBrowserClient(), []);
 
   return (
     <CacheProvider>
       <ChakraProvider theme={theme}>
         <DefaultSeo {...seoConfig} />
-        <AnalyticsProvider locale={locale}>
+        <AnalyticsProvider>
           <UserProvider supabaseClient={supabaseClient}>
             <CartDrawerProvider>{children}</CartDrawerProvider>
           </UserProvider>

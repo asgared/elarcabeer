@@ -13,10 +13,10 @@ import {
   StatNumber,
   Text
 } from "@chakra-ui/react";
+import NextLink from "next/link";
 
 import {AccountAccessPanel} from "@/components/account/account-access";
 import {ProfileForm} from "@/components/account/profile-form";
-import {Link} from "@/i18n/navigation";
 import {useUser} from "@/providers/user-provider";
 import {formatCurrency} from "@/utils/currency";
 
@@ -94,19 +94,19 @@ export default function AccountPage() {
             <Grid gap={6} templateColumns={{base: "1fr", md: "repeat(3, minmax(0, 1fr))"}}>
               <Box borderRadius="2xl" borderWidth="1px" p={6}>
                 <Heading size="md">
-                  <Link href="/account/orders">Órdenes y pagos</Link>
+                  <NextLink href="/account/orders">Órdenes y pagos</NextLink>
                 </Heading>
                 <Text color="whiteAlpha.700">Revisa el detalle de tus compras, pagos y entregas.</Text>
               </Box>
               <Box borderRadius="2xl" borderWidth="1px" p={6}>
                 <Heading size="md">
-                  <Link href="/account/subscriptions">Suscripciones</Link>
+                  <NextLink href="/account/subscriptions">Suscripciones</NextLink>
                 </Heading>
                 <Text color="whiteAlpha.700">Gestiona tus membresías del Beer Club.</Text>
               </Box>
               <Box borderRadius="2xl" borderWidth="1px" p={6}>
                 <Heading size="md">
-                  <Link href="/account/addresses">Direcciones</Link>
+                  <NextLink href="/account/addresses">Direcciones</NextLink>
                 </Heading>
                 <Text color="whiteAlpha.700">Mantén al día tus direcciones de entrega favoritas.</Text>
               </Box>
