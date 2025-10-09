@@ -65,13 +65,11 @@ export async function getAdminSession() {
   });
 
   if (!session) {
-    cookies().delete(SESSION_COOKIE);
     return null;
   }
 
   if (session.expiresAt.getTime() < Date.now()) {
     await prisma.adminSession.delete({where: {id: session.id}});
-    cookies().delete(SESSION_COOKIE);
     return null;
   }
 

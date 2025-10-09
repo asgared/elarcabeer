@@ -1,11 +1,34 @@
 "use client";
 
-import {ComponentProps} from "react";
+import {CacheProvider} from "@chakra-ui/next-js";
+import {ChakraProvider} from "@chakra-ui/react";
+import {DefaultSeo} from "next-seo";
+import {ReactNode, useMemo} from "react";
 
-import {AppProviders} from "./app-providers";
+import {AnalyticsProvider} from "./analytics-provider";
+import {CartDrawerProvider} from "./cart-drawer-provider";
+import {UserProvider} from "./UserProvider";
+import {createSupabaseBrowserClient} from "@/lib/supabase/client";
+import seoConfig from "../../next-seo.config";
+import {theme} from "../theme";
 
-type ClientProvidersProps = ComponentProps<typeof AppProviders>;
+type ClientProvidersProps = {
+  children: ReactNode;
+};
 
-export default function ClientProviders(props: ClientProvidersProps) {
-  return <AppProviders {...props} />;
+export default function ClientProviders({children}: ClientProvidersProps) {
+  const supabaseClient = useMemo(() => createSupabaseBrowserClient(), []);
+
+  return (
+    <CacheProvider>
+      <ChakraProvider theme={theme}>
+        <DefaultSeo {...seoConfig} />
+        <AnalyticsProvider>
+          <UserProvider supabaseClient={supabaseClient}>
+            <CartDrawerProvider>{children}</CartDrawerProvider>
+          </UserProvider>
+        </AnalyticsProvider>
+      </ChakraProvider>
+    </CacheProvider>
+  );
 }
