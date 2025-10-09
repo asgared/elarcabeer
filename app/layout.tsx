@@ -1,8 +1,9 @@
+// Ruta: app/layout.tsx
+
 import type { Metadata } from "next";
 import { ReactNode } from "react";
 import { ChakraColorModeScript } from "@/components/chakra-color-mode-script";
-import AppWrapper from "@/providers/app-wrapper";
-import ClientProviders from "@/providers/client-providers";
+import { Providers } from "./providers"; // Importamos el nuevo componente unificado
 
 import "./globals.css";
 
@@ -28,9 +29,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
     <html lang="es">
       <body>
         <ChakraColorModeScript />
-        <ClientProviders>
-          <AppWrapper>{children}</AppWrapper>
-        </ClientProviders>
+        <Providers>{children}</Providers>
       </body>
     </html>
   );
