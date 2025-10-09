@@ -8,7 +8,7 @@ if (!stripeSecretKey || !stripeApiVersion) {
 }
 
 export const stripe = new Stripe(stripeSecretKey, {
-  apiVersion: stripeApiVersion as "2023-10-16",
+  apiVersion: stripeApiVersion as "2024-04-10",
   typescript: true,
 });
 
