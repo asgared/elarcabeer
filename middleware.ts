@@ -1,52 +1,83 @@
-import {NextResponse} from "next/server";
-import type {NextRequest} from "next/server";
-import {UserRole} from "@prisma/client";
+import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
+import { createSupabaseMiddlewareClient } from "@/lib/supabase/middleware";
+import { defaultLocale, locales } from "@/i18n/locales";
 
-import {createSupabaseMiddlewareClient} from "@/lib/supabase/middleware";
-import {prisma} from "@/lib/prisma";
+// --- Lógica de Internacionalización (la mantenemos) ---
+const PUBLIC_FILE = /\.[^/]+$/;
+type AppLocale = (typeof locales)[number];
 
-async function redirectToAccount(request: NextRequest) {
-  const redirectUrl = request.nextUrl.clone();
-  redirectUrl.pathname = "/es/account";
-  redirectUrl.search = "";
-
-  const redirectResponse = NextResponse.redirect(redirectUrl);
-  const supabase = createSupabaseMiddlewareClient(request, redirectResponse);
-  await supabase.auth.getUser();
-
-  return redirectResponse;
+function resolveLocaleFromCookie(request: NextRequest): AppLocale {
+  const locale = request.cookies.get("NEXT_LOCALE")?.value as
+    | AppLocale
+    | undefined;
+  if (locale && locales.includes(locale)) {
+    return locale;
+  }
+  return defaultLocale;
 }
 
+// --- Middleware Principal ---
 export async function middleware(request: NextRequest) {
-  const response = NextResponse.next({
-    request: {
-      headers: request.headers
-    }
-  });
+  const { pathname } = request.nextUrl;
 
+  // 1. Saltamos los assets y rutas de API (lógica original)
+  if (
+    pathname.startsWith("/_next") ||
+    pathname.startsWith("/api") ||
+    pathname.startsWith("/static") ||
+    PUBLIC_FILE.test(pathname)
+  ) {
+    return NextResponse.next();
+  }
+
+  // 2. Gestionamos el prefijo de idioma (lógica original)
+  const localeFromCookie = resolveLocaleFromCookie(request);
+  const hasLocalePrefix = locales.some(
+    (locale) =>
+      pathname === `/${locale}` || pathname.startsWith(`/${locale}/`)
+  );
+
+  if (!hasLocalePrefix) {
+    const redirectURL = request.nextUrl.clone();
+    redirectURL.pathname = `/${localeFromCookie}${
+      pathname === "/" ? "" : pathname
+    }`;
+    return NextResponse.redirect(redirectURL);
+  }
+
+  const response = NextResponse.next();
   const supabase = createSupabaseMiddlewareClient(request, response);
   const {
-    data: {user}
+    data: { user },
   } = await supabase.auth.getUser();
 
-  if (!user) {
-    return redirectToAccount(request);
-  }
+  // --- INICIO: LÓGICA DE PROTECCIÓN DE DASHBOARD (la nueva parte) ---
+  const isAdminRoute = locales.some((locale) =>
+    pathname.startsWith(`/${locale}/dashboard`)
+  );
 
-  const dbUser = await prisma.user.findUnique({
-    where: {id: user.id},
-    select: {
-      role: true
+  if (isAdminRoute) {
+    // Si no hay usuario o el usuario no es ADMIN, redirigimos
+    if (!user) {
+      const redirectUrl = request.nextUrl.clone();
+      redirectUrl.pathname = `/${localeFromCookie}/account`;
+      return NextResponse.redirect(redirectUrl);
     }
-  });
 
-  if (!dbUser || dbUser.role !== UserRole.ADMIN) {
-    return redirectToAccount(request);
+    // Leemos el rol desde los metadatos de la sesión, no de la base de datos
+    if (user.app_metadata.role !== "ADMIN") {
+      const redirectUrl = request.nextUrl.clone();
+      redirectUrl.pathname = `/${localeFromCookie}/account`; // Asumo que tienes la variable localeFromCookie
+      return NextResponse.redirect(redirectUrl);
+    }
   }
+  // --- FIN: LÓGICA DE PROTECCIÓN DE DASHBOARD ---
 
   return response;
 }
 
+// 3. Restauramos el matcher original para que cubra toda la app
 export const config = {
-  matcher: ["/dashboard/:path*"]
+  matcher: ["/", "/(es|en)/:path*", "/((?!api|_next|_vercel|.*\\..*).*)"],
 };

@@ -1,53 +1,36 @@
 {
   "compilerOptions": {
-    "target": "es2022",
-    "lib": [
-      "dom",
-      "dom.iterable",
-      "es2022"
-    ],
-    "allowJs": false,
+    // --- CAMBIO CLAVE ---
+    "moduleResolution": "bundler", // Reemplaza "node" por "bundler"
+
+    // --- El resto de tus opciones están bien, solo ajustamos y simplificamos ---
+    "target": "es5", // "es5" es más compatible para navegadores
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "allowJs": true, // Es buena práctica permitirlo
     "skipLibCheck": true,
     "strict": true,
-    "forceConsistentCasingInFileNames": true,
     "noEmit": true,
     "esModuleInterop": true,
     "module": "esnext",
-    "moduleResolution": "node",
     "resolveJsonModule": true,
     "isolatedModules": true,
     "jsx": "preserve",
     "incremental": true,
-    "baseUrl": ".",
-    "paths": {
-      "@/*": [
-        "./src/*"
-      ],
-      "@app/*": [
-        "./app/*"
-      ]
-    },
-    "types": [
-      "node"
-    ],
     "plugins": [
       {
         "name": "next"
       }
-    ]
+    ],
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"] // El alias "@app/*" es redundante, Next.js ya lo maneja
+    }
   },
   "include": [
     "next-env.d.ts",
-    "app/**/*.ts",
-    "app/**/*.tsx",
-    "src/**/*.ts",
-    "src/**/*.tsx",
-    "prisma/**/*.ts",
+    "**/*.ts",
+    "**/*.tsx",
     ".next/types/**/*.ts"
   ],
-  "exclude": [
-    "node_modules",
-    "playwright-report",
-    "test-results"
-  ]
+  "exclude": ["node_modules"]
 }
