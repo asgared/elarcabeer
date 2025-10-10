@@ -172,7 +172,7 @@ export default function ProductsPage() {
       setIsLoadingProducts(true);
       setProductsError(null);
 
-      const response = await fetch("/api/admin/products", {
+      const response = await fetch("/api/dashboard/products", {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -286,7 +286,7 @@ export default function ProductsPage() {
         imageUrl: uploadResult.secure_url,
       };
 
-      const createResponse = await fetch("/api/admin/products", {
+      const createResponse = await fetch("/api/dashboard/products", {
         method: "POST",
         headers: {"Content-Type": "application/json"},
         body: JSON.stringify(productPayload),

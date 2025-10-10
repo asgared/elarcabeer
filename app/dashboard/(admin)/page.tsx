@@ -1,4 +1,5 @@
 import {Heading, SimpleGrid, Stack, Stat, StatHelpText, StatLabel, StatNumber, Text} from "@chakra-ui/react";
+import Link from "next/link";
 
 import {getAllCmsContent} from "@/lib/cms";
 import {prisma} from "@/lib/prisma";
@@ -28,7 +29,22 @@ export default async function AdminDashboardPage() {
             <StatNumber>{contentEntries.length}</StatNumber>
             <StatHelpText>Secciones editables</StatHelpText>
           </Stat>
-          <Stat borderWidth="1px" borderRadius="xl" p={6} bg="background.800">
+          <Stat
+            as={Link}
+            href="/dashboard/products"
+            borderWidth="1px"
+            borderRadius="xl"
+            p={6}
+            bg="background.800"
+            cursor="pointer"
+            transition="all 0.2s ease-in-out"
+            _hover={{
+              textDecoration: "none",
+              boxShadow: "lg",
+              transform: "translateY(-4px)",
+              bg: "background.700",
+            }}
+          >
             <StatLabel>Productos</StatLabel>
             <StatNumber>{productCount}</StatNumber>
             <StatHelpText>Activos en catálogo</StatHelpText>

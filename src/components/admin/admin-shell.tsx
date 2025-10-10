@@ -16,21 +16,30 @@ import {
 } from "@chakra-ui/react";
 import Link from "next/link";
 import {usePathname, useRouter} from "next/navigation";
-import {FaBook, FaGears, FaPowerOff} from "react-icons/fa6";
+import {FaBook, FaBoxOpen, FaGears, FaPowerOff} from "react-icons/fa6";
+import type {IconType} from "react-icons";
 
 import type {User} from "@prisma/client";
+
+type AdminNavLink = {
+  label: string;
+  href: string;
+  icon: IconType;
+};
 
 type AdminShellProps = {
   user: User;
   children: ReactNode;
+  navLinks?: AdminNavLink[];
 };
 
-const NAV_LINKS = [
+const DEFAULT_NAV_LINKS: AdminNavLink[] = [
   {label: "Panel", href: "/dashboard", icon: FaGears},
-  {label: "Contenido", href: "/dashboard/content", icon: FaBook}
+  {label: "Contenido", href: "/dashboard/content", icon: FaBook},
+  {label: "Productos", href: "/dashboard/products", icon: FaBoxOpen}
 ];
 
-export function AdminShell({user, children}: AdminShellProps) {
+export function AdminShell({user, children, navLinks = DEFAULT_NAV_LINKS}: AdminShellProps) {
   const pathname = usePathname();
   const router = useRouter();
   const toast = useToast();
@@ -94,7 +103,7 @@ export function AdminShell({user, children}: AdminShellProps) {
           display={{base: "none", md: "block"}}
         >
           <Stack py={6} spacing={1}>
-            {NAV_LINKS.map((link) => {
+            {navLinks.map((link) => {
               const isActive = pathname === link.href || pathname.startsWith(`${link.href}/`);
 
               return (
