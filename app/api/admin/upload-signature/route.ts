@@ -1,29 +1,26 @@
-import {NextResponse} from "next/server";
-import {v2 as cloudinary} from "cloudinary";
-
-import {requireAdmin} from "@/lib/auth/admin";
-
+import { NextResponse } from "next/server";
+import { v2 as cloudinary } from "cloudinary";
+import { requireAdmin } from "@/lib/auth/admin";
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+  secure: true,
+});
 export async function POST(request: Request) {
-  await requireAdmin();
-
   try {
+    await requireAdmin();
     const paramsToSign = await request.json();
+    const apiSecret = process.env.CLOUDINARY_API_SECRET;
 
-    cloudinary.config({
-      cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-      api_key: process.env.CLOUDINARY_API_KEY,
-      api_secret: process.env.CLOUDINARY_API_SECRET
-    });
-
-    const signature = cloudinary.utils.api_sign_request(paramsToSign);
-
-    return NextResponse.json({signature});
+    if (!apiSecret) {
+      throw new Error("La API secret de Cloudinary no está configurada en las variables de entorno.");
+    }
+    const signature = cloudinary.utils.api_sign_request(paramsToSign, apiSecret);
+    return NextResponse.json({ signature });
   } catch (error) {
-    console.error("Failed to generate Cloudinary signature", error);
-
-    return NextResponse.json(
-      {error: "No se pudo generar la firma de subida."},
-      {status: 500}
-    );
+    console.error("Error al generar la firma de Cloudinary:", error);
+    const message = error instanceof Error ? error.message : "Error desconocido al generar la firma.";
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }
