@@ -26,8 +26,8 @@ type AdminShellProps = {
 };
 
 const NAV_LINKS = [
-  {label: "Panel", href: "/admin", icon: FaGears},
-  {label: "Contenido", href: "/admin/content", icon: FaBook}
+  {label: "Panel", href: "/dashboard", icon: FaGears},
+  {label: "Contenido", href: "/dashboard/content", icon: FaBook}
 ];
 
 export function AdminShell({user, children}: AdminShellProps) {
@@ -47,7 +47,7 @@ export function AdminShell({user, children}: AdminShellProps) {
       }
 
       toast({title: "Sesión finalizada", status: "success"});
-      router.replace("/admin/login");
+      router.replace("/dashboard/login");
       router.refresh();
     } catch (error) {
       toast({
@@ -95,7 +95,7 @@ export function AdminShell({user, children}: AdminShellProps) {
         >
           <Stack py={6} spacing={1}>
             {NAV_LINKS.map((link) => {
-              const isActive = pathname === link.href;
+              const isActive = pathname === link.href || pathname.startsWith(`${link.href}/`);
 
               return (
                 <ChakraLink

@@ -13,7 +13,7 @@ export default async function AdminContentPage() {
     <Stack spacing={8}>
       <Stack direction={{base: "column", md: "row"}} justify="space-between" align={{base: "stretch", md: "center"}}>
         <Heading size="lg">Gestión de contenido</Heading>
-        <Button as={Link} href="/admin/content/new" leftIcon={<FaPlus />} colorScheme="teal">
+        <Button as={Link} href="/dashboard/content/new" leftIcon={<FaPlus />} colorScheme="teal">
           Nueva sección
         </Button>
       </Stack>
@@ -36,7 +36,7 @@ export default async function AdminContentPage() {
               <Td textAlign="right">
                 <Button
                   as={Link}
-                  href={`/admin/content/${entry.slug}`}
+                  href={`/dashboard/content/${entry.slug}`}
                   size="sm"
                   leftIcon={<Icon as={FaRegPenToSquare} />}
                   variant="ghost"

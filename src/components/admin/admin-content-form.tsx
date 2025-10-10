@@ -136,7 +136,7 @@ export function AdminContentForm({initialContent}: AdminContentFormProps) {
       }
 
       toast({title: "Contenido guardado", status: "success"});
-      router.replace("/admin/content");
+      router.replace("/dashboard/content");
       router.refresh();
     } catch (error) {
       setError(error instanceof Error ? error.message : "No se pudo guardar el contenido.");
@@ -164,7 +164,7 @@ export function AdminContentForm({initialContent}: AdminContentFormProps) {
       }
 
       toast({title: "Contenido eliminado", status: "success"});
-      router.replace("/admin/content");
+      router.replace("/dashboard/content");
       router.refresh();
     } catch (error) {
       setError(error instanceof Error ? error.message : "No se pudo eliminar la sección.");

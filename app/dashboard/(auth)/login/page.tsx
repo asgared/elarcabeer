@@ -42,7 +42,7 @@ export default function AdminLoginPage() {
         throw new Error(payload.error ?? "No se pudo iniciar sesión.");
       }
 
-      router.replace("/admin");
+      router.replace("/dashboard");
       router.refresh();
     } catch (error) {
       setError(error instanceof Error ? error.message : "No se pudo iniciar sesión.");

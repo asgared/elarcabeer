@@ -60,7 +60,7 @@ pnpm dev
 ## Healthcheck y utilidades
 
 - `pnpm health`: ejecuta las comprobaciones de base de datos, Stripe, NextAuth y servicios externos.
-- Endpoints JSON disponibles en `/api/health` y `/admin/health`.
+- Endpoints JSON disponibles en `/api/health` y `/dashboard/health`.
 
 ## Scripts disponibles
 

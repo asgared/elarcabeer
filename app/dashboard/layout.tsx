@@ -9,6 +9,6 @@ type Props = {
   children: ReactNode;
 };
 
-export default function AdminRootLayout({children}: Props) {
+export default function DashboardRootLayout({children}: Props) {
   return children;
 }
