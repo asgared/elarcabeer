@@ -8,39 +8,21 @@ import {
   Flex,
   Heading,
   HStack,
-  Icon,
-  Link as ChakraLink,
   Stack,
   Text,
-  useToast
+  useToast,
 } from "@chakra-ui/react";
-import Link from "next/link";
-import {usePathname, useRouter} from "next/navigation";
-import {FaBook, FaBoxOpen, FaGears, FaPowerOff} from "react-icons/fa6";
-import type {IconType} from "react-icons";
+import {useRouter} from "next/navigation";
+import {FaPowerOff} from "react-icons/fa6";
 
 import type {User} from "@prisma/client";
-
-type AdminNavLink = {
-  label: string;
-  href: string;
-  icon: IconType;
-};
 
 type AdminShellProps = {
   user: User;
   children: ReactNode;
-  navLinks?: AdminNavLink[];
 };
 
-const DEFAULT_NAV_LINKS: AdminNavLink[] = [
-  {label: "Panel", href: "/dashboard", icon: FaGears},
-  {label: "Contenido", href: "/dashboard/content", icon: FaBook},
-  {label: "Productos", href: "/dashboard/products", icon: FaBoxOpen}
-];
-
-export function AdminShell({user, children, navLinks = DEFAULT_NAV_LINKS}: AdminShellProps) {
-  const pathname = usePathname();
+export function AdminShell({user, children}: AdminShellProps) {
   const router = useRouter();
   const toast = useToast();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
@@ -62,7 +44,7 @@ export function AdminShell({user, children, navLinks = DEFAULT_NAV_LINKS}: Admin
       toast({
         title: "Error al cerrar sesión",
         description: error instanceof Error ? error.message : "Intenta de nuevo",
-        status: "error"
+        status: "error",
       });
     } finally {
       setIsLoggingOut(false);
@@ -70,7 +52,7 @@ export function AdminShell({user, children, navLinks = DEFAULT_NAV_LINKS}: Admin
   };
 
   return (
-    <Flex minH="100vh" direction="column" bg="background.900">
+    <Flex minH="100vh" flex="1" direction="column" bg="background.900">
       <Flex
         as="header"
         borderBottomWidth="1px"
@@ -87,51 +69,21 @@ export function AdminShell({user, children, navLinks = DEFAULT_NAV_LINKS}: Admin
             <Text fontWeight="semibold">{user.name ?? user.email}</Text>
             <Text color="whiteAlpha.600">Administrador</Text>
           </Stack>
-          <Button leftIcon={<FaPowerOff />} variant="outline" size="sm" onClick={handleLogout} isLoading={isLoggingOut}>
+          <Button
+            leftIcon={<FaPowerOff />}
+            variant="outline"
+            size="sm"
+            onClick={handleLogout}
+            isLoading={isLoggingOut}
+          >
             Salir
           </Button>
         </HStack>
       </Flex>
 
-      <Flex flex="1">
-        <Box
-          as="nav"
-          w={{base: "100%", md: 64}}
-          borderRightWidth="1px"
-          borderColor="whiteAlpha.200"
-          bg="background.800"
-          display={{base: "none", md: "block"}}
-        >
-          <Stack py={6} spacing={1}>
-            {navLinks.map((link) => {
-              const isActive = pathname === link.href || pathname.startsWith(`${link.href}/`);
-
-              return (
-                <ChakraLink
-                  key={link.href}
-                  as={Link}
-                  href={link.href}
-                  px={6}
-                  py={3}
-                  display="flex"
-                  alignItems="center"
-                  gap={3}
-                  fontWeight={isActive ? "bold" : "medium"}
-                  bg={isActive ? "teal.500" : "transparent"}
-                  color={isActive ? "black" : undefined}
-                  _hover={{textDecoration: "none", bg: isActive ? "teal.400" : "whiteAlpha.100"}}
-                >
-                  <Icon as={link.icon} />
-                  {link.label}
-                </ChakraLink>
-              );
-            })}
-          </Stack>
-        </Box>
-        <Box as="main" flex="1" px={{base: 4, md: 10}} py={10} maxW="6xl">
-          {children}
-        </Box>
-      </Flex>
+      <Box as="main" flex="1" px={{base: 4, md: 10}} py={10} maxW="6xl" w="100%" mx="auto">
+        {children}
+      </Box>
     </Flex>
   );
 }
