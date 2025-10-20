@@ -9,15 +9,14 @@ datasource db {
 }
 
 model Product {
-  id          String  @id @default(cuid())
-  slug        String  @unique
-  name        String
-  description String
-  // category  String                // si quieres mantener una etiqueta suelta, renómbrala p.ej. categoryLabel
-  style       String
-  rating      Float
-  heroImage   String
-  limited     Boolean @default(false)
+  id             String  @id @default(cuid())
+  slug           String  @unique
+  name           String
+  description    String
+  categoryLabel  String
+  style          String
+  rating         Float
+  limited        Boolean @default(false)
 
   variants Variant[] // <- necesita el modelo Variant
   reviews  Review[] // <- necesita el modelo Review

@@ -1,98 +1,68 @@
-import {NextResponse} from "next/server";
+import { NextResponse } from "next/server";
+import { z } from "zod";
 
-import {products as catalogProducts} from "@/data/products";
+import { prisma } from "@/lib/prisma";
+import { requireAdmin } from "@/lib/auth/admin";
 
-type ProductPayload = {
-  id?: string;
-  name?: unknown;
-  slug?: unknown;
-  sku?: unknown;
-  description?: unknown;
-  price?: unknown;
-  stock?: unknown;
-  style?: unknown;
-  rating?: unknown;
-  limited?: unknown;
-  imageUrl?: unknown;
-};
+// Esquema de validación con Zod para la creación de productos
+const createProductSchema = z.object({
+  name: z.string().min(1, "El nombre es requerido."),
+  slug: z.string().min(1, "El slug es requerido."),
+  sku: z.string().min(1, "El SKU es requerido."),
+  description: z.string().optional(),
+  price: z.number().int().min(0, "El precio no puede ser negativo."),
+  stock: z.number().int().min(0, "El stock no puede ser negativo."),
+  style: z.string().optional(),
+  rating: z.number().min(0).max(5).optional(),
+  limitedEdition: z.boolean().default(false),
+  imageUrl: z.string().url("La URL de la imagen no es válida."),
+});
 
-const generateId = () => {
-  if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
-    return crypto.randomUUID();
-  }
-
-  return `prod-${Math.random().toString(36).slice(2)}`;
-};
-
-const coerceNumber = (value: unknown): number | undefined => {
-  if (typeof value === "number") {
-    return Number.isFinite(value) ? value : undefined;
-  }
-
-  if (typeof value === "string" && value.trim() !== "") {
-    const parsed = Number(value);
-    return Number.isFinite(parsed) ? parsed : undefined;
-  }
-
-  return undefined;
-};
-
-const toAdminProduct = (payload: ProductPayload) => {
-  const id =
-    typeof payload.id === "string"
-      ? payload.id
-      : typeof payload.sku === "string" && payload.sku
-      ? payload.sku
-      : typeof payload.slug === "string" && payload.slug
-      ? payload.slug
-      : generateId();
-
-  return {
-    id,
-    name: typeof payload.name === "string" ? payload.name : "Producto sin nombre",
-    slug: typeof payload.slug === "string" ? payload.slug : undefined,
-    sku: typeof payload.sku === "string" ? payload.sku : undefined,
-    description: typeof payload.description === "string" ? payload.description : undefined,
-    price: coerceNumber(payload.price),
-    stock: coerceNumber(payload.stock),
-    style: typeof payload.style === "string" ? payload.style : undefined,
-    rating: coerceNumber(payload.rating),
-    limited: typeof payload.limited === "boolean" ? payload.limited : undefined,
-    imageUrl: typeof payload.imageUrl === "string" ? payload.imageUrl : undefined,
-    heroImage: typeof payload.imageUrl === "string" ? payload.imageUrl : undefined,
-  };
-};
-
+// --- GET: Para obtener todos los productos ---
 export async function GET() {
-  return NextResponse.json({products: catalogProducts});
+  try {
+    await requireAdmin(); // Seguridad: solo admins pueden listar productos
+
+    const products = await prisma.product.findMany({
+      orderBy: { createdAt: "desc" },
+      include: {
+        variants: true, // Incluimos variantes si las tienes
+      },
+    });
+
+    return NextResponse.json({ products });
+  } catch (error) {
+    console.error("Error fetching products:", error);
+    const message = error instanceof Error ? error.message : "Error desconocido.";
+    return NextResponse.json({ error: message }, { status: 500 });
+  }
 }
 
+// --- POST: Para crear un nuevo producto ---
 export async function POST(request: Request) {
   try {
-    const body = (await request.json()) as ProductPayload;
+    await requireAdmin(); // Seguridad: solo admins pueden crear productos
 
-    if (typeof body.name !== "string" || body.name.trim() === "") {
-      return NextResponse.json(
-        {error: "El nombre del producto es obligatorio."},
-        {status: 400}
-      );
+    const body = await request.json();
+    const validation = createProductSchema.safeParse(body);
+
+    if (!validation.success) {
+      return NextResponse.json({ error: validation.error.flatten() }, { status: 400 });
     }
+    
+    const { limitedEdition, ...data } = validation.data;
 
-    if (typeof body.imageUrl !== "string" || body.imageUrl.trim() === "") {
-      return NextResponse.json(
-        {error: "La imagen del producto es obligatoria."},
-        {status: 400}
-      );
-    }
+    const product = await prisma.product.create({
+      data: {
+        ...data,
+        limited: limitedEdition,
+      },
+    });
 
-    const product = toAdminProduct(body);
-
-    return NextResponse.json({product}, {status: 201});
+    return NextResponse.json({ product }, { status: 201 });
   } catch (error) {
-    console.error("Error creating admin product", error);
-    return NextResponse.json(
-      {error: "No se pudo crear el producto."},
-      {status: 500}
-    );
+    console.error("Error creating product:", error);
+    const message = error instanceof Error ? error.message : "Error desconocido.";
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }

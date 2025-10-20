@@ -1,6 +1,6 @@
 "use client";
 
-import {useCallback, useEffect, useMemo, useState} from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   Badge,
   Box,
@@ -34,7 +34,8 @@ import {
   useDisclosure,
   useToast,
 } from "@chakra-ui/react";
-import {Controller, useForm} from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
+import NextLink from "next/link";
 
 type RawProduct = Record<string, unknown> & {
   id?: string;
@@ -80,53 +81,27 @@ type CreateProductFormValues = {
 };
 
 const normalizeProduct = (product: RawProduct): AdminProduct => {
-  const coerceNumber = (value: unknown): number | undefined => {
-    if (value === null || value === undefined || value === "") {
-      return undefined;
-    }
-    const numericValue = typeof value === "number" ? value : Number(value);
-    return Number.isNaN(numericValue) ? undefined : numericValue;
-  };
+    const coerceNumber = (value: unknown): number | undefined => {
+        if (value === null || value === undefined || value === "") return undefined;
+        const num = Number(value);
+        return isNaN(num) ? undefined : num;
+    };
 
-  const ensureId = (): string => {
-    if (product.id && typeof product.id === "string") {
-      return product.id;
-    }
-    if (product.sku && typeof product.sku === "string") {
-      return product.sku;
-    }
-    if (product.slug && typeof product.slug === "string") {
-      return product.slug;
-    }
-    if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
-      return crypto.randomUUID();
-    }
-    return Math.random().toString(36).slice(2);
-  };
+    const id = product.id ?? product.sku ?? product.slug ?? crypto.randomUUID();
 
-  return {
-    id: ensureId(),
-    name: typeof product.name === "string" ? product.name : "Producto sin nombre",
-    slug: typeof product.slug === "string" ? product.slug : undefined,
-    sku: typeof product.sku === "string" ? product.sku : undefined,
-    description: typeof product.description === "string" ? product.description : undefined,
-    price: coerceNumber(product.price),
-    stock: coerceNumber(product.stock),
-    style: typeof product.style === "string" ? product.style : undefined,
-    rating: coerceNumber(product.rating),
-    limited:
-      typeof product.limited === "boolean"
-        ? product.limited
-        : typeof product.limitedEdition === "boolean"
-        ? product.limitedEdition
-        : undefined,
-    imageUrl:
-      typeof product.imageUrl === "string"
-        ? product.imageUrl
-        : typeof product.heroImage === "string"
-        ? product.heroImage
-        : undefined,
-  };
+    return {
+        id: String(id),
+        name: String(product.name ?? "Producto sin nombre"),
+        slug: String(product.slug ?? ""),
+        sku: String(product.sku ?? ""),
+        description: String(product.description ?? ""),
+        price: coerceNumber(product.price),
+        stock: coerceNumber(product.stock),
+        style: String(product.style ?? ""),
+        rating: coerceNumber(product.rating),
+        limited: Boolean(product.limited ?? product.limitedEdition),
+        imageUrl: String(product.imageUrl ?? product.heroImage ?? ""),
+    };
 };
 
 export default function ProductsPage() {
@@ -134,12 +109,12 @@ export default function ProductsPage() {
   const [isLoadingProducts, setIsLoadingProducts] = useState<boolean>(true);
   const [productsError, setProductsError] = useState<string | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
-  const {isOpen, onOpen, onClose} = useDisclosure();
+  const { isOpen, onOpen, onClose } = useDisclosure();
   const toast = useToast();
 
   const {
     control,
-    formState: {errors, isSubmitting},
+    formState: { errors, isSubmitting },
     handleSubmit,
     register,
     reset,
@@ -158,12 +133,7 @@ export default function ProductsPage() {
   });
 
   const currencyFormatter = useMemo(
-    () =>
-      new Intl.NumberFormat("es-MX", {
-        style: "currency",
-        currency: "MXN",
-        minimumFractionDigits: 2,
-      }),
+    () => new Intl.NumberFormat("es-MX", { style: "currency", currency: "MXN" }),
     []
   );
 
@@ -171,35 +141,13 @@ export default function ProductsPage() {
     try {
       setIsLoadingProducts(true);
       setProductsError(null);
-
-      const response = await fetch("/api/dashboard/products", {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-
-      if (!response.ok) {
-        const errorPayload = await response.json().catch(() => null);
-        const message =
-          (errorPayload && typeof errorPayload.error === "string" && errorPayload.error) ||
-          "No se pudieron cargar los productos.";
-        throw new Error(message);
-      }
-
-      const payload = await response.json();
-      const parsedList = Array.isArray(payload)
-        ? payload
-        : Array.isArray(payload?.products)
-        ? payload.products
-        : [];
-
-      const normalizedProducts = parsedList.map((item) => normalizeProduct(item as RawProduct));
-      setProducts(normalizedProducts);
+      const response = await fetch("/api/dashboard/products");
+      if (!response.ok) throw new Error("No se pudieron cargar los productos.");
+      const data = await response.json();
+      setProducts((data.products || []).map(normalizeProduct));
     } catch (error) {
-      console.error("Error loading products", error);
-      const message = error instanceof Error ? error.message : "No se pudieron cargar los productos.";
-      setProductsError(message);
+      console.error("Error loading products:", error);
+      setProductsError(error instanceof Error ? error.message : "Error desconocido.");
     } finally {
       setIsLoadingProducts(false);
     }
@@ -215,46 +163,30 @@ export default function ProductsPage() {
     onClose();
   };
 
+  // --- INICIO DE LA LÓGICA CORREGIDA ---
   const onSubmit = handleSubmit(async (values) => {
     setFormError(null);
     try {
-      const file = values.imageFile?.item(0);
+      const file = values.imageFile?.[0];
       if (!file) {
         throw new Error("Selecciona una imagen para el producto.");
       }
 
+      // 1. Leemos las variables de entorno CORRECTAS para la subida sin firmar.
+      //    No necesitamos la API_KEY aquí.
       const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
-      const apiKey = process.env.NEXT_PUBLIC_CLOUDINARY_API_KEY;
+      const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET;
 
-      if (!cloudName || !apiKey) {
+      if (!cloudName || !uploadPreset) {
         throw new Error("La configuración pública de Cloudinary no está disponible.");
       }
 
-      const timestamp = Math.round(Date.now() / 1000);
-      const signatureResponse = await fetch("/api/admin/upload-signature", {
-        method: "POST",
-        headers: {"Content-Type": "application/json"},
-        body: JSON.stringify({
-          timestamp,
-          folder: "products",
-        }),
-      });
-
-      const signaturePayload = await signatureResponse.json().catch(() => ({}));
-      if (!signatureResponse.ok || !signaturePayload?.signature) {
-        const message =
-          typeof signaturePayload?.error === "string"
-            ? signaturePayload.error
-            : "No se pudo obtener la firma para la carga de la imagen.";
-        throw new Error(message);
-      }
-
+      // 2. Eliminamos la llamada a nuestra API de firma. Ya no es necesaria.
+      //    Creamos el FormData para la subida directa a Cloudinary.
       const formData = new FormData();
       formData.append("file", file);
-      formData.append("api_key", apiKey);
-      formData.append("timestamp", String(timestamp));
-      formData.append("signature", signaturePayload.signature as string);
-      formData.append("folder", "products");
+      formData.append("upload_preset", uploadPreset);
+      formData.append("folder", "products"); // Opcional: para organizar en Cloudinary
 
       const uploadUrl = `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`;
       const uploadResponse = await fetch(uploadUrl, {
@@ -262,71 +194,58 @@ export default function ProductsPage() {
         body: formData,
       });
 
-      const uploadResult = await uploadResponse.json().catch(() => ({}));
-      if (!uploadResponse.ok || typeof uploadResult?.secure_url !== "string") {
-        const message =
-          (uploadResult?.error &&
-            typeof uploadResult.error === "object" &&
-            typeof uploadResult.error.message === "string" &&
-            uploadResult.error.message) ||
-          (typeof uploadResult?.error === "string" ? uploadResult.error : "No se pudo subir la imagen.");
-        throw new Error(message);
+      const uploadResult = await uploadResponse.json();
+      if (!uploadResponse.ok || !uploadResult.secure_url) {
+        throw new Error("No se pudo subir la imagen a Cloudinary.");
       }
 
-      const productPayload: Record<string, unknown> = {
+      // 3. Preparamos los datos del producto para nuestra API.
+      const productPayload = {
         name: values.name,
         slug: values.slug,
         sku: values.sku,
         description: values.description,
-        price: values.price,
+        price: Math.round(values.price * 100), // Convertimos a centavos
         stock: values.stock,
         style: values.style,
         rating: values.rating,
-        limited: values.limited,
+        limitedEdition: values.limited,
         imageUrl: uploadResult.secure_url,
       };
 
+      // 4. Llamamos a nuestra API para crear el producto en la base de datos.
       const createResponse = await fetch("/api/dashboard/products", {
         method: "POST",
-        headers: {"Content-Type": "application/json"},
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(productPayload),
       });
 
-      const createPayload = await createResponse.json().catch(() => ({}));
+      const createPayload = await createResponse.json();
       if (!createResponse.ok) {
-        const message =
-          (createPayload && typeof createPayload.error === "string" && createPayload.error) ||
-          "No se pudo crear el producto.";
-        throw new Error(message);
+        throw new Error(createPayload.error || "No se pudo crear el producto.");
       }
 
-      const createdProduct = normalizeProduct(
-        (createPayload?.product as RawProduct | undefined) ?? (createPayload as RawProduct)
-      );
-      setProducts((prev) => [createdProduct, ...prev]);
-
+      // Actualizamos el estado local para mostrar el nuevo producto inmediatamente.
+      setProducts((prev) => [normalizeProduct(createPayload.product), ...prev]);
+      
       toast({
         title: "Producto creado",
-        description: `${createdProduct.name} se añadió correctamente al catálogo.`,
+        description: `${createPayload.product.name} se añadió correctamente.`,
         status: "success",
       });
 
-      reset();
-      onClose();
+      handleCloseModal();
     } catch (error) {
-      console.error("Error creating product", error);
+      console.error("Error creating product:", error);
       const message = error instanceof Error ? error.message : "No se pudo crear el producto.";
       setFormError(message);
-      toast({
-        title: "Error",
-        description: message,
-        status: "error",
-      });
+      toast({ title: "Error", description: message, status: "error" });
     }
   });
+  // --- FIN DE LA LÓGICA CORREGIDA ---
 
   return (
-    <Box py={10} px={{base: 4, md: 8}}>
+    <Box py={10} px={{ base: 4, md: 8 }}>
       <Flex align="center" justify="space-between" mb={8} wrap="wrap" gap={4}>
         <Box>
           <Heading size="lg">Gestión de productos</Heading>
@@ -450,7 +369,7 @@ export default function ProductsPage() {
                   <Input
                     id="name"
                     placeholder="Nombre del producto"
-                    {...register("name", {required: "El nombre es obligatorio."})}
+                    {...register("name", { required: "El nombre es obligatorio." })}
                   />
                   <FormErrorMessage>{errors.name?.message}</FormErrorMessage>
                 </FormControl>
@@ -460,7 +379,7 @@ export default function ProductsPage() {
                   <Input
                     id="slug"
                     placeholder="slug-del-producto"
-                    {...register("slug", {required: "El slug es obligatorio."})}
+                    {...register("slug", { required: "El slug es obligatorio." })}
                   />
                   <FormErrorMessage>{errors.slug?.message}</FormErrorMessage>
                 </FormControl>
@@ -470,7 +389,7 @@ export default function ProductsPage() {
                   <Input
                     id="sku"
                     placeholder="SKU único"
-                    {...register("sku", {required: "El SKU es obligatorio."})}
+                    {...register("sku", { required: "El SKU es obligatorio." })}
                   />
                   <FormErrorMessage>{errors.sku?.message}</FormErrorMessage>
                 </FormControl>
@@ -481,12 +400,12 @@ export default function ProductsPage() {
                     id="description"
                     placeholder="Describe el producto"
                     rows={4}
-                    {...register("description", {required: "La descripción es obligatoria."})}
+                    {...register("description", { required: "La descripción es obligatoria." })}
                   />
                   <FormErrorMessage>{errors.description?.message}</FormErrorMessage>
                 </FormControl>
 
-                <Flex gap={4} direction={{base: "column", md: "row"}}>
+                <Flex gap={4} direction={{ base: "column", md: "row" }}>
                   <FormControl isInvalid={!!errors.price} isRequired flex={1}>
                     <FormLabel htmlFor="price">Precio (centavos)</FormLabel>
                     <Input
@@ -497,7 +416,7 @@ export default function ProductsPage() {
                       {...register("price", {
                         valueAsNumber: true,
                         required: "El precio es obligatorio.",
-                        min: {value: 0, message: "El precio debe ser mayor o igual a 0."},
+                        min: { value: 0, message: "El precio debe ser mayor o igual a 0." },
                       })}
                     />
                     <FormErrorMessage>{errors.price?.message}</FormErrorMessage>
@@ -513,14 +432,14 @@ export default function ProductsPage() {
                       {...register("stock", {
                         valueAsNumber: true,
                         required: "El stock es obligatorio.",
-                        min: {value: 0, message: "El stock debe ser mayor o igual a 0."},
+                        min: { value: 0, message: "El stock debe ser mayor o igual a 0." },
                       })}
                     />
                     <FormErrorMessage>{errors.stock?.message}</FormErrorMessage>
                   </FormControl>
                 </Flex>
 
-                <Flex gap={4} direction={{base: "column", md: "row"}}>
+                <Flex gap={4} direction={{ base: "column", md: "row" }}>
                   <FormControl flex={1}>
                     <FormLabel htmlFor="style">Estilo</FormLabel>
                     <Input id="style" placeholder="Estilo de la cerveza" {...register("style")} />
@@ -536,8 +455,8 @@ export default function ProductsPage() {
                       step="0.1"
                       {...register("rating", {
                         valueAsNumber: true,
-                        min: {value: 0, message: "El rating mínimo es 0."},
-                        max: {value: 5, message: "El rating máximo es 5."},
+                        min: { value: 0, message: "El rating mínimo es 0." },
+                        max: { value: 5, message: "El rating máximo es 5." },
                       })}
                     />
                     <FormErrorMessage>{errors.rating?.message}</FormErrorMessage>
@@ -551,7 +470,7 @@ export default function ProductsPage() {
                   <Controller
                     control={control}
                     name="limited"
-                    render={({field}) => (
+                    render={({ field }) => (
                       <Switch
                         id="limited"
                         isChecked={field.value}
@@ -569,17 +488,17 @@ export default function ProductsPage() {
                     accept="image/*"
                     {...register("imageFile", {
                       validate: (value) =>
-                        value && value.length > 0 ? true : "La imagen principal es obligatoria.",
+                        (value && value.length > 0) || "La imagen principal es obligatoria.",
                     })}
                   />
                   <FormErrorMessage>{errors.imageFile?.message}</FormErrorMessage>
                 </FormControl>
 
-                {formError ? (
+                {formError && (
                   <Box bg="red.50" borderRadius="md" color="red.700" p={3}>
                     {formError}
                   </Box>
-                ) : null}
+                )}
               </Stack>
             </ModalBody>
             <ModalFooter gap={3}>
