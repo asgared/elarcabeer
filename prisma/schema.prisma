@@ -17,6 +17,9 @@ model Product {
   style          String
   rating         Float
   limited        Boolean @default(false)
+  tastingNotes   String[] @default([])
+  pairings       String[] @default([])
+  gallery        String[] @default([])
 
   variants Variant[] // <- necesita el modelo Variant
   reviews  Review[] // <- necesita el modelo Review

@@ -10,6 +10,7 @@ import {
   FormControl,
   FormErrorMessage,
   FormLabel,
+  FormHelperText,
   Heading,
   Image,
   Input,
@@ -34,7 +35,7 @@ import {
   useDisclosure,
   useToast,
 } from "@chakra-ui/react";
-import { Controller, useForm } from "react-hook-form";
+import { Controller, useFieldArray, useForm } from "react-hook-form";
 import NextLink from "next/link";
 
 type RawProduct = Record<string, unknown> & {
@@ -65,6 +66,18 @@ type AdminProduct = {
   rating?: number;
   limited?: boolean;
   imageUrl?: string;
+  categoryLabel?: string;
+  tastingNotes?: string[];
+  pairings?: string[];
+  gallery?: string[];
+};
+
+type VariantFormValues = {
+  name: string;
+  price: number;
+  packSize: number;
+  abv: number;
+  ibu: number;
 };
 
 type CreateProductFormValues = {
@@ -77,7 +90,12 @@ type CreateProductFormValues = {
   style: string;
   rating: number;
   limited: boolean;
-  imageFile: FileList;
+  imageFile: FileList | null | undefined;
+  categoryLabel: string;
+  tastingNotes: string;
+  pairings: string;
+  galleryFiles: FileList | null | undefined;
+  variants: VariantFormValues[];
 };
 
 const normalizeProduct = (product: RawProduct): AdminProduct => {
@@ -129,7 +147,20 @@ export default function ProductsPage() {
       style: "",
       rating: 0,
       limited: false,
+      categoryLabel: "",
+      tastingNotes: "",
+      pairings: "",
+      variants: [],
     },
+  });
+
+  const {
+    fields: variantFields,
+    append: appendVariant,
+    remove: removeVariant,
+  } = useFieldArray({
+    control,
+    name: "variants",
   });
 
   const currencyFormatter = useMemo(
@@ -163,17 +194,15 @@ export default function ProductsPage() {
     onClose();
   };
 
-  // --- INICIO DE LA LÓGICA CORREGIDA ---
+  // --- INICIO DE LA LÓGICA DE CREACIÓN DE PRODUCTOS ---
   const onSubmit = handleSubmit(async (values) => {
     setFormError(null);
     try {
-      const file = values.imageFile?.[0];
-      if (!file) {
+      const mainImageFile = values.imageFile?.[0];
+      if (!mainImageFile) {
         throw new Error("Selecciona una imagen para el producto.");
       }
 
-      // 1. Leemos las variables de entorno CORRECTAS para la subida sin firmar.
-      //    No necesitamos la API_KEY aquí.
       const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
       const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET;
 
@@ -181,39 +210,79 @@ export default function ProductsPage() {
         throw new Error("La configuración pública de Cloudinary no está disponible.");
       }
 
-      // 2. Eliminamos la llamada a nuestra API de firma. Ya no es necesaria.
-      //    Creamos el FormData para la subida directa a Cloudinary.
-      const formData = new FormData();
-      formData.append("file", file);
-      formData.append("upload_preset", uploadPreset);
-      formData.append("folder", "products"); // Opcional: para organizar en Cloudinary
+      const uploadToCloudinary = async (file: File) => {
+        const formData = new FormData();
+        formData.append("file", file);
+        formData.append("upload_preset", uploadPreset);
+        formData.append("folder", "products");
 
-      const uploadUrl = `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`;
-      const uploadResponse = await fetch(uploadUrl, {
-        method: "POST",
-        body: formData,
-      });
+        const uploadUrl = `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`;
+        const response = await fetch(uploadUrl, {
+          method: "POST",
+          body: formData,
+        });
 
-      const uploadResult = await uploadResponse.json();
-      if (!uploadResponse.ok || !uploadResult.secure_url) {
-        throw new Error("No se pudo subir la imagen a Cloudinary.");
-      }
+        const result = await response.json();
+        if (!response.ok || !result.secure_url) {
+          throw new Error("No se pudo subir la imagen a Cloudinary.");
+        }
 
-      // 3. Preparamos los datos del producto para nuestra API.
+        return result.secure_url as string;
+      };
+
+      const heroImageUrl = await uploadToCloudinary(mainImageFile);
+
+      const galleryFiles = values.galleryFiles ? Array.from(values.galleryFiles) : [];
+      const galleryUrls = await Promise.all(
+        galleryFiles.map((galleryFile) => uploadToCloudinary(galleryFile))
+      );
+
+      const parseMultiValueField = (value: string) =>
+        value
+          .split(/,|\n/)
+          .map((item) => item.trim())
+          .filter(Boolean);
+
+      const tastingNotes = parseMultiValueField(values.tastingNotes);
+      const pairings = parseMultiValueField(values.pairings);
+
+      const variantsPayload = (values.variants ?? [])
+        .map((variant) => {
+          const trimmedName = variant.name.trim();
+          if (!trimmedName) {
+            return null;
+          }
+
+          return {
+            name: trimmedName,
+            price: Math.round(variant.price * 100),
+            packSize: variant.packSize,
+            abv: variant.abv,
+            ibu: variant.ibu,
+          };
+        })
+        .filter((variant): variant is NonNullable<typeof variant> => Boolean(variant));
+
+      const ratingValue = Number.isFinite(values.rating) ? values.rating : 0;
+
       const productPayload = {
         name: values.name,
         slug: values.slug,
         sku: values.sku,
         description: values.description,
-        price: Math.round(values.price * 100), // Convertimos a centavos
+        price: Math.round(values.price * 100),
         stock: values.stock,
         style: values.style,
-        rating: values.rating,
+        rating: ratingValue,
         limitedEdition: values.limited,
-        imageUrl: uploadResult.secure_url,
+        imageUrl: heroImageUrl,
+        categoryLabel: values.categoryLabel,
+        tastingNotes,
+        pairings,
+        gallery: galleryUrls,
+        variants: variantsPayload,
       };
 
-      // 4. Llamamos a nuestra API para crear el producto en la base de datos.
       const createResponse = await fetch("/api/dashboard/products", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -225,9 +294,8 @@ export default function ProductsPage() {
         throw new Error(createPayload.error || "No se pudo crear el producto.");
       }
 
-      // Actualizamos el estado local para mostrar el nuevo producto inmediatamente.
       setProducts((prev) => [normalizeProduct(createPayload.product), ...prev]);
-      
+
       toast({
         title: "Producto creado",
         description: `${createPayload.product.name} se añadió correctamente.`,
@@ -242,7 +310,7 @@ export default function ProductsPage() {
       toast({ title: "Error", description: message, status: "error" });
     }
   });
-  // --- FIN DE LA LÓGICA CORREGIDA ---
+  // --- FIN DE LA LÓGICA DE CREACIÓN DE PRODUCTOS ---
 
   return (
     <Box py={10} px={{ base: 4, md: 8 }}>
@@ -384,6 +452,18 @@ export default function ProductsPage() {
                   <FormErrorMessage>{errors.slug?.message}</FormErrorMessage>
                 </FormControl>
 
+                <FormControl isInvalid={!!errors.categoryLabel} isRequired>
+                  <FormLabel htmlFor="categoryLabel">Etiqueta de categoría</FormLabel>
+                  <Input
+                    id="categoryLabel"
+                    placeholder="Ej. IPA, Lager, Stout"
+                    {...register("categoryLabel", {
+                      required: "La categoría es obligatoria.",
+                    })}
+                  />
+                  <FormErrorMessage>{errors.categoryLabel?.message}</FormErrorMessage>
+                </FormControl>
+
                 <FormControl isInvalid={!!errors.sku} isRequired>
                   <FormLabel htmlFor="sku">SKU</FormLabel>
                   <Input
@@ -403,6 +483,32 @@ export default function ProductsPage() {
                     {...register("description", { required: "La descripción es obligatoria." })}
                   />
                   <FormErrorMessage>{errors.description?.message}</FormErrorMessage>
+                </FormControl>
+
+                <FormControl>
+                  <FormLabel htmlFor="tastingNotes">Notas de cata</FormLabel>
+                  <Textarea
+                    id="tastingNotes"
+                    placeholder="Cítrica, tropical, herbal"
+                    rows={3}
+                    {...register("tastingNotes")}
+                  />
+                  <FormHelperText>
+                    Separa cada nota por comas o saltos de línea.
+                  </FormHelperText>
+                </FormControl>
+
+                <FormControl>
+                  <FormLabel htmlFor="pairings">Maridaje sugerido</FormLabel>
+                  <Textarea
+                    id="pairings"
+                    placeholder="Hamburguesas, tacos, postres"
+                    rows={3}
+                    {...register("pairings")}
+                  />
+                  <FormHelperText>
+                    Separa cada opción por comas o saltos de línea.
+                  </FormHelperText>
                 </FormControl>
 
                 <Flex gap={4} direction={{ base: "column", md: "row" }}>
@@ -493,6 +599,170 @@ export default function ProductsPage() {
                   />
                   <FormErrorMessage>{errors.imageFile?.message}</FormErrorMessage>
                 </FormControl>
+
+                <FormControl>
+                  <FormLabel htmlFor="galleryFiles">Galería de imágenes</FormLabel>
+                  <Input
+                    id="galleryFiles"
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    {...register("galleryFiles")}
+                  />
+                  <FormHelperText>
+                    Puedes subir varias imágenes adicionales para la galería.
+                  </FormHelperText>
+                </FormControl>
+
+                <Box>
+                  <Flex align="center" justify="space-between" mb={3}>
+                    <Heading size="sm">Variantes</Heading>
+                    <Button
+                      size="sm"
+                      type="button"
+                      onClick={() =>
+                        appendVariant({ name: "", price: 0, packSize: 1, abv: 0, ibu: 0 })
+                      }
+                    >
+                      Añadir variante
+                    </Button>
+                  </Flex>
+                  <Stack spacing={4}>
+                    {variantFields.length === 0 ? (
+                      <Text color="gray.600" fontSize="sm">
+                        Añade variantes para definir presentaciones y precios específicos.
+                      </Text>
+                    ) : (
+                      variantFields.map((field, index) => {
+                        const variantErrors = errors.variants?.[index];
+                        return (
+                          <Box key={field.id} borderWidth="1px" borderRadius="md" p={4}>
+                            <Stack spacing={4}>
+                              <Flex align="center" justify="space-between">
+                                <Text fontWeight="semibold">Variante {index + 1}</Text>
+                                <Button
+                                  size="xs"
+                                  type="button"
+                                  colorScheme="red"
+                                  variant="ghost"
+                                  onClick={() => removeVariant(index)}
+                                >
+                                  Eliminar
+                                </Button>
+                              </Flex>
+
+                              <FormControl isInvalid={!!variantErrors?.name} isRequired>
+                                <FormLabel htmlFor={`variant-${index}-name`}>Nombre</FormLabel>
+                                <Input
+                                  id={`variant-${index}-name`}
+                                  placeholder="Ej. 4-pack"
+                                  {...register(`variants.${index}.name`, {
+                                    required: "El nombre es obligatorio.",
+                                  })}
+                                />
+                                <FormErrorMessage>
+                                  {variantErrors?.name?.message as string | undefined}
+                                </FormErrorMessage>
+                              </FormControl>
+
+                              <FormControl isInvalid={!!variantErrors?.packSize} isRequired>
+                                <FormLabel htmlFor={`variant-${index}-packSize`}>
+                                  Tamaño del paquete
+                                </FormLabel>
+                                <Input
+                                  id={`variant-${index}-packSize`}
+                                  type="number"
+                                  min={1}
+                                  step={1}
+                                  {...register(`variants.${index}.packSize`, {
+                                    valueAsNumber: true,
+                                    required: "El tamaño del paquete es obligatorio.",
+                                    min: {
+                                      value: 1,
+                                      message: "Debe ser al menos 1.",
+                                    },
+                                  })}
+                                />
+                                <FormErrorMessage>
+                                  {variantErrors?.packSize?.message as string | undefined}
+                                </FormErrorMessage>
+                              </FormControl>
+
+                              <FormControl isInvalid={!!variantErrors?.price} isRequired>
+                                <FormLabel htmlFor={`variant-${index}-price`}>
+                                  Precio (centavos)
+                                </FormLabel>
+                                <Input
+                                  id={`variant-${index}-price`}
+                                  type="number"
+                                  min={0}
+                                  step="1"
+                                  {...register(`variants.${index}.price`, {
+                                    valueAsNumber: true,
+                                    required: "El precio es obligatorio.",
+                                    min: {
+                                      value: 0,
+                                      message: "El precio debe ser mayor o igual a 0.",
+                                    },
+                                  })}
+                                />
+                                <FormErrorMessage>
+                                  {variantErrors?.price?.message as string | undefined}
+                                </FormErrorMessage>
+                              </FormControl>
+
+                              <FormControl isInvalid={!!variantErrors?.abv} isRequired>
+                                <FormLabel htmlFor={`variant-${index}-abv`}>
+                                  ABV (%)
+                                </FormLabel>
+                                <Input
+                                  id={`variant-${index}-abv`}
+                                  type="number"
+                                  min={0}
+                                  step="0.1"
+                                  {...register(`variants.${index}.abv`, {
+                                    valueAsNumber: true,
+                                    required: "El ABV es obligatorio.",
+                                    min: {
+                                      value: 0,
+                                      message: "El ABV debe ser mayor o igual a 0.",
+                                    },
+                                  })}
+                                />
+                                <FormErrorMessage>
+                                  {variantErrors?.abv?.message as string | undefined}
+                                </FormErrorMessage>
+                              </FormControl>
+
+                              <FormControl isInvalid={!!variantErrors?.ibu} isRequired>
+                                <FormLabel htmlFor={`variant-${index}-ibu`}>
+                                  IBU
+                                </FormLabel>
+                                <Input
+                                  id={`variant-${index}-ibu`}
+                                  type="number"
+                                  min={0}
+                                  step="1"
+                                  {...register(`variants.${index}.ibu`, {
+                                    valueAsNumber: true,
+                                    required: "El IBU es obligatorio.",
+                                    min: {
+                                      value: 0,
+                                      message: "El IBU debe ser mayor o igual a 0.",
+                                    },
+                                  })}
+                                />
+                                <FormErrorMessage>
+                                  {variantErrors?.ibu?.message as string | undefined}
+                                </FormErrorMessage>
+                              </FormControl>
+                            </Stack>
+                          </Box>
+                        );
+                      })
+                    )}
+                  </Stack>
+                </Box>
 
                 {formError && (
                   <Box bg="red.50" borderRadius="md" color="red.700" p={3}>

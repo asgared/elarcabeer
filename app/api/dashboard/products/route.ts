@@ -5,6 +5,14 @@ import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/auth/admin";
 
 // Esquema de validación con Zod para la creación de productos
+const variantSchema = z.object({
+  name: z.string().min(1, "El nombre de la variante es requerido."),
+  price: z.number().int().min(0, "El precio no puede ser negativo."),
+  packSize: z.number().int().min(1, "El tamaño del paquete debe ser al menos 1."),
+  abv: z.number().min(0, "El ABV no puede ser negativo."),
+  ibu: z.number().int().min(0, "El IBU no puede ser negativo."),
+});
+
 const createProductSchema = z.object({
   name: z.string().min(1, "El nombre es requerido."),
   slug: z.string().min(1, "El slug es requerido."),
@@ -16,6 +24,11 @@ const createProductSchema = z.object({
   rating: z.number().min(0).max(5).optional(),
   limitedEdition: z.boolean().default(false),
   imageUrl: z.string().url("La URL de la imagen no es válida."),
+  categoryLabel: z.string().min(1, "La categoría es requerida."),
+  tastingNotes: z.array(z.string().min(1)).default([]),
+  pairings: z.array(z.string().min(1)).default([]),
+  gallery: z.array(z.string().url("La URL de la imagen no es válida.")).default([]),
+  variants: z.array(variantSchema).default([]),
 });
 
 // --- GET: Para obtener todos los productos ---
@@ -50,12 +63,27 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: validation.error.flatten() }, { status: 400 });
     }
     
-    const { limitedEdition, ...data } = validation.data;
+    const { limitedEdition, variants, ...data } = validation.data;
 
     const product = await prisma.product.create({
       data: {
         ...data,
         limited: limitedEdition,
+        variants:
+          variants.length > 0
+            ? {
+                create: variants.map((variant) => ({
+                  name: variant.name,
+                  price: variant.price,
+                  packSize: variant.packSize,
+                  abv: variant.abv,
+                  ibu: variant.ibu,
+                })),
+              }
+            : undefined,
+      },
+      include: {
+        variants: true,
       },
     });
 
