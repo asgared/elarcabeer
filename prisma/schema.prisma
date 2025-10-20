@@ -9,53 +9,55 @@ datasource db {
 }
 
 model Product {
-  id             String  @id @default(cuid())
-  slug           String  @unique
-  sku            String  @unique
+  id             String   @id @default(cuid())
+  slug           String   @unique
   name           String
   description    String
-  categoryLabel  String
-  style          String
-  rating         Float
-  limited        Boolean @default(false)
-  tastingNotes   String[] @default([])
-  pairings       String[] @default([])
-  gallery        String[] @default([])
+  style          String?
+  rating         Float?
+  imageUrl       String? // -> AÑADIDO: Faltaba el campo para la imagen principal.
+  limitedEdition Boolean  @default(false) // -> RENOMBRADO: De "limited" para ser más claro.
+  categoryLabel  String?  // -> CAMBIADO A OPCIONAL: No todas las creaciones de producto tendrán esto al inicio.
+  tastingNotes   String[]
+  pairings       String[]
+  gallery        String[]
 
-  variants Variant[] // <- necesita el modelo Variant
-  reviews  Review[] // <- necesita el modelo Review
-
-  // lados opuestos
+  variants    Variant[]
+  reviews     Review[]
   bundleItems BundleItem[]
-  categories  Category[]   @relation("ProductCategories")
+  categories  Category[] @relation("ProductCategories")
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
 model Variant {
-  id       String @id @default(cuid())
-  name     String
-  abv      Float
-  ibu      Int
-  packSize Int
-  price    Int
+  id        String @id @default(cuid())
+  name      String
+  sku       String @unique // -> AÑADIDO: El SKU pertenece a la variante, no al producto general.
+  price     Int    // Precio en centavos
+  stock     Int    @default(0)
+  abv       Float?
+  ibu       Int?
+  packSize  Int? // -> CAMBIADO A OPCIONAL: No todas las variantes (ej. barril) tienen un "pack size".
 
   productId String
-  product   Product @relation(fields: [productId], references: [id])
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade) // -> AÑADIDO: onDelete para limpieza automática.
 }
 
 model Review {
-  id      String @id @default(cuid())
+  id      String   @id @default(cuid())
   rating  Int
-  comment String
+  comment String?
   author  String
 
   productId String
-  product   Product @relation(fields: [productId], references: [id])
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade) // -> AÑADIDO: onDelete.
 
   createdAt DateTime @default(now())
 }
+
+// ... (El resto de tus modelos: Bundle, BundleItem, Category, Store, etc., están bien y se mantienen igual) ...
 
 model Bundle {
   id          String       @id @default(cuid())
@@ -117,11 +119,11 @@ enum UserRole {
 }
 
 model User {
-  id            String          @id @default(cuid())
-  email         String          @unique
+  id            String         @id @default(cuid())
+  email         String         @unique
   name          String?
-  password      String?
-  role          UserRole        @default(USER)
+  // -> ELIMINADO: El campo "password" no debe estar aquí. Supabase Auth lo gestiona.
+  role          UserRole       @default(USER)
   addresses     Address[]
   orders        Order[]
   loyalty       LoyaltyLedger[]
@@ -138,7 +140,7 @@ model Address {
   postal  String
 
   userId String
-  user   User   @relation(fields: [userId], references: [id])
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade) // -> AÑADIDO: onDelete.
 }
 
 model Order {
@@ -153,9 +155,9 @@ model Order {
 }
 
 model OrderItem {
-  id        String  @id @default(cuid())
+  id        String @id @default(cuid())
   orderId   String
-  order     Order   @relation(fields: [orderId], references: [id])
+  order     Order  @relation(fields: [orderId], references: [id])
   productId String
   variantId String
   name      String
@@ -193,9 +195,9 @@ model LoyaltyLedger {
   id        String   @id @default(cuid())
   userId    String
   user      User     @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now())
   points    Int
   reason    String
-  createdAt DateTime @default(now())
 }
 
 model ContentPost {
