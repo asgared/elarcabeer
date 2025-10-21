@@ -69,7 +69,7 @@ export async function POST(request: Request) {
     const product = await prisma.product.create({
       data: {
         ...data,
-        limited: limitedEdition,
+        limitedEdition,
         variants:
           variants.length > 0
             ? {
