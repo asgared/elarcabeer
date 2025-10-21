@@ -186,6 +186,7 @@ export function validateCreateUserPayload(data: unknown): UserRegistrationPayloa
   const email = readField(payload, "email", "email", issues, {required: true, minLength: 1, email: true});
   const password = readField(payload, "password", "password", issues, {required: true, minLength: 8});
   const name = readField(payload, "name", "name", issues, {minLength: 2, maxLength: 120});
+  const lastName = readField(payload, "lastName", "lastName", issues, {minLength: 2, maxLength: 120});
   const addresses = validateAddresses(payload, issues);
 
   if (
@@ -202,6 +203,10 @@ export function validateCreateUserPayload(data: unknown): UserRegistrationPayloa
 
   if (typeof name === "string" && name.length > 0) {
     result.name = name;
+  }
+
+  if (typeof lastName === "string" && lastName.length > 0) {
+    result.lastName = lastName;
   }
 
   if (Array.isArray(addresses) && addresses.length > 0) {
@@ -237,6 +242,11 @@ export function validateUpdateUserPayload(data: unknown): UserUpdatePayload {
 
   const email = readField(payload, "email", "email", issues, {minLength: 1, email: true});
   const name = readField(payload, "name", "name", issues, {minLength: 2, maxLength: 120, nullable: true});
+  const lastName = readField(payload, "lastName", "lastName", issues, {
+    minLength: 2,
+    maxLength: 120,
+    nullable: true
+  });
   const password = readField(payload, "password", "password", issues, {minLength: 8});
   const addresses = validateAddresses(payload, issues);
 
@@ -254,6 +264,12 @@ export function validateUpdateUserPayload(data: unknown): UserUpdatePayload {
     result.name = name;
   } else if (name === null) {
     result.name = null;
+  }
+
+  if (typeof lastName === "string") {
+    result.lastName = lastName;
+  } else if (lastName === null) {
+    result.lastName = null;
   }
 
   if (typeof password === "string") {

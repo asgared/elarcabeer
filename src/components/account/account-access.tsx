@@ -6,8 +6,10 @@ import {
   AlertIcon,
   AlertTitle,
   Button,
+  Divider,
   FormControl,
   FormLabel,
+  HStack,
   Input,
   Stack,
   Tab,
@@ -15,6 +17,7 @@ import {
   TabPanel,
   TabPanels,
   Tabs,
+  Text,
   chakra
 } from "@chakra-ui/react";
 import type {AlertStatus} from "@chakra-ui/react";
@@ -22,6 +25,7 @@ import {FormEvent, useMemo, useState} from "react";
 
 import {createSupabaseBrowserClient} from "@/lib/supabase/client";
 import {useUser} from "@/providers/user-provider";
+import {OAuthButtons} from "@/components/auth/OAuthButtons";
 
 type Feedback = {type: Extract<AlertStatus, "success" | "error">; message: string};
 
@@ -32,6 +36,7 @@ export function AccountAccessPanel() {
   const [feedback, setFeedback] = useState<Feedback | null>(null);
   const [registerForm, setRegisterForm] = useState({
     name: "",
+    lastName: "",
     email: "",
     password: "",
     confirmPassword: ""
@@ -99,11 +104,23 @@ export function AccountAccessPanel() {
 
     try {
       setIsRegistering(true);
+      const trimmedName = registerForm.name.trim();
+      const trimmedLastName = registerForm.lastName.trim();
+      const metadata: Record<string, string> = {};
+
+      if (trimmedName) {
+        metadata.name = trimmedName;
+      }
+
+      if (trimmedLastName) {
+        metadata.lastName = trimmedLastName;
+      }
+
       const {data, error} = await supabase.auth.signUp({
         email: registerForm.email,
         password: registerForm.password,
         options: {
-          data: registerForm.name ? {name: registerForm.name} : undefined
+          data: Object.keys(metadata).length ? metadata : undefined
         }
       });
 
@@ -118,7 +135,8 @@ export function AccountAccessPanel() {
           body: JSON.stringify({
             email: registerForm.email,
             password: registerForm.password,
-            name: registerForm.name || undefined
+            name: trimmedName || undefined,
+            lastName: trimmedLastName || undefined
           })
         });
 
@@ -142,7 +160,7 @@ export function AccountAccessPanel() {
             ? "Cuenta creada correctamente. Ya puedes administrar tu perfil."
             : "Cuenta creada correctamente. Revisa tu correo para confirmar tu cuenta."
       });
-      setRegisterForm({name: "", email: "", password: "", confirmPassword: ""});
+      setRegisterForm({name: "", lastName: "", email: "", password: "", confirmPassword: ""});
     } catch (error) {
       setFeedback({
         type: "error",
@@ -211,48 +229,77 @@ export function AccountAccessPanel() {
         <TabPanels>
           <TabPanel>
             <chakra.form onSubmit={handleRegister}>
-              <Stack spacing={4}>
-                <FormControl>
-                  <FormLabel>Nombre</FormLabel>
-                  <Input
-                    placeholder="Tu nombre"
-                    value={registerForm.name}
-                    onChange={(event) => setRegisterForm((prev) => ({...prev, name: event.target.value}))}
-                    autoComplete="name"
-                  />
-                </FormControl>
-                <FormControl isRequired>
-                  <FormLabel>Correo electrónico</FormLabel>
-                  <Input
-                    type="email"
-                    placeholder="tu@correo.com"
-                    value={registerForm.email}
-                    onChange={(event) => setRegisterForm((prev) => ({...prev, email: event.target.value}))}
-                    autoComplete="email"
-                  />
-                </FormControl>
-                <FormControl isRequired>
-                  <FormLabel>Contraseña</FormLabel>
-                  <Input
-                    type="password"
-                    placeholder="Mínimo 8 caracteres"
-                    value={registerForm.password}
-                    onChange={(event) => setRegisterForm((prev) => ({...prev, password: event.target.value}))}
-                    autoComplete="new-password"
-                  />
-                </FormControl>
-                <FormControl isRequired>
-                  <FormLabel>Confirmar contraseña</FormLabel>
-                  <Input
-                    type="password"
-                    placeholder="Repite tu contraseña"
-                    value={registerForm.confirmPassword}
-                    onChange={(event) =>
-                      setRegisterForm((prev) => ({...prev, confirmPassword: event.target.value}))
-                    }
-                    autoComplete="new-password"
-                  />
-                </FormControl>
+              <Stack spacing={6}>
+                <Stack spacing={4}>
+                  <FormControl>
+                    <FormLabel>Nombre</FormLabel>
+                    <Input
+                      placeholder="Tu nombre"
+                      value={registerForm.name}
+                      onChange={(event) =>
+                        setRegisterForm((prev) => ({...prev, name: event.target.value}))
+                      }
+                      autoComplete="given-name"
+                    />
+                  </FormControl>
+                  <FormControl>
+                    <FormLabel>Apellido</FormLabel>
+                    <Input
+                      placeholder="Tu apellido"
+                      value={registerForm.lastName}
+                      onChange={(event) =>
+                        setRegisterForm((prev) => ({...prev, lastName: event.target.value}))
+                      }
+                      autoComplete="family-name"
+                    />
+                  </FormControl>
+                  <FormControl isRequired>
+                    <FormLabel>Correo electrónico</FormLabel>
+                    <Input
+                      type="email"
+                      placeholder="tu@correo.com"
+                      value={registerForm.email}
+                      onChange={(event) =>
+                        setRegisterForm((prev) => ({...prev, email: event.target.value}))
+                      }
+                      autoComplete="email"
+                    />
+                  </FormControl>
+                  <FormControl isRequired>
+                    <FormLabel>Contraseña</FormLabel>
+                    <Input
+                      type="password"
+                      placeholder="Mínimo 8 caracteres"
+                      value={registerForm.password}
+                      onChange={(event) =>
+                        setRegisterForm((prev) => ({...prev, password: event.target.value}))
+                      }
+                      autoComplete="new-password"
+                    />
+                  </FormControl>
+                  <FormControl isRequired>
+                    <FormLabel>Confirmar contraseña</FormLabel>
+                    <Input
+                      type="password"
+                      placeholder="Repite tu contraseña"
+                      value={registerForm.confirmPassword}
+                      onChange={(event) =>
+                        setRegisterForm((prev) => ({...prev, confirmPassword: event.target.value}))
+                      }
+                      autoComplete="new-password"
+                    />
+                  </FormControl>
+                </Stack>
+                <Stack spacing={3}>
+                  <HStack align="center" spacing={3} color="whiteAlpha.700">
+                    <Divider />
+                    <Text fontSize="sm" fontWeight="medium" textTransform="uppercase">
+                      O continúa con
+                    </Text>
+                    <Divider />
+                  </HStack>
+                  <OAuthButtons />
+                </Stack>
                 <Button
                   colorScheme="yellow"
                   type="submit"
@@ -266,27 +313,43 @@ export function AccountAccessPanel() {
           </TabPanel>
           <TabPanel>
             <chakra.form onSubmit={handleLogin}>
-              <Stack spacing={4}>
-                <FormControl isRequired>
-                  <FormLabel>Correo electrónico</FormLabel>
-                  <Input
-                    type="email"
-                    placeholder="tu@correo.com"
-                    value={loginForm.email}
-                    onChange={(event) => setLoginForm((prev) => ({...prev, email: event.target.value}))}
-                    autoComplete="email"
-                  />
-                </FormControl>
-                <FormControl isRequired>
-                  <FormLabel>Contraseña</FormLabel>
-                  <Input
-                    type="password"
-                    placeholder="Tu contraseña"
-                    value={loginForm.password}
-                    onChange={(event) => setLoginForm((prev) => ({...prev, password: event.target.value}))}
-                    autoComplete="current-password"
-                  />
-                </FormControl>
+              <Stack spacing={6}>
+                <Stack spacing={4}>
+                  <FormControl isRequired>
+                    <FormLabel>Correo electrónico</FormLabel>
+                    <Input
+                      type="email"
+                      placeholder="tu@correo.com"
+                      value={loginForm.email}
+                      onChange={(event) =>
+                        setLoginForm((prev) => ({...prev, email: event.target.value}))
+                      }
+                      autoComplete="email"
+                    />
+                  </FormControl>
+                  <FormControl isRequired>
+                    <FormLabel>Contraseña</FormLabel>
+                    <Input
+                      type="password"
+                      placeholder="Tu contraseña"
+                      value={loginForm.password}
+                      onChange={(event) =>
+                        setLoginForm((prev) => ({...prev, password: event.target.value}))
+                      }
+                      autoComplete="current-password"
+                    />
+                  </FormControl>
+                </Stack>
+                <Stack spacing={3}>
+                  <HStack align="center" spacing={3} color="whiteAlpha.700">
+                    <Divider />
+                    <Text fontSize="sm" fontWeight="medium" textTransform="uppercase">
+                      O continúa con
+                    </Text>
+                    <Divider />
+                  </HStack>
+                  <OAuthButtons />
+                </Stack>
                 <Button
                   colorScheme="yellow"
                   type="submit"

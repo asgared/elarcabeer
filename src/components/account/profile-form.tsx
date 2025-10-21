@@ -26,6 +26,7 @@ export function ProfileForm() {
   const [feedback, setFeedback] = useState<Feedback | null>(null);
   const [form, setForm] = useState({
     name: "",
+    lastName: "",
     email: "",
     password: "",
     confirmPassword: ""
@@ -36,7 +37,12 @@ export function ProfileForm() {
       return;
     }
 
-    setForm((prev) => ({...prev, name: user.name ?? "", email: user.email}));
+    setForm((prev) => ({
+      ...prev,
+      name: user.name ?? "",
+      lastName: user.lastName ?? "",
+      email: user.email
+    }));
   }, [user]);
 
   const alert = useMemo<Feedback | null>(
@@ -62,6 +68,7 @@ export function ProfileForm() {
     try {
       await updateUser({
         name: form.name ? form.name : null,
+        lastName: form.lastName ? form.lastName : null,
         email: form.email,
         password: form.password ? form.password : undefined
       });
@@ -96,23 +103,33 @@ export function ProfileForm() {
         <Stack spacing={4}>
           <SimpleGrid columns={{base: 1, md: 2}} spacing={4}>
             <FormControl>
-              <FormLabel>Nombre completo</FormLabel>
+              <FormLabel>Nombre</FormLabel>
               <Input
-                placeholder="Cómo quieres que te llamemos"
+                placeholder="Tu nombre"
                 value={form.name}
                 onChange={(event) => setForm((prev) => ({...prev, name: event.target.value}))}
+                autoComplete="given-name"
               />
             </FormControl>
-            <FormControl isRequired>
-              <FormLabel>Correo electrónico</FormLabel>
+            <FormControl>
+              <FormLabel>Apellido</FormLabel>
               <Input
-                type="email"
-                value={form.email}
-                onChange={(event) => setForm((prev) => ({...prev, email: event.target.value}))}
-                autoComplete="email"
+                placeholder="Tu apellido"
+                value={form.lastName}
+                onChange={(event) => setForm((prev) => ({...prev, lastName: event.target.value}))}
+                autoComplete="family-name"
               />
             </FormControl>
           </SimpleGrid>
+          <FormControl isRequired>
+            <FormLabel>Correo electrónico</FormLabel>
+            <Input
+              type="email"
+              value={form.email}
+              onChange={(event) => setForm((prev) => ({...prev, email: event.target.value}))}
+              autoComplete="email"
+            />
+          </FormControl>
 
           <SimpleGrid columns={{base: 1, md: 2}} spacing={4}>
             <FormControl>

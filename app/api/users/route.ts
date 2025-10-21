@@ -7,6 +7,7 @@ import { serializeUser, userInclude } from "./utils";
 
 const userCreateSchema = z.object({
   name: z.string().min(1, "El nombre es requerido").nullable(),
+  lastName: z.string().min(1, "El apellido es requerido").nullable().optional(),
   email: z.string().email("Email inválido"),
   password: z.string().min(8, "La contraseña debe tener al menos 8 caracteres"),
   addresses: z.array(z.object({
@@ -32,18 +33,28 @@ export async function POST(request: Request) {
     }
     console.log("2. Validación con Zod exitosa.");
 
-    const { name, email, password, addresses } = validation.data;
+    const { name, lastName, email, password, addresses } = validation.data;
+
+    const normalizedName = typeof name === "string" ? name.trim() : null;
+    const normalizedLastName = typeof lastName === "string" ? lastName.trim() : null;
 
     const supabase = createSupabaseAdminClient();
     console.log("3. Creando usuario en Supabase Auth...");
+    const userMetadata: Record<string, string> = { role: "USER" };
+
+    if (normalizedName) {
+      userMetadata.name = normalizedName;
+    }
+
+    if (normalizedLastName) {
+      userMetadata.lastName = normalizedLastName;
+    }
+
     const { data: authData, error: authError } = await supabase.auth.admin.createUser({
       email,
       password,
       email_confirm: false,
-      user_metadata: {
-        role: "USER",
-        name: name,
-      },
+      user_metadata: userMetadata,
     });
 
     if (authError) {
@@ -64,7 +75,8 @@ export async function POST(request: Request) {
       data: {
         id: authData.user.id,
         email,
-        name,
+        name: normalizedName,
+        lastName: normalizedLastName,
         role: "USER",
         addresses: addresses
           ? {

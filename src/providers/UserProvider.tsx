@@ -228,15 +228,27 @@ export function UserProvider({ children, supabaseClient }: Props) {
         setStatus("loading");
         setError(null);
 
-        if (payload.email || payload.password || payload.name !== undefined) {
+        const metadataUpdates: Record<string, string | null> = {};
+
+        if (payload.name !== undefined) {
+          metadataUpdates.name = payload.name ?? null;
+        }
+
+        if (payload.lastName !== undefined) {
+          metadataUpdates.lastName = payload.lastName ?? null;
+        }
+
+        const shouldUpdateMetadata = Object.keys(metadataUpdates).length > 0;
+
+        if (payload.email || payload.password || shouldUpdateMetadata) {
           const { error: authError } = await supabase.auth.updateUser({
             ...(payload.email ? { email: payload.email } : {}),
             ...(payload.password ? { password: payload.password } : {}),
-            ...(payload.name !== undefined
+            ...(shouldUpdateMetadata
               ? {
                   data: {
                     ...authUser.user_metadata,
-                    name: payload.name ?? null,
+                    ...metadataUpdates,
                   },
                 }
               : {}),

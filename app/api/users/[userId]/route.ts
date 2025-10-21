@@ -44,6 +44,10 @@ export async function PATCH(request: Request, {params}: RouteContext) {
       updateData.name = payload.name;
     }
 
+    if (payload.lastName !== undefined) {
+      updateData.lastName = payload.lastName;
+    }
+
     if (payload.email) {
       updateData.email = payload.email;
     }

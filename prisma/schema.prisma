@@ -122,6 +122,7 @@ model User {
   id            String         @id @default(cuid())
   email         String         @unique
   name          String?
+  lastName      String?
   // -> ELIMINADO: El campo "password" no debe estar aquí. Supabase Auth lo gestiona.
   role          UserRole       @default(USER)
   addresses     Address[]
