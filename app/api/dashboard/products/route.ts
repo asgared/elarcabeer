@@ -6,6 +6,7 @@ import { requireAdmin } from "@/lib/auth/admin";
 
 // Esquema de validación con Zod para la creación de productos
 const variantSchema = z.object({
+  sku: z.string().min(1, "El SKU de la variante es requerido."),
   name: z.string().min(1, "El nombre de la variante es requerido."),
   price: z.number().int().min(0, "El precio no puede ser negativo."),
   packSize: z.number().int().min(1, "El tamaño del paquete debe ser al menos 1."),
@@ -73,6 +74,7 @@ export async function POST(request: Request) {
           variants.length > 0
             ? {
                 create: variants.map((variant) => ({
+                  sku: variant.sku,
                   name: variant.name,
                   price: variant.price,
                   packSize: variant.packSize,

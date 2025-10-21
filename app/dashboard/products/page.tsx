@@ -73,6 +73,7 @@ type AdminProduct = {
 };
 
 type VariantFormValues = {
+  sku: string;
   name: string;
   price: number;
   packSize: number;
@@ -249,11 +250,13 @@ export default function ProductsPage() {
       const variantsPayload = (values.variants ?? [])
         .map((variant) => {
           const trimmedName = variant.name.trim();
-          if (!trimmedName) {
+          const trimmedSku = variant.sku.trim();
+          if (!trimmedName || !trimmedSku) {
             return null;
           }
 
           return {
+            sku: trimmedSku,
             name: trimmedName,
             price: Math.round(variant.price * 100),
             packSize: variant.packSize,
@@ -621,7 +624,14 @@ export default function ProductsPage() {
                       size="sm"
                       type="button"
                       onClick={() =>
-                        appendVariant({ name: "", price: 0, packSize: 1, abv: 0, ibu: 0 })
+                        appendVariant({
+                          sku: "",
+                          name: "",
+                          price: 0,
+                          packSize: 1,
+                          abv: 0,
+                          ibu: 0,
+                        })
                       }
                     >
                       Añadir variante
@@ -650,6 +660,20 @@ export default function ProductsPage() {
                                   Eliminar
                                 </Button>
                               </Flex>
+
+                              <FormControl isInvalid={!!variantErrors?.sku} isRequired>
+                                <FormLabel htmlFor={`variant-${index}-sku`}>SKU</FormLabel>
+                                <Input
+                                  id={`variant-${index}-sku`}
+                                  placeholder="Ej. SKU-4PK"
+                                  {...register(`variants.${index}.sku`, {
+                                    required: "El SKU es obligatorio.",
+                                  })}
+                                />
+                                <FormErrorMessage>
+                                  {variantErrors?.sku?.message as string | undefined}
+                                </FormErrorMessage>
+                              </FormControl>
 
                               <FormControl isInvalid={!!variantErrors?.name} isRequired>
                                 <FormLabel htmlFor={`variant-${index}-name`}>Nombre</FormLabel>
