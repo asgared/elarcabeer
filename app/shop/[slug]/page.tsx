@@ -44,28 +44,28 @@ export async function generateStaticParams() {
   try {
     const products = await getProducts();
 
-    // Filtra para asegurar que solo procesamos productos con un slug válido
-    const validProducts = products.filter((product) => product && typeof product.slug === 'string' && product.slug.length > 0);
+    return products
+      .filter((product) => {
+        const slug = product?.slug;
 
-    return validProducts.map((product) => ({
-      slug: product.slug,
-    }));
+        return typeof slug === "string" && slug.trim().length > 0;
+      })
+      .map((product) => ({
+        slug: product.slug!,
+      }));
   } catch (error) {
     console.error("Error generating static params for products:", error);
-    // Devuelve un array vacío en caso de error para evitar que el build falle
+
     return [];
   }
 }
 
-
 export default async function ProductDetailPage({params}: {params: {slug: string}}) {
-  let product = null;
-
-  try {
-    product = await getProductBySlug(params.slug);
-  } catch (error) {
+  const product = await getProductBySlug(params.slug).catch((error) => {
     console.error("Error loading product detail", params.slug, error);
-  }
+
+    return null;
+  });
 
   if (!product) {
     notFound();
@@ -175,3 +175,4 @@ export default async function ProductDetailPage({params}: {params: {slug: string
     </Container>
   );
 }
+
