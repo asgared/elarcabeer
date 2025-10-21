@@ -1,11 +1,10 @@
-// Ruta: app/layout.tsx
+import type {Metadata} from "next";
+import type {ReactNode} from "react";
 
-import type { Metadata } from "next";
-import { ReactNode } from "react";
-import { ChakraColorModeScript } from "@/components/chakra-color-mode-script";
-import { Providers } from "./providers"; // Importamos el nuevo componente unificado
+import {ChakraColorModeScript} from "@/components/chakra-color-mode-script";
 
 import "./globals.css";
+import {Providers} from "./providers";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://elarcabeer.com"),
@@ -24,7 +23,7 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({ children }: { children: ReactNode }) {
+export default function RootLayout({children}: {children: ReactNode}) {
   return (
     <html lang="es">
       <body>
