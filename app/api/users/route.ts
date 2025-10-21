@@ -1,26 +1,13 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
-import { prisma } from "@/lib/prisma";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
-import { serializeUser, userInclude } from "./utils";
 
 const userCreateSchema = z.object({
   name: z.string().min(1, "El nombre es requerido").nullish(),
   lastName: z.string().min(1, "El apellido es requerido").nullish(),
   email: z.string().email("Email inválido"),
   password: z.string().min(8, "La contraseña debe tener al menos 8 caracteres"),
-  addresses: z
-    .array(
-      z.object({
-        label: z.string(),
-        street: z.string(),
-        city: z.string(),
-        country: z.string(),
-        postal: z.string(),
-      })
-    )
-    .optional(),
 });
 
 export async function POST(request: Request) {
@@ -43,7 +30,7 @@ export async function POST(request: Request) {
     }
     console.log("4. Validación con Zod completada con éxito.");
 
-    const { email, password, name, lastName, addresses } = validation.data;
+    const { email, password, name, lastName } = validation.data;
 
     console.log("5. Creando cliente administrador de Supabase...");
     const supabase = createSupabaseAdminClient();
@@ -72,31 +59,15 @@ export async function POST(request: Request) {
     }
     console.log("7. Usuario creado en Supabase Auth con ID:", authData.user.id);
 
-    console.log("8. Preparando creación del perfil en Prisma...");
-    const user = await prisma.user.create({
-      data: {
-        id: authData.user.id,
-        email,
-        name: name ?? null,
-        lastName: lastName ?? null,
-        addresses:
-          addresses && addresses.length > 0
-            ? {
-                create: addresses.map(({ label, street, city, country, postal }) => ({
-                  label,
-                  street,
-                  city,
-                  country,
-                  postal,
-                })),
-              }
-            : undefined,
+    return NextResponse.json(
+      {
+        user: {
+          id: authData.user.id,
+          email: authData.user.email,
+        },
       },
-      include: userInclude,
-    });
-    console.log("9. Perfil de usuario creado en Prisma con éxito.");
-
-    return NextResponse.json({ user: serializeUser(user) }, { status: 201 });
+      { status: 201 }
+    );
   } catch (error) {
     console.error("-> ERROR NO CONTROLADO EN POST /api/users:", error);
     const message = error instanceof Error ? error.message : "No se pudo crear la cuenta.";
