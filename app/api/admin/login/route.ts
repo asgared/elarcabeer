@@ -2,7 +2,7 @@ import {NextResponse} from "next/server";
 
 import {createAdminSession} from "@/lib/auth/admin";
 import {prisma} from "@/lib/prisma";
-import {verifyPassword} from "@/utils/auth";
+import {createSupabaseServerClient} from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
 
@@ -19,13 +19,19 @@ export async function POST(request: Request) {
     return NextResponse.json({error: "Correo y contraseña son obligatorios."}, {status: 400});
   }
 
-  const user = await prisma.user.findUnique({where: {email}});
+  const supabase = await createSupabaseServerClient();
+  const {data: authData, error: authError} = await supabase.auth.signInWithPassword({
+    email,
+    password,
+  });
 
-  if (!user || !user.password || user.role !== "ADMIN") {
+  if (authError || !authData.user) {
     return NextResponse.json({error: "Credenciales inválidas."}, {status: 401});
   }
 
-  if (!verifyPassword(password, user.password)) {
+  const user = await prisma.user.findUnique({where: {id: authData.user.id}});
+
+  if (!user || user.role !== "ADMIN") {
     return NextResponse.json({error: "Credenciales inválidas."}, {status: 401});
   }
 
