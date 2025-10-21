@@ -20,6 +20,14 @@ export async function POST(request: Request) {
   }
 
   const supabase = await createSupabaseServerClient();
+
+  if (!supabase) {
+    return NextResponse.json(
+      {error: "Supabase no está configurado correctamente."},
+      {status: 500}
+    );
+  }
+
   const {data: authData, error: authError} = await supabase.auth.signInWithPassword({
     email,
     password,

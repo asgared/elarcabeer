@@ -7,7 +7,15 @@ export const dynamic = "force-dynamic";
 export async function POST(request: Request) {
   try {
     const payload = validateLoginPayload(await request.json());
-    const supabase = createSupabaseServerClient();
+    const supabase = await createSupabaseServerClient();
+
+    if (!supabase) {
+      return NextResponse.json(
+        { error: "Supabase no está configurado correctamente." },
+        { status: 500 }
+      );
+    }
+
     const { error: authError } = await supabase.auth.signInWithPassword({
       email: payload.email,
       password: payload.password,

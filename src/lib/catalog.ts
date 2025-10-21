@@ -13,9 +13,9 @@ function mapVariants(recordVariants: PrismaProductWithVariants["variants"], fall
     return recordVariants.map((variant) => ({
       id: variant.id,
       name: variant.name,
-      abv: variant.abv,
-      ibu: variant.ibu,
-      packSize: variant.packSize,
+      abv: typeof variant.abv === "number" ? variant.abv : 0,
+      ibu: typeof variant.ibu === "number" ? variant.ibu : 0,
+      packSize: typeof variant.packSize === "number" ? variant.packSize : 1,
       price: variant.price
     }));
   }
@@ -24,23 +24,30 @@ function mapVariants(recordVariants: PrismaProductWithVariants["variants"], fall
 }
 
 function mapProductRecord(record: PrismaProductWithVariants, fallback?: Product): Product {
-  const heroImage = record.heroImage ?? fallback?.heroImage ?? "/images/beer-bg.jpg";
-  const gallery = fallback?.gallery && fallback.gallery.length > 0 ? fallback.gallery : [heroImage];
+  const heroImage = record.imageUrl ?? fallback?.heroImage ?? "/images/beer-bg.jpg";
+  const gallerySource = record.gallery.length > 0
+    ? record.gallery
+    : fallback?.gallery && fallback.gallery.length > 0
+      ? fallback.gallery
+      : [heroImage];
+
+  const tastingNotes = record.tastingNotes.length > 0 ? record.tastingNotes : fallback?.tastingNotes ?? [];
+  const pairings = record.pairings.length > 0 ? record.pairings : fallback?.pairings ?? [];
 
   return {
     id: record.id,
     slug: record.slug,
     name: record.name ?? fallback?.name ?? "Producto",
-    category: fallback?.category ?? "Catálogo",
+    category: record.categoryLabel ?? fallback?.category ?? "Catálogo",
     style: record.style ?? fallback?.style ?? "",
     description: record.description ?? fallback?.description ?? "",
-    tastingNotes: fallback?.tastingNotes ?? [],
-    pairings: fallback?.pairings ?? [],
+    tastingNotes,
+    pairings,
     ingredients: fallback?.ingredients ?? [],
     rating: typeof record.rating === "number" ? record.rating : fallback?.rating ?? 0,
-    limitedEdition: record.limited ?? fallback?.limitedEdition ?? false,
+    limitedEdition: record.limitedEdition ?? fallback?.limitedEdition ?? false,
     heroImage,
-    gallery,
+    gallery: gallerySource,
     variants: mapVariants(record.variants, fallback?.variants)
   };
 }

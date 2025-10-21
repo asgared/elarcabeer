@@ -1,6 +1,6 @@
 import { Prisma } from "@prisma/client";
 import { prisma } from "./prisma";
-import { stripe } from "./stripe";
+import { getStripeClient } from "./stripe";
 
 type CheckStatus = "ok" | "warn" | "error";
 
@@ -66,7 +66,7 @@ function checkStripeKeys(): HealthCheck {
     };
   }
   
-  if (!stripe) {
+  if (!getStripeClient()) {
     return {
       id: "stripe-client",
       label: "Stripe SDK",

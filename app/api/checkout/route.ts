@@ -1,8 +1,9 @@
 import {NextResponse} from "next/server";
 
 import {products} from "@/data/products";
-import {stripe} from "@/lib/stripe"; // <<<--- CORRECCIÓN #1: Se importa la constante 'stripe'
-import type {Stripe} from "stripe"; // Se importa el tipo 'Stripe' directamente de la librería
+import type {Stripe} from "stripe";
+
+import {getStripeClient} from "@/lib/stripe";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -260,6 +261,15 @@ export async function POST(request: Request) {
   } = validationResult;
 
   try {
+    const stripe = getStripeClient();
+
+    if (!stripe) {
+      return NextResponse.json(
+        {error: "Stripe no está configurado correctamente."},
+        {status: 500}
+      );
+    }
+
     const session = await stripe.checkout.sessions.create({
       mode: "payment",
       line_items: items,

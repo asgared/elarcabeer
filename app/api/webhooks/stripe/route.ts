@@ -3,7 +3,7 @@ import { headers } from "next/headers";
 import Stripe from "stripe";
 
 import { prisma } from "@/lib/prisma";
-import { stripe } from "@/lib/stripe";
+import { getStripeClient } from "@/lib/stripe";
 
 type CheckoutMetadata = {
   user_id?: string | null;
@@ -103,8 +103,15 @@ export async function POST(request: NextRequest) {
 
   let event: Stripe.Event;
 
+  const stripeClient = getStripeClient();
+
+  if (!stripeClient) {
+    console.error("[webhooks/stripe] Stripe no está configurado en el entorno actual.");
+    return new NextResponse("Stripe no configurado", { status: 500 });
+  }
+
   try {
-    event = stripe.webhooks.constructEvent(
+    event = stripeClient.webhooks.constructEvent(
       body,
       signature,
       process.env.STRIPE_WEBHOOK_SECRET ?? ""

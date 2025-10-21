@@ -2,7 +2,6 @@ import {NextResponse} from "next/server";
 import {Prisma} from "@prisma/client";
 
 import {prisma} from "@/lib/prisma";
-import {hashPassword} from "@/utils/auth";
 
 import {getUserById, serializeUser, userInclude} from "../utils";
 import {ValidationError, validateUpdateUserPayload} from "../validation";
@@ -50,7 +49,10 @@ export async function PATCH(request: Request, {params}: RouteContext) {
     }
 
     if (payload.password) {
-      updateData.password = hashPassword(payload.password);
+      return NextResponse.json(
+        {error: "La contraseña debe actualizarse desde Supabase Auth."},
+        {status: 400}
+      );
     }
 
     if (payload.addresses !== undefined) {

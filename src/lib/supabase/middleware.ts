@@ -163,7 +163,8 @@ export function getSupabaseUserFromRequest(request: NextRequest): SupabaseMiddle
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 
   if (!supabaseUrl) {
-    throw new Error("MIDDLEWARE: Missing Supabase environment variables");
+    console.warn("[supabase] Variables NEXT_PUBLIC_SUPABASE_URL no configuradas en middleware.");
+    return null;
   }
 
   const projectRef = extractProjectRef(supabaseUrl);

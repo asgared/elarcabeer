@@ -3,6 +3,22 @@ import type {Prisma} from "@prisma/client";
 import {prisma} from "@/lib/prisma";
 import type {CmsContent, SocialLink} from "@/types/cms";
 
+const databaseUrl = process.env.DATABASE_URL;
+let hasLoggedDatabaseWarning = false;
+
+function isDatabaseConfigured() {
+  if (databaseUrl) {
+    return true;
+  }
+
+  if (!hasLoggedDatabaseWarning) {
+    console.warn("[cms] DATABASE_URL no está configurado. Se omite la carga de contenido.");
+    hasLoggedDatabaseWarning = true;
+  }
+
+  return false;
+}
+
 function normalizeSocialLinks(value: Prisma.JsonValue | null): SocialLink[] | null {
   if (!value) {
     return null;
@@ -34,23 +50,41 @@ function serializeCmsContent(entry: Awaited<ReturnType<typeof prisma.cmsContent.
 }
 
 export async function getCmsContent(slug: string): Promise<CmsContent | null> {
-  const entry = await prisma.cmsContent.findUnique({where: {slug}});
+  if (!isDatabaseConfigured()) {
+    return null;
+  }
 
-  return serializeCmsContent(entry);
+  try {
+    const entry = await prisma.cmsContent.findUnique({where: {slug}});
+
+    return serializeCmsContent(entry);
+  } catch (error) {
+    console.error("[cms] Error al obtener el contenido", slug, error);
+    return null;
+  }
 }
 
 export async function getAllCmsContent(): Promise<CmsContent[]> {
-  const entries = await prisma.cmsContent.findMany({orderBy: {updatedAt: "desc"}});
+  if (!isDatabaseConfigured()) {
+    return [];
+  }
 
-  return entries.map((entry) => ({
-    id: entry.id,
-    slug: entry.slug,
-    title: entry.title,
-    subtitle: entry.subtitle,
-    body: entry.body,
-    imageUrl: entry.imageUrl,
-    socialLinks: normalizeSocialLinks(entry.socialLinks),
-    createdAt: entry.createdAt.toISOString(),
-    updatedAt: entry.updatedAt.toISOString()
-  }));
+  try {
+    const entries = await prisma.cmsContent.findMany({orderBy: {updatedAt: "desc"}});
+
+    return entries.map((entry) => ({
+      id: entry.id,
+      slug: entry.slug,
+      title: entry.title,
+      subtitle: entry.subtitle,
+      body: entry.body,
+      imageUrl: entry.imageUrl,
+      socialLinks: normalizeSocialLinks(entry.socialLinks),
+      createdAt: entry.createdAt.toISOString(),
+      updatedAt: entry.updatedAt.toISOString()
+    }));
+  } catch (error) {
+    console.error("[cms] Error al listar el contenido", error);
+    return [];
+  }
 }

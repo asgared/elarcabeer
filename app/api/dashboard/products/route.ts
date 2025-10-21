@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
+import type { Prisma } from "@prisma/client";
+
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/auth/admin";
 
@@ -18,7 +20,7 @@ const createProductSchema = z.object({
   name: z.string().min(1, "El nombre es requerido."),
   slug: z.string().min(1, "El slug es requerido."),
   sku: z.string().min(1, "El SKU es requerido."),
-  description: z.string().optional(),
+  description: z.string().default(""),
   price: z.number().int().min(0, "El precio no puede ser negativo."),
   stock: z.number().int().min(0, "El stock no puede ser negativo."),
   style: z.string().optional(),
@@ -32,6 +34,21 @@ const createProductSchema = z.object({
   variants: z.array(variantSchema).default([]),
 });
 
+type ProductWithVariants = Prisma.ProductGetPayload<{
+  include: { variants: true };
+}>;
+
+function mapProductForResponse(product: ProductWithVariants) {
+  const primaryVariant = product.variants[0];
+
+  return {
+    ...product,
+    sku: primaryVariant?.sku ?? null,
+    price: primaryVariant?.price ?? null,
+    stock: primaryVariant?.stock ?? null,
+  };
+}
+
 // --- GET: Para obtener todos los productos ---
 export async function GET() {
   try {
@@ -40,11 +57,11 @@ export async function GET() {
     const products = await prisma.product.findMany({
       orderBy: { createdAt: "desc" },
       include: {
-        variants: true, // Incluimos variantes si las tienes
+        variants: true, // Incluimos variantes para derivar información adicional
       },
     });
 
-    return NextResponse.json({ products });
+    return NextResponse.json({ products: products.map(mapProductForResponse) });
   } catch (error) {
     console.error("Error fetching products:", error);
     const message = error instanceof Error ? error.message : "Error desconocido.";
@@ -64,23 +81,37 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: validation.error.flatten() }, { status: 400 });
     }
     
-    const { limitedEdition, variants, ...data } = validation.data;
+    const { limitedEdition, variants, description, sku, price, stock, ...data } = validation.data;
+
+    const preparedVariants: Prisma.VariantCreateWithoutProductInput[] = variants.map((variant) => ({
+      sku: variant.sku,
+      name: variant.name,
+      price: variant.price,
+      packSize: variant.packSize,
+      abv: variant.abv,
+      ibu: variant.ibu,
+      stock,
+    }));
+
+    if (!preparedVariants.some((variant) => variant.sku === sku)) {
+      preparedVariants.unshift({
+        sku,
+        name: data.name,
+        price,
+        packSize: 1,
+        stock,
+      });
+    }
 
     const product = await prisma.product.create({
       data: {
         ...data,
+        description,
         limitedEdition,
         variants:
-          variants.length > 0
+          preparedVariants.length > 0
             ? {
-                create: variants.map((variant) => ({
-                  sku: variant.sku,
-                  name: variant.name,
-                  price: variant.price,
-                  packSize: variant.packSize,
-                  abv: variant.abv,
-                  ibu: variant.ibu,
-                })),
+                create: preparedVariants,
               }
             : undefined,
       },
@@ -89,7 +120,7 @@ export async function POST(request: Request) {
       },
     });
 
-    return NextResponse.json({ product }, { status: 201 });
+    return NextResponse.json({ product: mapProductForResponse(product) }, { status: 201 });
   } catch (error) {
     console.error("Error creating product:", error);
     const message = error instanceof Error ? error.message : "Error desconocido.";

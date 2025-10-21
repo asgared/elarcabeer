@@ -1,14 +1,33 @@
 import Stripe from "stripe";
 
-const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
-const stripeApiVersion = process.env.STRIPE_API_VERSION;
+let stripeClient: Stripe | null = null;
+let stripeInitializationAttempted = false;
 
-if (!stripeSecretKey || !stripeApiVersion) {
-  throw new Error("Stripe keys or API version not defined in environment variables.");
+export function getStripeClient(): Stripe | null {
+  if (stripeClient) {
+    return stripeClient;
+  }
+
+  if (stripeInitializationAttempted) {
+    return null;
+  }
+
+  stripeInitializationAttempted = true;
+
+  const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
+  const stripeApiVersion = process.env.STRIPE_API_VERSION;
+
+  if (!stripeSecretKey || !stripeApiVersion) {
+    console.warn(
+      "[stripe] Las variables STRIPE_SECRET_KEY o STRIPE_API_VERSION no están configuradas."
+    );
+    return null;
+  }
+
+  stripeClient = new Stripe(stripeSecretKey, {
+    apiVersion: stripeApiVersion as Stripe.LatestApiVersion,
+    typescript: true,
+  });
+
+  return stripeClient;
 }
-
-export const stripe = new Stripe(stripeSecretKey, {
-  apiVersion: stripeApiVersion as "2024-04-10",
-  typescript: true,
-});
-

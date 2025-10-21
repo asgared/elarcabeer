@@ -31,13 +31,55 @@ const ssrBrowserFactory: CreateBrowserClientFn | undefined = (() => {
 })();
 
 let hasLoggedFallbackWarning = false;
+let fallbackSupabaseClient: SupabaseClient | null = null;
+
+function createFallbackSupabaseClient(): SupabaseClient {
+  const fallbackMessage = "Supabase no está configurado";
+
+  const subscription = {
+    unsubscribe() {
+      // no-op
+    },
+  };
+
+  return {
+    auth: {
+      async getSession() {
+        return { data: { session: null }, error: null };
+      },
+      onAuthStateChange() {
+        return { data: { subscription }, error: null };
+      },
+      async signOut() {
+        return { error: null } as const;
+      },
+      async signInWithPassword() {
+        return {
+          data: { user: null },
+          error: { message: fallbackMessage },
+        } as const;
+      },
+      async updateUser() {
+        return {
+          data: null,
+          error: { message: fallbackMessage },
+        } as const;
+      },
+    },
+  } as unknown as SupabaseClient;
+}
 
 export function createSupabaseBrowserClient(): SupabaseClient {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
   if (!supabaseUrl || !supabaseAnonKey) {
-    throw new Error("CLIENT-SIDE: Missing Supabase environment variables");
+    if (!fallbackSupabaseClient) {
+      console.warn("[supabase] Variables NEXT_PUBLIC_SUPABASE_URL o KEY no configuradas.");
+      fallbackSupabaseClient = createFallbackSupabaseClient();
+    }
+
+    return fallbackSupabaseClient;
   }
 
   if (ssrBrowserFactory) {
