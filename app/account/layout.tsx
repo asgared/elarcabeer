@@ -1,11 +1,9 @@
-import {ReactNode} from "react";
-
-import {SiteAppLayout} from "@/components/layout/site-app-layout";
-
+"use client";
+import { ReactNode } from "react";
+import { SiteAppLayout } from "@/components/layout/site-app-layout";
 type Props = {
   children: ReactNode;
 };
-
-export default async function SiteSectionLayout({children}: Props) {
+export default function SiteSectionLayout({ children }: Props) {
   return <SiteAppLayout>{children}</SiteAppLayout>;
 }

@@ -1,13 +1,11 @@
 "use client";
-
 import { Box } from "@chakra-ui/react";
 import { ReactNode } from "react";
 import dynamic from "next/dynamic";
-
 import type { SocialLink } from "@/types/cms";
 import { Footer } from "./footer";
 const Navbar = dynamic(
-  () => import('./navbar').then((mod) => mod.Navbar), 
+  () => import('./navbar').then((mod) => mod.Navbar),
   { ssr: false }
 );
 type SiteShellProps = {
@@ -17,7 +15,6 @@ type SiteShellProps = {
     socialLinks?: SocialLink[] | null;
   };
 };
-
 export function SiteShell({ children, footerContent }: SiteShellProps) {
   return (
     <Box minH="100vh" display="flex" flexDir="column">
