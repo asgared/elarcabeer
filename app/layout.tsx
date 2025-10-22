@@ -1,10 +1,12 @@
-import type {Metadata} from "next";
-import type {ReactNode} from "react";
+// app/layout.tsx
+import type { Metadata } from "next";
+import type { ReactNode } from "react";
+// 1. Importa ColorModeScript directamente de Chakra UI
+import { ColorModeScript } from "@chakra-ui/react";
 
-import {ChakraColorModeScript} from "@/components/chakra-color-mode-script";
-
+import { themeConfig } from "@/theme/config"; // 2. Importa tu configuración de tema
 import "./globals.css";
-import {Providers} from "./providers";
+import { Providers } from "./providers";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://elarcabeer.com"),
@@ -23,11 +25,12 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({children}: {children: ReactNode}) {
+export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="es">
       <body>
-        <ChakraColorModeScript />
+        {/* 3. Usa ColorModeScript directamente, pasándole el modo inicial */}
+        <ColorModeScript initialColorMode={themeConfig.initialColorMode} />
         <Providers>{children}</Providers>
       </body>
     </html>
