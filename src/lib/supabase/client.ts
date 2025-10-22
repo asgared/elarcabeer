@@ -3,6 +3,9 @@
 import {createClient, type SupabaseClient} from "@supabase/supabase-js";
 import * as SupabaseSSR from "@supabase/ssr";
 
+const DEFAULT_LOCAL_SITE_URL = "http://localhost:3000";
+const DEFAULT_PRODUCTION_SITE_URL = "https://elarcabeer.com";
+
 type CreateBrowserClientFn = (
   supabaseUrl: string,
   supabaseAnonKey: string
@@ -32,6 +35,44 @@ const ssrBrowserFactory: CreateBrowserClientFn | undefined = (() => {
 
 let hasLoggedFallbackWarning = false;
 let fallbackSupabaseClient: SupabaseClient | null = null;
+
+function resolveEnvSiteUrl() {
+  const envUrl =
+    process.env.NEXT_PUBLIC_SITE_URL ?? process.env.NEXT_PUBLIC_VERCEL_URL;
+
+  if (!envUrl) {
+    return null;
+  }
+
+  if (/^https?:\/\//i.test(envUrl)) {
+    return envUrl.replace(/\/$/, "");
+  }
+
+  return `https://${envUrl.replace(/\/$/, "")}`;
+}
+
+export function getSiteUrl() {
+  const envUrl = resolveEnvSiteUrl();
+
+  if (envUrl) {
+    return envUrl;
+  }
+
+  if (typeof window !== "undefined" && window.location.origin) {
+    return window.location.origin;
+  }
+
+  return process.env.NODE_ENV === "development"
+    ? DEFAULT_LOCAL_SITE_URL
+    : DEFAULT_PRODUCTION_SITE_URL;
+}
+
+export function getSupabaseAuthRedirectUrl(path = "/auth/callback") {
+  const baseUrl = getSiteUrl().replace(/\/$/, "");
+  const normalizedPath = path.startsWith("/") ? path : `/${path}`;
+
+  return `${baseUrl}${normalizedPath}`;
+}
 
 function createFallbackSupabaseClient(): SupabaseClient {
   const fallbackMessage = "Supabase no está configurado";

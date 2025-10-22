@@ -9,7 +9,6 @@ import {
   useState,
 } from "react";
 import type { ReactNode } from "react";
-// <-- CAMBIO 1: Se añade "AuthChangeEvent" a la importación de tipos.
 import type {
   AuthChangeEvent,
   Session,
