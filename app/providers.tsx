@@ -1,10 +1,8 @@
 // app/providers.tsx (Simplificado)
 "use client";
 
-// 1. ELIMINA la importación de CacheProvider
-// import { CacheProvider } from "@chakra-ui/next-js";
+import dynamic from "next/dynamic";
 import { ChakraProvider } from "@chakra-ui/react";
-import { DefaultSeo } from "next-seo";
 import { ReactNode, useMemo } from "react";
 
 import { AnalyticsProvider } from "@/providers/analytics-provider";
@@ -13,6 +11,11 @@ import { UserProvider } from "@/providers/UserProvider"; // Asegúrate que la ru
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import { theme } from "@/theme"; // Mantén la importación del tema
 import seoConfig from "../next-seo.config";
+
+const DefaultSeo = dynamic(
+  () => import("next-seo").then((mod) => ({ default: mod.DefaultSeo })),
+  { ssr: false }
+);
 
 type Props = {
   children: ReactNode;
