@@ -1,12 +1,13 @@
 "use client";
 
+import {Suspense} from "react";
 import {Button, Heading, Stack, Text} from "@chakra-ui/react";
 import NextLink from "next/link";
 import {useSearchParams} from "next/navigation";
 
 import {Container} from "@/components/ui/container";
 
-export default function AccountCheckEmailPage() {
+function AccountCheckEmailContent() {
   const searchParams = useSearchParams();
   const email = searchParams.get("email");
 
@@ -27,5 +28,26 @@ export default function AccountCheckEmailPage() {
         </Button>
       </Stack>
     </Container>
+  );
+}
+
+function AccountCheckEmailFallback() {
+  return (
+    <Container maxW="2xl" py={{base: 16, md: 24}} centerContent>
+      <Stack spacing={6} textAlign="center" align="center">
+        <Heading size="lg">Revisa tu correo electrónico</Heading>
+        <Text color="whiteAlpha.700">
+          Hemos enviado un enlace de confirmación a tu correo. Sigue las instrucciones que encontrarás en tu bandeja de entrada.
+        </Text>
+      </Stack>
+    </Container>
+  );
+}
+
+export default function AccountCheckEmailPage() {
+  return (
+    <Suspense fallback={<AccountCheckEmailFallback />}>
+      <AccountCheckEmailContent />
+    </Suspense>
   );
 }
