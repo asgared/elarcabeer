@@ -1,6 +1,5 @@
 "use client";
 
-import {List, ListIcon, ListItem} from "@chakra-ui/react";
 import {FaCheck} from "react-icons/fa6";
 
 type Props = {
@@ -9,13 +8,13 @@ type Props = {
 
 export function CheckList({items}: Props) {
   return (
-    <List spacing={2}>
+    <ul className="space-y-2">
       {items.map((item) => (
-        <ListItem key={item} color="whiteAlpha.800">
-          <ListIcon as={FaCheck} color="brand.400" />
-          {item}
-        </ListItem>
+        <li key={item} className="flex items-start gap-3 text-white/80">
+          <FaCheck aria-hidden className="mt-0.5 text-[#38b2ac]" />
+          <span>{item}</span>
+        </li>
       ))}
-    </List>
+    </ul>
   );
 }

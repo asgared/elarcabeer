@@ -1,7 +1,7 @@
 "use client";
 
 import {Container} from "@/components/ui/container";
-import {Box, Button, Heading, Stack, Text} from "@chakra-ui/react";
+import {Button} from "@/components/ui/button";
 import Link from "next/link";
 
 import {useAnalyticsContext} from "../../providers/analytics-provider";
@@ -25,57 +25,43 @@ export function BrandHero({content}: BrandHeroProps) {
     "Explora estilos premiados, descubre nuestras tabernas marinas y únete al club exclusivo Arca Crew.";
 
   return (
-    <Box
-      bgGradient="linear(to-r, rgba(12,27,30,0.95), rgba(19,58,67,0.85))"
-      borderRadius="3xl"
-      overflow="hidden"
-      position="relative"
-      backgroundImage={content?.imageUrl ? `url(${content.imageUrl})` : undefined}
-      backgroundSize="cover"
-      backgroundPosition="center"
-      _before={
+    <div
+      className="relative overflow-hidden rounded-[2.75rem] bg-gradient-to-r from-[rgba(12,27,30,0.95)] to-[rgba(19,58,67,0.85)] shadow-card"
+      style={
         content?.imageUrl
           ? {
-              content: '""',
-              position: "absolute",
-              inset: 0,
-              bg: "rgba(12,27,30,0.75)"
+              backgroundImage: `url(${content.imageUrl})`,
+              backgroundSize: "cover",
+              backgroundPosition: "center",
             }
           : undefined
       }
     >
-      <Container py={{base: 16, md: 24}} position="relative" zIndex={1}>
-        <Stack maxW={{base: "100%", md: "60%"}} spacing={6}>
-          <Text color="gold.500" fontWeight="semibold" letterSpacing="0.2em">
-            {subtitle}
-          </Text>
-          <Heading size="2xl" fontFamily="var(--font-playfair)">
-            {title}
-          </Heading>
-          <Text fontSize="lg" color="whiteAlpha.800">
-            {description}
-          </Text>
-          <Stack direction={{base: "column", sm: "row"}} spacing={4}>
+      {content?.imageUrl ? <div className="absolute inset-0 bg-[rgba(12,27,30,0.75)]" /> : null}
+      <Container className="relative z-10" py={{base: 16, md: 24}}>
+        <div className="space-y-6 md:max-w-[60%]">
+          <span className="text-sm font-semibold uppercase tracking-[0.2em] text-[#C6A15B]">{subtitle}</span>
+          <h2 className="font-serif text-4xl font-semibold leading-tight text-white md:text-5xl">{title}</h2>
+          <p className="text-lg text-white/80">{description}</p>
+          <div className="flex flex-col gap-4 sm:flex-row">
             <Button
+              asChild
               size="lg"
-              as={Link}
-              href="/shop"
               onClick={() => analytics.push({event: "select_promotion", location: "hero_shop"})}
             >
-              Explorar catálogo
+              <Link href="/shop">Explorar catálogo</Link>
             </Button>
             <Button
+              asChild
               size="lg"
               variant="outline"
-              as={Link}
-              href="/loyalty"
               onClick={() => analytics.push({event: "select_promotion", location: "hero_loyalty"})}
             >
-              Unirme al Arca Crew
+              <Link href="/loyalty">Unirme al Arca Crew</Link>
             </Button>
-          </Stack>
-        </Stack>
+          </div>
+        </div>
       </Container>
-    </Box>
+    </div>
   );
 }

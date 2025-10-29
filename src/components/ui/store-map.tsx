@@ -1,6 +1,5 @@
 "use client";
 
-import {Box, Text, Tooltip} from "@chakra-ui/react";
 import {useMemo} from "react";
 
 import type {Store} from "../../types/catalog";
@@ -48,61 +47,45 @@ export function StoreMap({stores}: Props) {
 
   if (!projection) {
     return (
-      <Box borderRadius="2xl" borderWidth="1px" p={8} textAlign="center">
-        <Text color="whiteAlpha.700">No hay bares para mostrar en el mapa.</Text>
-      </Box>
+      <div className="rounded-3xl border border-white/10 p-8 text-center">
+        <p className="text-white/70">No hay bares para mostrar en el mapa.</p>
+      </div>
     );
   }
 
   return (
-    <Box
-      borderRadius="2xl"
-      borderWidth="1px"
-      h={{base: "320px", md: "480px"}}
-      position="relative"
-      overflow="hidden"
-      bgGradient="linear(to-br, rgba(19,58,67,0.85), rgba(12,27,30,0.95))"
+    <div
+      className="relative h-[320px] overflow-hidden rounded-3xl border border-white/10 md:h-[480px]"
+      style={{
+        backgroundImage: "linear-gradient(to bottom right, rgba(19,58,67,0.85), rgba(12,27,30,0.95))",
+      }}
     >
-      <Box
-        position="absolute"
-        inset={0}
-        bgImage="radial-gradient(circle at 1px 1px, rgba(53,163,179,0.15) 1px, transparent 0)"
-        backgroundSize="32px 32px"
-        opacity={0.6}
-        pointerEvents="none"
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 opacity-60"
+        style={{
+          backgroundImage: "radial-gradient(circle at 1px 1px, rgba(53,163,179,0.15) 1px, transparent 0)",
+          backgroundSize: "32px 32px",
+        }}
       />
       {stores.map((store) => {
         const {x, y} = projectCoordinate(store.coordinates, projection);
 
         return (
-          <Tooltip key={store.id} label={store.name} hasArrow>
-            <Box
-              aria-label={store.name}
-              bg="gold.500"
-              borderRadius="full"
-              boxShadow="0 0 0 2px #0C1B1E, 0 0 12px rgba(198,161,91,0.6)"
-              h={4}
-              w={4}
-              position="absolute"
-              left={`${x}%`}
-              top={`${y}%`}
-              transform="translate(-50%, -50%)"
-              _before={{
-                content: '""',
-                position: "absolute",
-                inset: "-12px",
-                borderRadius: "full",
-                bg: "rgba(198,161,91,0.12)"
-              }}
-            />
-          </Tooltip>
+          <div
+            key={store.id}
+            aria-label={store.name}
+            className="absolute h-4 w-4 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#C6A15B] shadow-[0_0_0_2px_#0C1B1E,0_0_12px_rgba(198,161,91,0.6)]"
+            style={{left: `${x}%`, top: `${y}%`}}
+            title={store.name}
+          >
+            <span className="absolute inset-[-12px] rounded-full bg-[rgba(198,161,91,0.12)]" />
+          </div>
         );
       })}
-      <Box position="absolute" bottom={4} left={4} right={4} textAlign="right">
-        <Text color="whiteAlpha.700" fontSize="sm">
-          Mapa ilustrativo generado sin dependencias externas.
-        </Text>
-      </Box>
-    </Box>
+      <div className="pointer-events-none absolute inset-x-4 bottom-4 text-right">
+        <p className="text-sm text-white/70">Mapa ilustrativo generado sin dependencias externas.</p>
+      </div>
+    </div>
   );
 }
