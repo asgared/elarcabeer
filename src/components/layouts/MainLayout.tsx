@@ -1,6 +1,8 @@
 import Head from "next/head";
 import {ReactNode} from "react";
 
+import {cn} from "@/lib/utils";
+
 // import { Footer, Header } from "../ui"
 
 interface Props {
@@ -8,6 +10,7 @@ interface Props {
   title: string;
   pageDescription: string;
   imageUrl?: string;
+  className?: string;
 }
 
 export default function MainLayout({
@@ -15,6 +18,7 @@ export default function MainLayout({
   imageUrl = "https://res.cloudinary.com/ljtdev/image/upload/v1678488373/WhatsApp_Image_2023-03-10_at_17.45.20_xdibu7.jpg",
   pageDescription,
   title,
+  className,
 }: Props) {
   return (
     <>
@@ -42,7 +46,12 @@ export default function MainLayout({
 
       {/* <Header /> */}
 
-      <main className="mx-auto mb-[4.5rem] w-full max-w-[1200px] md:w-[90%] lg:w-4/5">
+      <main
+        className={cn(
+          "mx-auto mb-[4.5rem] w-full max-w-screen-xl px-4 sm:px-6 lg:px-10",
+          className,
+        )}
+      >
         {children}
       </main>
 
