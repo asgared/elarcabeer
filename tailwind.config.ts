@@ -19,7 +19,28 @@ const config: Config = {
     },
     extend: {
       colors: {
-        background: "#0c1b1e",
+        brand: {
+          50: "#0C1B1E",
+          100: "#10272D",
+          200: "#133A43",
+          300: "#1F515C",
+          400: "#2B6B77",
+          500: "#35A3B3",
+          600: "#4BC0CD",
+          700: "#6FD6E0",
+          800: "#9AE7EE",
+          900: "#D6F8FB",
+        },
+        gold: {
+          500: "#C6A15B",
+        },
+        sand: {
+          500: "#DCC9A6",
+        },
+        background: {
+          800: "#10272D",
+          900: "#0C1B1E",
+        },
         foreground: "#f0f6f8",
         accent: {
           DEFAULT: "#38b2ac",
@@ -50,6 +71,8 @@ const config: Config = {
         soft: "0 4px 12px rgba(0, 0, 0, 0.15)",
       },
       fontFamily: {
+        heading: ["var(--font-playfair)", ...defaultTheme.fontFamily.sans],
+        body: ["var(--font-inter)", ...defaultTheme.fontFamily.sans],
         sans: ["var(--font-inter)", ...defaultTheme.fontFamily.sans],
         serif: ["var(--font-playfair)", ...defaultTheme.fontFamily.serif],
       },
