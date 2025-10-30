@@ -1,7 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import {FaFacebookF, FaInstagram, FaTiktok, FaTwitter, FaYoutube} from "react-icons/fa6";
+import {
+  Facebook,
+  Instagram,
+  Music2,
+  Twitter,
+  Youtube,
+  type LucideIcon,
+} from "lucide-react";
 
 import {Container} from "@/components/ui/container";
 import type {SocialLink} from "@/types/cms";
@@ -11,14 +18,21 @@ type FooterProps = {
   socialLinks?: SocialLink[];
 };
 
-function resolveIcon(platform: string) {
+function resolveIcon(platform: string): LucideIcon | null {
   const normalized = platform.toLowerCase();
 
-  if (normalized.includes("insta")) return FaInstagram;
-  if (normalized.includes("face")) return FaFacebookF;
-  if (normalized.includes("tiktok")) return FaTiktok;
-  if (normalized.includes("youtube")) return FaYoutube;
-  if (normalized.includes("twitter") || normalized.includes("x")) return FaTwitter;
+  const mapping: {match: RegExp; icon: LucideIcon}[] = [
+    {match: /insta/, icon: Instagram},
+    {match: /face/, icon: Facebook},
+    {match: /tiktok/, icon: Music2},
+    {match: /youtube/, icon: Youtube},
+    {match: /twitter|\bx\b/, icon: Twitter},
+  ];
+
+  const resolved = mapping.find(({match}) => match.test(normalized));
+  if (resolved) {
+    return resolved.icon;
+  }
 
   return null;
 }

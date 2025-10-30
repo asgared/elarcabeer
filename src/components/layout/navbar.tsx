@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import {type ReactNode, useEffect, useRef, useState} from "react";
-import {FaBars, FaCartShopping, FaChevronDown, FaUser, FaXmark} from "react-icons/fa6";
+import {ChevronDown, Menu, ShoppingCart, User, X} from "lucide-react";
 
 import {Button} from "@/components/ui/button";
 import {Container} from "@/components/ui/container";
@@ -115,7 +115,7 @@ export function Navbar() {
                 aria-label="Abrir carrito"
                 onClick={open}
               >
-                <FaCartShopping className="h-5 w-5" />
+                <ShoppingCart className="h-5 w-5" />
               </Button>
               {shouldShowCartCount ? (
                 <span className="absolute right-1 top-1 flex h-5 min-w-[1.25rem] items-center justify-center rounded-full bg-amber-400 px-1.5 text-xs font-bold text-black">
@@ -172,7 +172,7 @@ export function Navbar() {
                 aria-label="Cuenta"
                 className="flex h-12 w-12 items-center justify-center rounded-full border border-white/20 text-white transition hover:bg-white/10"
               >
-                <FaUser className="h-5 w-5" />
+                <User className="h-5 w-5" />
               </Link>
             )}
             <button
@@ -181,7 +181,7 @@ export function Navbar() {
               className="flex h-12 w-12 items-center justify-center rounded-full text-white transition hover:bg-white/10 md:hidden"
               onClick={() => setIsMobileMenuOpen(true)}
             >
-              <FaBars className="h-5 w-5" />
+              <Menu className="h-5 w-5" />
             </button>
           </div>
         </div>
@@ -198,7 +198,7 @@ export function Navbar() {
                 aria-label="Cerrar menú"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
-                <FaXmark className="h-5 w-5" />
+                <X className="h-5 w-5" />
               </button>
             </div>
             <nav className="mt-6 flex flex-col gap-4">
@@ -247,7 +247,7 @@ function DesktopDropdown({label, links, isOpen, onOpen, onClose}: DesktopDropdow
         onClick={() => (isOpen ? onClose() : onOpen())}
       >
         {label}
-        <FaChevronDown
+        <ChevronDown
           className={cn("h-3 w-3 transition-transform", isOpen ? "rotate-180" : undefined)}
         />
       </button>
