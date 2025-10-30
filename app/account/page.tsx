@@ -30,7 +30,7 @@ export default function AccountPage() {
     user?.subscriptions?.filter((subscription) => subscription.status === "active")?.length ?? 0;
 
   return (
-    <Container maxW="5xl">
+    <Container className="max-w-5xl">
       <div className="flex flex-col gap-10">
         <div className="flex flex-col gap-3">
           <h1 className="text-3xl font-semibold md:text-4xl">Tu cuenta</h1>

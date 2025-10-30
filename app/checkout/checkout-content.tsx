@@ -206,7 +206,7 @@ export function CheckoutContent() {
 
   return (
     <FormProvider {...methods}>
-      <Container maxW="6xl" py={{base: 10, md: 16}}>
+      <Container className="max-w-6xl py-10 md:py-16">
         <div className="flex flex-col gap-8">
           <h1 className="text-3xl font-semibold md:text-4xl">Checkout</h1>
           <div className="grid gap-10 lg:grid-cols-[3fr_2fr] lg:gap-12">

@@ -61,7 +61,7 @@ export default function OrdersPage() {
 
   if (isLoading) {
     return (
-      <Container maxW="4xl">
+      <Container className="max-w-4xl">
         <div className="flex flex-col items-center gap-4 py-12">
           <div className="h-12 w-12 animate-spin rounded-full border-4 border-white/20 border-t-accent" />
           <p className="text-white/70">Cargando historial de órdenes...</p>
@@ -72,7 +72,7 @@ export default function OrdersPage() {
 
   if (!user) {
     return (
-      <Container maxW="4xl">
+      <Container className="max-w-4xl">
         <div className="flex flex-col gap-6">
           <h1 className="text-3xl font-semibold md:text-4xl">Órdenes</h1>
           <div className="rounded-2xl border border-white/10 bg-background/40 p-6">
@@ -88,7 +88,7 @@ export default function OrdersPage() {
   const orders = user.orders;
 
   return (
-    <Container maxW="4xl">
+    <Container className="max-w-4xl">
       <div className="flex flex-col gap-6">
         <h1 className="text-3xl font-semibold md:text-4xl">Órdenes</h1>
         {orders.length === 0 ? (

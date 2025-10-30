@@ -39,7 +39,7 @@ export default function BundlePage({params}: {params: {slug: string}}) {
     .filter((entry): entry is {product: Product; quantity: number} => entry !== null);
 
   return (
-    <Container maxW="5xl">
+    <Container className="max-w-5xl">
       <div className="flex flex-col gap-8">
         <h1 className="text-3xl font-semibold md:text-4xl">{bundle.name}</h1>
         <p className="text-lg text-white/70">{bundle.description}</p>

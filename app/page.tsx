@@ -18,7 +18,7 @@ export default async function HomePage() {
 
   return (
     <SiteAppLayout>
-      <Container maxW="7xl">
+      <Container className="max-w-7xl">
         <div className="flex flex-col gap-16">
           <BrandHero
             content={{

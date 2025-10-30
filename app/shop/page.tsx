@@ -29,7 +29,7 @@ export default function ShopPage() {
   }, [selectedStyle, search, maxPrice]);
 
   return (
-    <Container maxW="7xl">
+    <Container className="max-w-7xl">
       <div className="flex flex-col gap-10">
         <div className="flex flex-col gap-2">
           <h1 className="text-3xl font-semibold md:text-4xl">Shop</h1>

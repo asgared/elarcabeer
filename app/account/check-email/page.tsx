@@ -12,7 +12,7 @@ function AccountCheckEmailContent() {
   const email = searchParams.get("email");
 
   return (
-    <Container centerContent maxW="2xl" py={{base: 16, md: 24}}>
+    <Container className="flex max-w-2xl flex-col items-center py-16 md:py-24">
       <div className="flex flex-col items-center gap-6 text-center">
         <h1 className="text-2xl font-semibold">Revisa tu correo electrónico</h1>
         <p className="max-w-xl text-white/70">
@@ -33,7 +33,7 @@ function AccountCheckEmailContent() {
 
 function AccountCheckEmailFallback() {
   return (
-    <Container centerContent maxW="2xl" py={{base: 16, md: 24}}>
+    <Container className="flex max-w-2xl flex-col items-center py-16 md:py-24">
       <div className="flex flex-col items-center gap-6 text-center">
         <h1 className="text-2xl font-semibold">Revisa tu correo electrónico</h1>
         <p className="max-w-xl text-white/70">

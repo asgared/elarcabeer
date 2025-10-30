@@ -70,7 +70,7 @@ export function Navbar() {
 
   return (
     <header className="sticky top-0 z-[1000] bg-[rgba(12,27,30,0.85)] backdrop-blur-md">
-      <Container maxW="6xl" className="py-4">
+      <Container className="max-w-6xl py-4">
         <div className="flex flex-wrap items-center justify-between gap-3 md:gap-4">
           <div className="flex items-center gap-3 md:gap-6">
             <Link href="/" className="text-lg font-semibold text-white">

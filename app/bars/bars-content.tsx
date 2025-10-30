@@ -24,7 +24,7 @@ export function BarsContent() {
   }, [petFriendly, kitchen, events]);
 
   return (
-    <Container maxW="6xl">
+    <Container className="max-w-6xl">
       <div className="flex flex-col gap-10">
         <div className="flex flex-col gap-2">
           <h1 className="text-3xl font-semibold md:text-4xl">Bares & taprooms</h1>

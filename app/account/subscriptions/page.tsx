@@ -28,7 +28,7 @@ export default function AccountSubscriptionsPage() {
   const isLoading = status === "initializing" || (status === "loading" && !user);
 
   return (
-    <Container maxW="4xl">
+    <Container className="max-w-4xl">
       <div className="flex flex-col gap-6">
         <h1 className="text-3xl font-semibold md:text-4xl">Suscripciones</h1>
 

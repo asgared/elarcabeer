@@ -2,7 +2,7 @@ import {Container} from "@/components/ui/container";
 
 export default function TermsPage() {
   return (
-    <Container maxW="4xl">
+    <Container className="max-w-4xl">
       <div className="space-y-4">
         <h1 className="text-3xl font-semibold tracking-tight text-foreground md:text-4xl">
           Términos y condiciones

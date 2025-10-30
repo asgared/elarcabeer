@@ -26,7 +26,7 @@ function resolveIcon(platform: string) {
 export function Footer({subtitle, socialLinks = []}: FooterProps) {
   return (
     <footer className="mt-16 border-t border-white/10 py-12">
-      <Container maxW="6xl" className="w-full">
+      <Container className="w-full max-w-6xl">
         <div className="flex w-full flex-col justify-between gap-8 md:flex-row md:items-start">
           <div className="flex max-w-md flex-col gap-2">
             <p className="text-lg font-semibold">El Arca Cervecería</p>

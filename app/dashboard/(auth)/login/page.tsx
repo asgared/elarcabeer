@@ -42,7 +42,7 @@ export default function AdminLoginPage() {
   };
 
   return (
-    <Container maxW="lg" py={24}>
+    <Container className="max-w-lg py-24">
       <div className="flex flex-col gap-8">
         <div className="flex flex-col gap-3 text-center">
           <h1 className="text-3xl font-semibold">Panel administrativo</h1>

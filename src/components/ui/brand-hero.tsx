@@ -38,7 +38,7 @@ export function BrandHero({content}: BrandHeroProps) {
       }
     >
       {content?.imageUrl ? <div className="absolute inset-0 bg-[rgba(12,27,30,0.75)]" /> : null}
-      <Container className="relative z-10" py={{base: 16, md: 24}}>
+      <Container className="relative z-10 py-16 md:py-24">
         <div className="space-y-6 md:max-w-[60%]">
           <span className="text-sm font-semibold uppercase tracking-[0.2em] text-[#C6A15B]">{subtitle}</span>
           <h2 className="font-serif text-4xl font-semibold leading-tight text-white md:text-5xl">{title}</h2>

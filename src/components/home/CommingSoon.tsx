@@ -12,7 +12,7 @@ const ComingSoon = () => {
     <div className="flex min-h-screen flex-col bg-gradient-to-r from-background via-[#143137] to-muted text-foreground">
       <HeaderArca />
       <div className="flex flex-1 items-center justify-center px-6 md:px-0">
-        <Container maxW="container.md" textAlign="center" className="space-y-12">
+        <Container className="max-w-3xl space-y-12 text-center">
           <MotionBox
             className="flex justify-center"
             animate={{scale: [1, 1.15, 1], rotate: [0, 6, -6, 0]}}

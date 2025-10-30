@@ -29,7 +29,7 @@ export default function DiscoverDetailPage({params}: {params: {slug: string}}) {
   }
 
   return (
-    <Container maxW="4xl">
+    <Container className="max-w-4xl">
       <div className="flex flex-col gap-6">
         <div className="flex flex-col gap-2">
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-amber-300">

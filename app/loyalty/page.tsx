@@ -4,7 +4,7 @@ import {loyaltyProgress, subscriptionPlans} from "@/data/subscriptions";
 
 export default function LoyaltyPage() {
   return (
-    <Container maxW="5xl">
+    <Container className="max-w-5xl">
       <div className="flex flex-col gap-10">
         <div className="flex flex-col gap-2">
           <h1 className="text-3xl font-semibold md:text-4xl">Arca Crew</h1>

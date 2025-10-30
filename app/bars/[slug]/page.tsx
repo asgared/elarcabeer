@@ -29,7 +29,7 @@ export default function StorePage({params}: {params: {slug: string}}) {
   }
 
   return (
-    <Container maxW="4xl">
+    <Container className="max-w-4xl">
       <div className="flex flex-col gap-8">
         <div className="flex flex-col gap-2">
           <h1 className="text-3xl font-semibold md:text-4xl">{store.name}</h1>

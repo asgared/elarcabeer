@@ -68,7 +68,7 @@ export default async function ProductDetailPage({params}: {params: {slug: string
   const hasVariants = product.variants.length > 0;
 
   return (
-    <Container maxW="6xl" py={{base: 6, md: 12}}>
+    <Container className="max-w-6xl py-6 md:py-12">
       <div className="grid gap-10 lg:grid-cols-[1.2fr_1fr] lg:gap-12">
         <div className="flex flex-col gap-6 md:gap-8">
           <div className="overflow-hidden rounded-3xl border border-white/10 bg-[#102327]">

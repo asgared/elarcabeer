@@ -18,7 +18,7 @@ export default function SuccessContent() {
   }, [clearCart]);
 
   return (
-    <Container maxW="4xl" py={{base: 16, md: 24}}>
+    <Container className="max-w-4xl py-16 md:py-24">
       <div className="flex flex-col items-center gap-8 text-center">
         <h1 className="text-3xl font-semibold md:text-4xl">¡Gracias por tu compra!</h1>
         <p className="text-lg text-white/70">

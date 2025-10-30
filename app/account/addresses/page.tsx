@@ -12,7 +12,7 @@ export default function AddressesPage() {
   const isLoading = status === "initializing" || (status === "loading" && !user);
 
   return (
-    <Container maxW="4xl">
+    <Container className="max-w-4xl">
       <div className="flex flex-col gap-6">
         {isLoading ? (
           <div className="flex flex-col items-center gap-4 py-12">
