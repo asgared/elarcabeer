@@ -1,26 +1,14 @@
 "use client";
 
 import {useMemo, useState} from "react";
-
-import {
-  Alert,
-  AlertDescription,
-  AlertIcon,
-  Box,
-  Button,
-  FormControl,
-  FormLabel,
-  Heading,
-  IconButton,
-  Input,
-  SimpleGrid,
-  Stack,
-  Textarea,
-  useToast
-} from "@chakra-ui/react";
 import {useRouter} from "next/navigation";
 import {FaPlus, FaTrashCan} from "react-icons/fa6";
 
+import {Button} from "@/components/ui/button";
+import {Input} from "@/components/ui/input";
+import {Label} from "@/components/ui/label";
+import {Textarea} from "@/components/ui/textarea";
+import {useToast} from "@/hooks/use-toast";
 import type {CmsContent, SocialLink} from "@/types/cms";
 
 const EMPTY_LINK: SocialLink = {platform: "", url: ""};
@@ -174,95 +162,145 @@ export function AdminContentForm({initialContent}: AdminContentFormProps) {
   };
 
   return (
-    <Box as="form" onSubmit={handleSubmit} maxW="4xl" bg="background.800" borderRadius="xl" borderWidth="1px" p={8}>
-      <Stack spacing={6}>
-        <Heading size="lg">{isNew ? "Crear sección" : `Editar ${initialContent?.title}`}</Heading>
-        <SimpleGrid columns={{base: 1, md: 2}} spacing={6}>
-          <FormControl isRequired>
-            <FormLabel>Slug</FormLabel>
+    <form
+      onSubmit={handleSubmit}
+      className="max-w-4xl rounded-xl border border-white/10 bg-background/80 p-8 shadow-soft"
+    >
+      <div className="flex flex-col gap-6">
+        <h2 className="text-2xl font-semibold">
+          {isNew ? "Crear sección" : `Editar ${initialContent?.title}`}
+        </h2>
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="slug">Slug</Label>
             <Input
+              id="slug"
               value={form.slug}
               onChange={(event) => handleFieldChange("slug", event.target.value)}
               placeholder="home-hero"
               disabled={!isNew}
+              required
             />
-          </FormControl>
-          <FormControl isRequired>
-            <FormLabel>Título</FormLabel>
-            <Input value={form.title} onChange={(event) => handleFieldChange("title", event.target.value)} />
-          </FormControl>
-          <FormControl>
-            <FormLabel>Subtítulo</FormLabel>
-            <Input value={form.subtitle} onChange={(event) => handleFieldChange("subtitle", event.target.value)} />
-          </FormControl>
-          <FormControl>
-            <FormLabel>Imagen destacada (URL)</FormLabel>
-            <Input value={form.imageUrl} onChange={(event) => handleFieldChange("imageUrl", event.target.value)} />
-          </FormControl>
-        </SimpleGrid>
-        <FormControl>
-          <FormLabel>Descripción</FormLabel>
+          </div>
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="title">Título</Label>
+            <Input
+              id="title"
+              value={form.title}
+              onChange={(event) => handleFieldChange("title", event.target.value)}
+              required
+            />
+          </div>
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="subtitle">Subtítulo</Label>
+            <Input
+              id="subtitle"
+              value={form.subtitle}
+              onChange={(event) => handleFieldChange("subtitle", event.target.value)}
+            />
+          </div>
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="imageUrl">Imagen destacada (URL)</Label>
+            <Input
+              id="imageUrl"
+              value={form.imageUrl}
+              onChange={(event) => handleFieldChange("imageUrl", event.target.value)}
+            />
+          </div>
+        </div>
+        <div className="flex flex-col gap-2">
+          <Label htmlFor="body">Descripción</Label>
           <Textarea
+            id="body"
             value={form.body}
             onChange={(event) => handleFieldChange("body", event.target.value)}
             rows={6}
           />
-        </FormControl>
+        </div>
 
-        <Stack spacing={4}>
-          <Heading size="md">Redes sociales</Heading>
-          <Stack spacing={3}>
+        <div className="flex flex-col gap-4">
+          <h3 className="text-xl font-semibold">Redes sociales</h3>
+          <div className="flex flex-col gap-3">
             {form.socialLinks.map((link, index) => (
-              <SimpleGrid key={`link-${index}`} columns={{base: 1, md: 7}} spacing={3} alignItems="center">
-                <FormControl gridColumn={{base: "1 / -1", md: "span 3"}}>
-                  <FormLabel fontSize="sm">Plataforma</FormLabel>
+              <div
+                key={`link-${index}`}
+                className="grid grid-cols-1 items-center gap-3 rounded-lg border border-white/10 p-3 md:grid-cols-7"
+              >
+                <div className="flex flex-col gap-2 md:col-span-3">
+                  <Label htmlFor={`platform-${index}`} className="text-xs uppercase tracking-wide text-foreground/60">
+                    Plataforma
+                  </Label>
                   <Input
+                    id={`platform-${index}`}
                     value={link.platform}
                     onChange={(event) => handleLinkChange(index, "platform", event.target.value)}
                     placeholder="Instagram"
                   />
-                </FormControl>
-                <FormControl gridColumn={{base: "1 / -1", md: "span 3"}}>
-                  <FormLabel fontSize="sm">URL</FormLabel>
+                </div>
+                <div className="flex flex-col gap-2 md:col-span-3">
+                  <Label htmlFor={`url-${index}`} className="text-xs uppercase tracking-wide text-foreground/60">
+                    URL
+                  </Label>
                   <Input
+                    id={`url-${index}`}
                     value={link.url}
                     onChange={(event) => handleLinkChange(index, "url", event.target.value)}
                     placeholder="https://instagram.com/elarca"
                   />
-                </FormControl>
-                <IconButton
-                  aria-label="Eliminar"
-                  icon={<FaTrashCan />}
-                  onClick={() => handleRemoveLink(index)}
-                  variant="ghost"
-                  colorScheme="red"
-                />
-              </SimpleGrid>
+                </div>
+                <div className="flex justify-end md:col-span-1">
+                  <button
+                    type="button"
+                    className="inline-flex h-10 w-10 items-center justify-center rounded-md border border-danger/40 text-danger transition hover:bg-danger/10"
+                    onClick={() => handleRemoveLink(index)}
+                    aria-label="Eliminar"
+                  >
+                    <FaTrashCan className="h-4 w-4" />
+                  </button>
+                </div>
+              </div>
             ))}
-            <Button leftIcon={<FaPlus />} variant="outline" onClick={handleAddLink} alignSelf="flex-start">
+            <Button variant="outline" className="w-fit gap-2" type="button" onClick={handleAddLink}>
+              <FaPlus className="h-4 w-4" />
               Agregar red social
             </Button>
-          </Stack>
-        </Stack>
+          </div>
+        </div>
 
         {error ? (
-          <Alert status="error" borderRadius="md">
-            <AlertIcon />
-            <AlertDescription>{error}</AlertDescription>
-          </Alert>
+          <div className="flex items-start gap-3 rounded-lg border border-danger/60 bg-danger/10 p-4 text-sm text-danger-foreground">
+            <span className="mt-0.5 inline-flex h-5 w-5 items-center justify-center rounded-full bg-danger text-xs font-bold text-danger-foreground">
+              !
+            </span>
+            <span>{error}</span>
+          </div>
         ) : null}
 
-        <Stack direction={{base: "column", md: "row"}} spacing={4}>
-          <Button type="submit" colorScheme="teal" isLoading={isSubmitting}>
-            Guardar cambios
+        <div className="flex flex-col gap-4 md:flex-row">
+          <Button type="submit" disabled={isSubmitting} className="gap-2">
+            {isSubmitting ? <SmallSpinner /> : null}
+            {isSubmitting ? "Guardando..." : "Guardar cambios"}
           </Button>
           {!isNew ? (
-            <Button variant="outline" colorScheme="red" onClick={handleDelete} isLoading={isDeleting}>
-              Eliminar sección
+            <Button
+              type="button"
+              variant="outline"
+              className="gap-2 border-danger/50 text-danger hover:bg-danger/10"
+              onClick={handleDelete}
+              disabled={isDeleting}
+            >
+              {isDeleting ? <SmallSpinner /> : null}
+              {isDeleting ? "Eliminando..." : "Eliminar sección"}
             </Button>
           ) : null}
-        </Stack>
-      </Stack>
-    </Box>
+        </div>
+      </div>
+    </form>
+  );
+}
+
+function SmallSpinner() {
+  return (
+    <span className="inline-flex h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
   );
 }

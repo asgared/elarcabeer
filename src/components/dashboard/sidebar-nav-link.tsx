@@ -1,29 +1,35 @@
 "use client";
-import { Link as ChakraLink, LinkProps, useStyleConfig } from "@chakra-ui/react";
-import NextLink, { LinkProps as NextLinkProps } from "next/link";
-import { usePathname } from "next/navigation";
-import { ReactNode } from "react";
 
-type Props = NextLinkProps & LinkProps & {
-  children: ReactNode;
-  icon?: ReactNode;
-};
+import Link, {type LinkProps} from "next/link";
+import {usePathname} from "next/navigation";
+import {type AnchorHTMLAttributes, type ReactNode} from "react";
 
-export function SideBarNavLink({ href, children, icon, ...props }: Props) {
+import {cn} from "@/lib/utils";
+
+type Props = LinkProps &
+  Omit<AnchorHTMLAttributes<HTMLAnchorElement>, "href"> & {
+    children: ReactNode;
+    icon?: ReactNode;
+  };
+
+export function SideBarNavLink({href, children, icon, className, ...props}: Props) {
   const pathname = usePathname();
-  const styles = useStyleConfig("Link", props);
-  const isActive = pathname === href || pathname.startsWith(`${href}/`);
+  const hrefString = typeof href === "string" ? href : href.pathname ?? "";
+  const isActive = pathname === hrefString || pathname.startsWith(`${hrefString}/`);
 
   return (
-    <ChakraLink
-      as={NextLink}
+    <Link
       href={href}
-      className={isActive ? "dashboard-sidebar__link--active" : ""}
-      sx={styles}
+      className={cn(
+        "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium text-foreground/75 transition",
+        "hover:bg-muted/60 hover:text-foreground",
+        isActive && "bg-muted text-foreground shadow-soft",
+        className
+      )}
       {...props}
     >
-      {icon}
-      {children}
-    </ChakraLink>
+      {icon ? <span className="text-lg">{icon}</span> : null}
+      <span className="truncate">{children}</span>
+    </Link>
   );
 }

@@ -1,117 +1,141 @@
-import { useState } from 'react';
+"use client";
+
+import {useState, type FormEvent} from "react";
+import {FiLogIn} from "react-icons/fi";
+import {HiMiniBars3} from "react-icons/hi2";
+
+import {Button} from "@/components/ui/button";
 import {
-  Box,
-  Flex,
-  IconButton,
-  Stack,
-  useDisclosure,
-  Text,
-  useColorModeValue,
-  Modal,
-  ModalOverlay,
-  ModalContent,
-  ModalHeader,
-  ModalCloseButton,
-  ModalBody,
-  FormControl,
-  Input,
-  FormLabel,
-  ModalFooter,
-  Button,
-} from '@chakra-ui/react';
-import { HamburgerIcon } from '@chakra-ui/icons';
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import {Input} from "@/components/ui/input";
+import {Label} from "@/components/ui/label";
 
 export default function Header() {
-  const { isOpen, onOpen, onClose } = useDisclosure();
   const [showMenu, setShowMenu] = useState(false);
 
-  const bg = useColorModeValue('gray.100', 'gray.700');
-  const color = useColorModeValue('gray.700', 'white');
-
   return (
-    <>
-      <Box bg={bg} py={4}>
-        <Flex alignItems='center' justifyContent='space-between'>
-          <IconButton
-            aria-label='Toggle Menu'
-            display={{ base: 'block', md: 'none' }}
-            onClick={() => setShowMenu(!showMenu)}
-            icon={<HamburgerIcon />}
-          />
-          <Text fontSize='lg' fontWeight='bold' color={color} mx={4}>
-            My Website
-          </Text>
-          <Stack
-            direction={{ base: 'column', md: 'row' }}
-            alignItems='center'
-            spacing={4}
-            display={{ base: showMenu ? 'block' : 'none', md: 'flex' }}
-            mt={{ base: 4, md: 0 }}
-          >
-            <Text color={color}>Home</Text>
-            <Text color={color}>About</Text>
-            <Text color={color}>Contact</Text>
-            <IconButton
-              aria-label='Login'
-              onClick={onOpen}
-              variant='outline'
-              colorScheme='gray'
-              size='sm'
-              icon={<i className='bi bi-box-arrow-in-right'></i>}
-            />
-          </Stack>
-        </Flex>
-      </Box>
-      <LoginModal isOpen={isOpen} onClose={onClose} />
-    </>
+    <header className="border-b border-white/10 bg-muted/40 text-foreground">
+      <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4 md:px-6">
+        <button
+          type="button"
+          aria-label="Abrir menú"
+          className="flex h-10 w-10 items-center justify-center rounded-md border border-white/10 text-foreground transition hover:bg-muted md:hidden"
+          onClick={() => setShowMenu((previous) => !previous)}
+          aria-expanded={showMenu}
+          aria-controls="header-nav"
+        >
+          <HiMiniBars3 className="h-5 w-5" />
+        </button>
+
+        <p className="text-lg font-semibold">My Website</p>
+
+        <nav
+          id="header-nav"
+          className="hidden flex-1 items-center justify-end gap-6 text-sm font-medium text-foreground/80 md:flex"
+        >
+          <a className="transition hover:text-foreground" href="#inicio">
+            Home
+          </a>
+          <a className="transition hover:text-foreground" href="#acerca">
+            About
+          </a>
+          <a className="transition hover:text-foreground" href="#contacto">
+            Contact
+          </a>
+          <LoginDialog />
+        </nav>
+      </div>
+
+      {showMenu ? (
+        <div className="border-t border-white/10 bg-muted/40 px-4 py-4 text-sm text-foreground md:hidden">
+          <div className="flex flex-col gap-4">
+            <a className="transition hover:text-foreground" href="#inicio" onClick={() => setShowMenu(false)}>
+              Home
+            </a>
+            <a className="transition hover:text-foreground" href="#acerca" onClick={() => setShowMenu(false)}>
+              About
+            </a>
+            <a className="transition hover:text-foreground" href="#contacto" onClick={() => setShowMenu(false)}>
+              Contact
+            </a>
+            <LoginDialog inline onAction={() => setShowMenu(false)} />
+          </div>
+        </div>
+      ) : null}
+    </header>
   );
 }
 
-interface LoginModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-}
-function LoginModal({ isOpen, onClose }: LoginModalProps) {
-  const handleSubmit = (e: { preventDefault: () => void; }) => {
-    e.preventDefault();
-    // Handle login
+type LoginDialogProps = {
+  inline?: boolean;
+  onAction?: () => void;
+};
+
+function LoginDialog({inline = false, onAction}: LoginDialogProps) {
+  const [open, setOpen] = useState(false);
+
+  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    // TODO: Integrate with authentication flow
+    setOpen(false);
+    onAction?.();
   };
 
   return (
-    <Box>
-      <IconButton
-        aria-label='Login'
-        onClick={onClose}
-        variant='outline'
-        colorScheme='gray'
-        size='sm'
-        icon={<i className='bi bi-box-arrow-in-right'></i>}
-      />
-      <Modal isOpen={isOpen} onClose={onClose} isCentered>
-        <ModalOverlay />
-        <ModalContent>
-          <ModalHeader>Login / Sign Up</ModalHeader>
-          <ModalCloseButton />
-          <form onSubmit={handleSubmit}>
-            <ModalBody>
-              <FormControl mb={4}>
-                <FormLabel>Email address</FormLabel>
-                <Input type='email' placeholder='Enter email' />
-              </FormControl>
-              <FormControl mb={4}>
-                <FormLabel>Password</FormLabel>
-                <Input type='password' placeholder='Password' />
-              </FormControl>
-            </ModalBody>
-            <ModalFooter>
-              <Button colorScheme='blue' mr={3} type='submit'>
-                Login
-              </Button>
-              <Button variant='ghost'>Sign Up</Button>
-            </ModalFooter>
-          </form>
-        </ModalContent>
-      </Modal>
-    </Box>
+    <Dialog open={open} onOpenChange={(value) => {
+      setOpen(value);
+      if (!value) {
+        onAction?.();
+      }
+    }}>
+      <DialogTrigger asChild>
+        {inline ? (
+          <button
+            type="button"
+            className="flex items-center gap-2 rounded-md border border-white/10 px-3 py-2 text-sm font-medium transition hover:bg-muted"
+            onClick={() => setOpen(true)}
+          >
+            <FiLogIn className="h-4 w-4" />
+            <span>Iniciar sesión</span>
+          </button>
+        ) : (
+          <Button variant="outline" size="sm" className="gap-2">
+            <FiLogIn className="h-4 w-4" />
+            Iniciar sesión
+          </Button>
+        )}
+      </DialogTrigger>
+      <DialogContent className="max-w-md">
+        <DialogHeader>
+          <DialogTitle>Login / Sign Up</DialogTitle>
+          <DialogDescription>
+            Ingresa tus credenciales para continuar navegando en El Arca.
+          </DialogDescription>
+        </DialogHeader>
+        <form className="space-y-4" onSubmit={handleSubmit}>
+          <div className="space-y-2">
+            <Label htmlFor="email">Correo electrónico</Label>
+            <Input id="email" type="email" placeholder="tu@correo.com" required />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="password">Contraseña</Label>
+            <Input id="password" type="password" placeholder="••••••" required />
+          </div>
+          <DialogFooter className="gap-2 sm:justify-between">
+            <Button type="submit">Iniciar sesión</Button>
+            <Button type="button" variant="ghost">
+              Crear cuenta
+            </Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
   );
 }

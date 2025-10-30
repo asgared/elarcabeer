@@ -1,19 +1,12 @@
 "use client";
 
-import { ReactNode, useState } from "react";
-import {
-  Box,
-  Button,
-  Flex,
-  Heading,
-  HStack,
-  Stack,
-  Text,
-  useToast,
-} from "@chakra-ui/react";
-import { useRouter } from "next/navigation";
-import { FaPowerOff } from "react-icons/fa6";
-import type { User } from "@prisma/client";
+import {ReactNode, useState} from "react";
+import {useRouter} from "next/navigation";
+import {FaPowerOff} from "react-icons/fa6";
+
+import {Button} from "@/components/ui/button";
+import {useToast} from "@/hooks/use-toast";
+import type {User} from "@prisma/client";
 
 type AdminShellProps = {
   user: User;
@@ -21,7 +14,7 @@ type AdminShellProps = {
   sidebar: ReactNode; // <-- 1. AÑADIMOS EL NUEVO PROP
 };
 
-export function AdminShell({ user, children, sidebar }: AdminShellProps) { // <-- 2. RECIBIMOS EL PROP
+export function AdminShell({user, children, sidebar}: AdminShellProps) {
   const router = useRouter();
   const toast = useToast();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
@@ -33,7 +26,7 @@ export function AdminShell({ user, children, sidebar }: AdminShellProps) { // <-
       if (!response.ok) {
         throw new Error("No se pudo cerrar sesión");
       }
-      toast({ title: "Sesión finalizada", status: "success" });
+      toast({title: "Sesión finalizada", status: "success"});
       router.replace("/dashboard/login");
       router.refresh();
     } catch (error) {
@@ -49,46 +42,36 @@ export function AdminShell({ user, children, sidebar }: AdminShellProps) { // <-
 
   // 3. AJUSTAMOS LA ESTRUCTURA PARA INCLUIR LA BARRA LATERAL
   return (
-    <Flex minH="100vh" flex="1" direction="row" bg="background.900">
-      {/* Aquí se renderiza la barra lateral que pasamos desde el layout */}
+    <div className="flex min-h-screen bg-background">
       {sidebar}
-
-      {/* El contenido principal (header + children) va en su propio Flex */}
-      <Flex flex="1" direction="column">
-        <Flex
-          as="header"
-          borderBottomWidth="1px"
-          borderColor="whiteAlpha.200"
-          px={8}
-          py={4}
-          align="center"
-          justify="space-between"
-          bg="background.800"
-        >
-          <Heading size="md">El Arca · Admin</Heading>
-          <HStack spacing={6} align="center">
-            <Stack spacing={0} textAlign="right" fontSize="sm">
-              <Text fontWeight="semibold">{user.name ?? user.email}</Text>
-              <Text color="whiteAlpha.600">Administrador</Text>
-            </Stack>
+      <div className="flex flex-1 flex-col">
+        <header className="flex items-center justify-between border-b border-white/10 bg-background/80 px-8 py-4 backdrop-blur">
+          <h1 className="text-lg font-semibold">El Arca · Admin</h1>
+          <div className="flex items-center gap-6 text-sm">
+            <div className="text-right">
+              <p className="font-semibold">{user.name ?? user.email}</p>
+              <p className="text-foreground/60">Administrador</p>
+            </div>
             <Button
-              leftIcon={<FaPowerOff />}
               variant="outline"
               size="sm"
+              className="gap-2"
               onClick={handleLogout}
-              isLoading={isLoggingOut}
-              loadingText="Saliendo..."
+              disabled={isLoggingOut}
             >
-              Cerrar sesión
+              {isLoggingOut ? <LoadingSpinner /> : <FaPowerOff className="h-4 w-4" />}
+              {isLoggingOut ? "Saliendo..." : "Cerrar sesión"}
             </Button>
-          </HStack>
-        </Flex>
+          </div>
+        </header>
+        <main className="flex flex-1 flex-col overflow-y-auto p-8">{children}</main>
+      </div>
+    </div>
+  );
+}
 
-        {/* Esta es la sección principal donde se renderiza el contenido de la página */}
-        <Box as="main" p={8} flex="1" overflowY="auto">
-          {children}
-        </Box>
-      </Flex>
-    </Flex>
+function LoadingSpinner() {
+  return (
+    <span className="inline-flex h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
   );
 }

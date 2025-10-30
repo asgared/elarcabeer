@@ -4,6 +4,7 @@
 import dynamic from "next/dynamic";
 import { ReactNode, useMemo } from "react";
 
+import {Toaster} from "@/components/ui/toaster";
 import { AnalyticsProvider } from "@/providers/analytics-provider";
 import { CartDrawerProvider } from "@/providers/cart-drawer-provider";
 import { UserProvider } from "@/providers/UserProvider"; // Asegúrate que la ruta sea correcta
@@ -27,7 +28,10 @@ export function Providers({ children }: Props) {
       <DefaultSeo {...seoConfig} />
       <AnalyticsProvider>
         <UserProvider supabaseClient={supabaseClient}>
-          <CartDrawerProvider>{children}</CartDrawerProvider>
+          <CartDrawerProvider>
+            {children}
+            <Toaster />
+          </CartDrawerProvider>
         </UserProvider>
       </AnalyticsProvider>
     </>

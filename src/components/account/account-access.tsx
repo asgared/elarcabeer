@@ -1,46 +1,29 @@
 "use client";
 
-import {
-  Alert,
-  AlertDescription,
-  AlertIcon,
-  AlertTitle,
-  Button,
-  Divider,
-  FormControl,
-  FormLabel,
-  HStack,
-  Input,
-  Stack,
-  Tab,
-  TabList,
-  TabPanel,
-  TabPanels,
-  Tabs,
-  Text,
-  chakra,
-  useToast
-} from "@chakra-ui/react";
-import type {AlertStatus} from "@chakra-ui/react";
-import type {AuthError} from "@supabase/supabase-js";
-import {FormEvent, useMemo, useState} from "react";
+import {FormEvent, useMemo, useState, type ReactNode} from "react";
 import {useRouter} from "next/navigation";
+import type {AuthError} from "@supabase/supabase-js";
 
+import {Button} from "@/components/ui/button";
+import {Input} from "@/components/ui/input";
+import {Label} from "@/components/ui/label";
+import {OAuthButtons} from "@/components/auth/OAuthButtons";
+import {useToast} from "@/hooks/use-toast";
 import {
   createSupabaseBrowserClient,
-  getSupabaseAuthRedirectUrl
+  getSupabaseAuthRedirectUrl,
 } from "@/lib/supabase/client";
 import {useUser} from "@/providers/user-provider";
-import {OAuthButtons} from "@/components/auth/OAuthButtons";
 
-type Feedback = {type: AlertStatus; message: string; title?: string};
+type FeedbackStatus = "info" | "success" | "error" | "warning";
 
-const alertTitles: Record<AlertStatus, string> = {
+type Feedback = {type: FeedbackStatus; message: string; title?: string};
+
+const alertTitles: Record<FeedbackStatus, string> = {
   info: "Información",
   success: "Éxito",
   error: "Error",
   warning: "Atención",
-  loading: "Aviso"
 };
 
 const RATE_LIMIT_MESSAGE =
@@ -100,26 +83,24 @@ export function AccountAccessPanel() {
     lastName: "",
     email: "",
     password: "",
-    confirmPassword: ""
+    confirmPassword: "",
   });
   const [loginForm, setLoginForm] = useState({
     email: "",
-    password: ""
+    password: "",
   });
   const [isRegistering, setIsRegistering] = useState(false);
   const [isLoggingIn, setIsLoggingIn] = useState(false);
   const [pendingConfirmationEmail, setPendingConfirmationEmail] =
     useState<string | null>(null);
-  const [isResendingConfirmation, setIsResendingConfirmation] =
-    useState(false);
+  const [isResendingConfirmation, setIsResendingConfirmation] = useState(false);
 
   const isRegisterLoading = isRegistering || status === "loading";
   const isLoginLoading = isLoggingIn || status === "loading";
 
   const alert = useMemo<Feedback | null>(
     () =>
-      feedback ??
-      (error ? {type: "error", message: error, title: "Error"} : null),
+      feedback ?? (error ? {type: "error", message: error, title: "Error"} : null),
     [feedback, error]
   );
 
@@ -172,8 +153,8 @@ export function AccountAccessPanel() {
         type: "signup",
         email: pendingConfirmationEmail,
         options: {
-          emailRedirectTo: getSupabaseAuthRedirectUrl()
-        }
+          emailRedirectTo: getSupabaseAuthRedirectUrl(),
+        },
       });
 
       if (resendError) {
@@ -185,7 +166,6 @@ export function AccountAccessPanel() {
         title: "Correo reenviado",
         description: "Hemos reenviado el enlace de confirmación. Revisa tu bandeja de entrada.",
         duration: 7000,
-        isClosable: true
       });
     } catch (error) {
       const message = isAuthError(error)
@@ -196,14 +176,13 @@ export function AccountAccessPanel() {
       setFeedback({
         type: "error",
         title: "No se pudo reenviar el correo",
-        message
+        message,
       });
       toast({
         status: "error",
         title: "No se pudo reenviar el correo",
         description: message,
         duration: 9000,
-        isClosable: true
       });
     } finally {
       setIsResendingConfirmation(false);
@@ -219,14 +198,13 @@ export function AccountAccessPanel() {
       setFeedback({
         type: "error",
         title: "Datos inválidos",
-        message
+        message,
       });
       toast({
         status: "error",
         title: "Datos inválidos",
         description: message,
         duration: 5000,
-        isClosable: true
       });
       return;
     }
@@ -253,8 +231,8 @@ export function AccountAccessPanel() {
         password: registerForm.password,
         options: {
           data: Object.keys(metadata).length ? metadata : undefined,
-          emailRedirectTo: getSupabaseAuthRedirectUrl()
-        }
+          emailRedirectTo: getSupabaseAuthRedirectUrl(),
+        },
       });
 
       if (signUpError) {
@@ -270,7 +248,7 @@ export function AccountAccessPanel() {
             type: "info",
             title: "Confirma tu correo",
             message:
-              "Ya existe una cuenta asociada a este correo pero está pendiente de confirmación. Puedes reenviar el correo de activación."
+              "Ya existe una cuenta asociada a este correo pero está pendiente de confirmación. Puedes reenviar el correo de activación.",
           });
           toast({
             status: "info",
@@ -278,20 +256,18 @@ export function AccountAccessPanel() {
             description:
               "Ya existe una cuenta asociada a este correo. Revisa tu bandeja de entrada o reenvía el correo de confirmación.",
             duration: 9000,
-            isClosable: true
           });
         } else {
           setFeedback({
             type: "error",
             title: "No se pudo crear la cuenta",
-            message
+            message,
           });
           toast({
             status: "error",
             title: "No se pudo crear la cuenta",
             description: message,
             duration: 9000,
-            isClosable: true
           });
         }
 
@@ -299,9 +275,7 @@ export function AccountAccessPanel() {
       }
 
       const alreadyRegisteredPending =
-        !!data.user &&
-        Array.isArray(data.user.identities) &&
-        data.user.identities.length === 0;
+        !!data.user && Array.isArray(data.user.identities) && data.user.identities.length === 0;
 
       if (alreadyRegisteredPending) {
         setPendingConfirmationEmail(rawEmail);
@@ -309,7 +283,7 @@ export function AccountAccessPanel() {
           type: "info",
           title: "Confirma tu correo",
           message:
-            "Tu cuenta ya existe pero aún no ha sido confirmada. Puedes reenviar el correo de activación."
+            "Tu cuenta ya existe pero aún no ha sido confirmada. Puedes reenviar el correo de activación.",
         });
         toast({
           status: "info",
@@ -317,7 +291,6 @@ export function AccountAccessPanel() {
           description:
             "Tu cuenta ya existe pero sigue pendiente de confirmación. Revisa tu correo o vuelve a enviar el enlace.",
           duration: 9000,
-          isClosable: true
         });
         return;
       }
@@ -330,8 +303,8 @@ export function AccountAccessPanel() {
             email,
             password: registerForm.password,
             name: trimmedName || undefined,
-            lastName: trimmedLastName || undefined
-          })
+            lastName: trimmedLastName || undefined,
+          }),
         });
 
         if (!response.ok) {
@@ -350,11 +323,10 @@ export function AccountAccessPanel() {
           title: "Cuenta creada",
           description: "Ya puedes administrar tu perfil.",
           duration: 7000,
-          isClosable: true
         });
         setFeedback({
           type: "success",
-          message: "Cuenta creada correctamente. Ya puedes administrar tu perfil."
+          message: "Cuenta creada correctamente. Ya puedes administrar tu perfil.",
         });
       } else {
         toast({
@@ -362,11 +334,10 @@ export function AccountAccessPanel() {
           title: "Confirma tu correo",
           description: "Hemos enviado un enlace de confirmación a tu correo.",
           duration: 9000,
-          isClosable: true
         });
         setFeedback({
           type: "success",
-          message: "Cuenta creada correctamente. Revisa tu correo para confirmar tu cuenta."
+          message: "Cuenta creada correctamente. Revisa tu correo para confirmar tu cuenta.",
         });
         void router.push(`/account/check-email?email=${encodeURIComponent(email)}`);
       }
@@ -377,12 +348,11 @@ export function AccountAccessPanel() {
         lastName: "",
         email: "",
         password: "",
-        confirmPassword: ""
+        confirmPassword: "",
       });
     } catch (error) {
       console.error(error);
-      const message =
-        error instanceof Error ? error.message : "No se pudo registrar la cuenta";
+      const message = error instanceof Error ? error.message : "No se pudo registrar la cuenta";
 
       if (message.toLowerCase().includes("registrad")) {
         setPendingConfirmationEmail(rawEmail);
@@ -391,14 +361,13 @@ export function AccountAccessPanel() {
       setFeedback({
         type: "error",
         title: "No se pudo crear la cuenta",
-        message
+        message,
       });
       toast({
         status: "error",
         title: "No se pudo crear la cuenta",
         description: message,
         duration: 9000,
-        isClosable: true
       });
     } finally {
       setIsRegistering(false);
@@ -415,7 +384,7 @@ export function AccountAccessPanel() {
       const normalizedEmail = rawEmail.toLowerCase();
       const {data, error: signInError} = await supabase.auth.signInWithPassword({
         email: normalizedEmail,
-        password: loginForm.password
+        password: loginForm.password,
       });
 
       if (signInError) {
@@ -429,14 +398,13 @@ export function AccountAccessPanel() {
         setFeedback({
           type: "error",
           title: "No se pudo iniciar sesión",
-          message
+          message,
         });
         toast({
           status: "error",
           title: "No se pudo iniciar sesión",
           description: message,
           duration: 9000,
-          isClosable: true
         });
         return;
       }
@@ -450,11 +418,10 @@ export function AccountAccessPanel() {
         title: "Sesión iniciada",
         description: "Cargando tu historial...",
         duration: 5000,
-        isClosable: true
       });
       setFeedback({
         type: "success",
-        message: "Sesión iniciada. Cargando tu historial..."
+        message: "Sesión iniciada. Cargando tu historial...",
       });
       setLoginForm({email: "", password: ""});
     } catch (error) {
@@ -463,211 +430,228 @@ export function AccountAccessPanel() {
       setFeedback({
         type: "error",
         title: "No se pudo iniciar sesión",
-        message
+        message,
       });
       toast({
         status: "error",
         title: "No se pudo iniciar sesión",
         description: message,
         duration: 9000,
-        isClosable: true
       });
     } finally {
       setIsLoggingIn(false);
     }
   };
 
+  const tabs = [
+    {label: "Crear cuenta", description: "Regístrate para llevar un registro de tus compras."},
+    {label: "Iniciar sesión", description: "Accede con tus credenciales o redes sociales."},
+  ];
+
   return (
-    <Stack spacing={6}>
-      {pendingConfirmationEmail && (
-        <Alert status="info" borderRadius="md">
-          <AlertIcon />
-          <Stack spacing={1} flex="1">
-            <AlertTitle>Confirma tu correo</AlertTitle>
-            <AlertDescription>
-              <Stack spacing={3}>
-                <Text>
-                  Hemos detectado que {""}
-                  <chakra.span fontWeight="semibold">
-                    {pendingConfirmationEmail}
-                  </chakra.span>{" "}
-                  todavía no ha sido confirmada. Revisa tu bandeja de entrada o solicita un nuevo correo.
-                </Text>
-                <Button
-                  variant="link"
-                  colorScheme="yellow"
-                  onClick={handleResendConfirmation}
-                  isLoading={isResendingConfirmation}
-                  loadingText="Enviando"
-                  alignSelf="flex-start"
-                >
-                  Reenviar correo de confirmación
-                </Button>
-              </Stack>
-            </AlertDescription>
-          </Stack>
-        </Alert>
-      )}
+    <div className="flex flex-col gap-6">
+      {pendingConfirmationEmail ? (
+        <div className="flex flex-col gap-3 rounded-lg border border-warning/60 bg-warning/10 p-4 text-sm text-warning-foreground">
+          <div className="font-semibold">Confirma tu correo</div>
+          <p>
+            Hemos detectado que <span className="font-semibold">{pendingConfirmationEmail}</span> todavía no ha sido confirmada.
+            Revisa tu bandeja de entrada o solicita un nuevo correo.
+          </p>
+          <Button
+            variant="link"
+            className="w-fit px-0 text-warning-foreground underline-offset-4 hover:underline"
+            onClick={handleResendConfirmation}
+            disabled={isResendingConfirmation}
+          >
+            {isResendingConfirmation ? "Enviando" : "Reenviar correo de confirmación"}
+          </Button>
+        </div>
+      ) : null}
 
-      {alert && (
-        <Alert status={alert.type} borderRadius="md">
-          <AlertIcon />
-          <Stack spacing={1} flex="1">
-            <AlertTitle>{alert.title ?? alertTitles[alert.type] ?? "Aviso"}</AlertTitle>
-            <AlertDescription>{alert.message}</AlertDescription>
-          </Stack>
-        </Alert>
-      )}
+      {alert ? (
+        <div className="flex flex-col gap-2 rounded-lg border border-white/10 bg-muted/50 p-4 text-sm text-foreground">
+          <div className="font-semibold">
+            {alert.title ?? alertTitles[alert.type] ?? "Aviso"}
+          </div>
+          <p>{alert.message}</p>
+        </div>
+      ) : null}
 
-      <Tabs
-        index={tabIndex}
-        onChange={(index) => {
-          setTabIndex(index);
-          resetFeedback();
-        }}
-        variant="enclosed"
-      >
-        <TabList>
-          <Tab>Crear cuenta</Tab>
-          <Tab>Iniciar sesión</Tab>
-        </TabList>
-        <TabPanels>
-          <TabPanel>
-            <chakra.form onSubmit={handleRegister}>
-              <Stack spacing={6}>
-                <Stack spacing={4}>
-                  <FormControl>
-                    <FormLabel>Nombre</FormLabel>
-                    <Input
-                      placeholder="Tu nombre"
-                      value={registerForm.name}
-                      onChange={(event) =>
-                        setRegisterForm((prev) => ({...prev, name: event.target.value}))
-                      }
-                      autoComplete="given-name"
-                    />
-                  </FormControl>
-                  <FormControl>
-                    <FormLabel>Apellido</FormLabel>
-                    <Input
-                      placeholder="Tu apellido"
-                      value={registerForm.lastName}
-                      onChange={(event) =>
-                        setRegisterForm((prev) => ({...prev, lastName: event.target.value}))
-                      }
-                      autoComplete="family-name"
-                    />
-                  </FormControl>
-                  <FormControl isRequired>
-                    <FormLabel>Correo electrónico</FormLabel>
-                    <Input
-                      type="email"
-                      placeholder="tu@correo.com"
-                      value={registerForm.email}
-                      onChange={(event) =>
-                        setRegisterForm((prev) => ({...prev, email: event.target.value}))
-                      }
-                      autoComplete="email"
-                    />
-                  </FormControl>
-                  <FormControl isRequired>
-                    <FormLabel>Contraseña</FormLabel>
-                    <Input
-                      type="password"
-                      placeholder="Mínimo 8 caracteres"
-                      value={registerForm.password}
-                      onChange={(event) =>
-                        setRegisterForm((prev) => ({...prev, password: event.target.value}))
-                      }
-                      autoComplete="new-password"
-                    />
-                  </FormControl>
-                  <FormControl isRequired>
-                    <FormLabel>Confirmar contraseña</FormLabel>
-                    <Input
-                      type="password"
-                      placeholder="Repite tu contraseña"
-                      value={registerForm.confirmPassword}
-                      onChange={(event) =>
-                        setRegisterForm((prev) => ({...prev, confirmPassword: event.target.value}))
-                      }
-                      autoComplete="new-password"
-                    />
-                  </FormControl>
-                </Stack>
-                <Stack spacing={3}>
-                  <HStack align="center" spacing={3} color="whiteAlpha.700">
-                    <Divider />
-                    <Text fontSize="sm" fontWeight="medium" textTransform="uppercase">
-                      O continúa con
-                    </Text>
-                    <Divider />
-                  </HStack>
-                  <OAuthButtons />
-                </Stack>
-                <Button
-                  colorScheme="yellow"
-                  type="submit"
-                  isLoading={isRegisterLoading}
-                  loadingText="Creando cuenta"
+      <section className="rounded-xl border border-white/10 bg-background/80 p-6 shadow-soft">
+        <div className="flex flex-col gap-6">
+          <div className="flex flex-col gap-2">
+            <div className="inline-flex overflow-hidden rounded-full border border-white/10 bg-background/60 p-1 text-sm">
+              {tabs.map((tab, index) => (
+                <button
+                  key={tab.label}
+                  type="button"
+                  className={`rounded-full px-4 py-2 font-medium transition ${
+                    tabIndex === index
+                      ? "bg-accent text-background shadow-soft"
+                      : "text-foreground/70 hover:text-foreground"
+                  }`}
+                  onClick={() => {
+                    setTabIndex(index);
+                    resetFeedback();
+                  }}
                 >
-                  Crear cuenta
-                </Button>
-              </Stack>
-            </chakra.form>
-          </TabPanel>
-          <TabPanel>
-            <chakra.form onSubmit={handleLogin}>
-              <Stack spacing={6}>
-                <Stack spacing={4}>
-                  <FormControl isRequired>
-                    <FormLabel>Correo electrónico</FormLabel>
-                    <Input
-                      type="email"
-                      placeholder="tu@correo.com"
-                      value={loginForm.email}
-                      onChange={(event) =>
-                        setLoginForm((prev) => ({...prev, email: event.target.value}))
-                      }
-                      autoComplete="email"
-                    />
-                  </FormControl>
-                  <FormControl isRequired>
-                    <FormLabel>Contraseña</FormLabel>
-                    <Input
-                      type="password"
-                      placeholder="Tu contraseña"
-                      value={loginForm.password}
-                      onChange={(event) =>
-                        setLoginForm((prev) => ({...prev, password: event.target.value}))
-                      }
-                      autoComplete="current-password"
-                    />
-                  </FormControl>
-                </Stack>
-                <Stack spacing={3}>
-                  <HStack align="center" spacing={3} color="whiteAlpha.700">
-                    <Divider />
-                    <Text fontSize="sm" fontWeight="medium" textTransform="uppercase">
-                      O continúa con
-                    </Text>
-                    <Divider />
-                  </HStack>
-                  <OAuthButtons />
-                </Stack>
-                <Button
-                  colorScheme="yellow"
-                  type="submit"
-                  isLoading={isLoginLoading}
-                  loadingText="Iniciando sesión"
-                >
-                  Iniciar sesión
-                </Button>
-              </Stack>
-            </chakra.form>
-          </TabPanel>
-        </TabPanels>
-      </Tabs>
-    </Stack>
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+            <p className="text-sm text-foreground/70">{tabs[tabIndex]?.description}</p>
+          </div>
+
+          {tabIndex === 0 ? (
+            <form onSubmit={handleRegister} className="space-y-6">
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                <FormField label="Nombre">
+                  <Input
+                    placeholder="Tu nombre"
+                    value={registerForm.name}
+                    onChange={(event) =>
+                      setRegisterForm((prev) => ({...prev, name: event.target.value}))
+                    }
+                    autoComplete="given-name"
+                  />
+                </FormField>
+                <FormField label="Apellido">
+                  <Input
+                    placeholder="Tu apellido"
+                    value={registerForm.lastName}
+                    onChange={(event) =>
+                      setRegisterForm((prev) => ({...prev, lastName: event.target.value}))
+                    }
+                    autoComplete="family-name"
+                  />
+                </FormField>
+                <FormField label="Correo electrónico" required className="md:col-span-2">
+                  <Input
+                    type="email"
+                    placeholder="tu@correo.com"
+                    value={registerForm.email}
+                    onChange={(event) =>
+                      setRegisterForm((prev) => ({...prev, email: event.target.value}))
+                    }
+                    autoComplete="email"
+                    required
+                  />
+                </FormField>
+                <FormField label="Contraseña" required>
+                  <Input
+                    type="password"
+                    placeholder="Mínimo 8 caracteres"
+                    value={registerForm.password}
+                    onChange={(event) =>
+                      setRegisterForm((prev) => ({...prev, password: event.target.value}))
+                    }
+                    autoComplete="new-password"
+                    required
+                  />
+                </FormField>
+                <FormField label="Confirmar contraseña" required>
+                  <Input
+                    type="password"
+                    placeholder="Repite tu contraseña"
+                    value={registerForm.confirmPassword}
+                    onChange={(event) =>
+                      setRegisterForm((prev) => ({...prev, confirmPassword: event.target.value}))
+                    }
+                    autoComplete="new-password"
+                    required
+                  />
+                </FormField>
+              </div>
+
+              <DividerWithLabel label="O continúa con" />
+              <OAuthButtons />
+
+              <Button type="submit" disabled={isRegisterLoading} className="w-full gap-2">
+                {isRegisterLoading ? <Spinner /> : null}
+                {isRegisterLoading ? "Creando cuenta" : "Crear cuenta"}
+              </Button>
+            </form>
+          ) : null}
+
+          {tabIndex === 1 ? (
+            <form onSubmit={handleLogin} className="space-y-6">
+              <div className="space-y-4">
+                <FormField label="Correo electrónico" required>
+                  <Input
+                    type="email"
+                    placeholder="tu@correo.com"
+                    value={loginForm.email}
+                    onChange={(event) =>
+                      setLoginForm((prev) => ({...prev, email: event.target.value}))
+                    }
+                    autoComplete="email"
+                    required
+                  />
+                </FormField>
+                <FormField label="Contraseña" required>
+                  <Input
+                    type="password"
+                    placeholder="Tu contraseña"
+                    value={loginForm.password}
+                    onChange={(event) =>
+                      setLoginForm((prev) => ({...prev, password: event.target.value}))
+                    }
+                    autoComplete="current-password"
+                    required
+                  />
+                </FormField>
+              </div>
+
+              <DividerWithLabel label="O continúa con" />
+              <OAuthButtons />
+
+              <Button type="submit" disabled={isLoginLoading} className="w-full gap-2">
+                {isLoginLoading ? <Spinner /> : null}
+                {isLoginLoading ? "Iniciando sesión" : "Iniciar sesión"}
+              </Button>
+            </form>
+          ) : null}
+        </div>
+      </section>
+    </div>
+  );
+}
+
+type FormFieldProps = {
+  label: string;
+  required?: boolean;
+  className?: string;
+  children: ReactNode;
+};
+
+function FormField({label, required, className, children}: FormFieldProps) {
+  return (
+    <div className={`flex flex-col gap-2 ${className ?? ""}`}>
+      <Label className="text-sm font-medium text-foreground">
+        {label}
+        {required ? <span className="text-danger"> *</span> : null}
+      </Label>
+      {children}
+    </div>
+  );
+}
+
+type DividerWithLabelProps = {
+  label: string;
+};
+
+function DividerWithLabel({label}: DividerWithLabelProps) {
+  return (
+    <div className="flex items-center gap-3 text-xs font-semibold uppercase tracking-wide text-foreground/50">
+      <span className="h-px flex-1 bg-white/10" />
+      {label}
+      <span className="h-px flex-1 bg-white/10" />
+    </div>
+  );
+}
+
+function Spinner() {
+  return (
+    <span className="inline-flex h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
   );
 }

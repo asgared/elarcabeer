@@ -1,7 +1,6 @@
 "use client";
 
-import {useDisclosure} from "@chakra-ui/react";
-import {ReactNode, createContext, useContext, useMemo} from "react";
+import {ReactNode, createContext, useCallback, useContext, useMemo, useState} from "react";
 
 import {CartDrawer} from "../components/cart/cart-drawer";
 
@@ -17,20 +16,23 @@ type Props = {
 };
 
 export function CartDrawerProvider({children}: Props) {
-  const disclosure = useDisclosure();
+  const [isOpen, setIsOpen] = useState(false);
+
+  const open = useCallback(() => setIsOpen(true), []);
+  const close = useCallback(() => setIsOpen(false), []);
 
   const value = useMemo(
     () => ({
-      open: disclosure.onOpen,
-      close: disclosure.onClose
+      open,
+      close
     }),
-    [disclosure.onClose, disclosure.onOpen]
+    [close, open]
   );
 
   return (
     <CartDrawerContext.Provider value={value}>
       {children}
-      <CartDrawer isOpen={disclosure.isOpen} onClose={disclosure.onClose} />
+      <CartDrawer isOpen={isOpen} onClose={close} />
     </CartDrawerContext.Provider>
   );
 }

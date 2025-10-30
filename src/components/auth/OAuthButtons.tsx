@@ -1,10 +1,11 @@
 "use client";
 
-import {Button, Stack, useToast} from "@chakra-ui/react";
 import {useMemo, useState} from "react";
 import type {IconType} from "react-icons";
 import {FaApple, FaFacebook, FaGoogle} from "react-icons/fa";
 
+import {Button} from "@/components/ui/button";
+import {useToast} from "@/hooks/use-toast";
 import {createSupabaseBrowserClient} from "@/lib/supabase/client";
 
 type OAuthProvider = "google" | "facebook" | "apple";
@@ -49,21 +50,39 @@ export function OAuthButtons() {
   };
 
   return (
-    <Stack spacing={3}>
-      {providers.map(({provider, label, icon: Icon}) => (
-        <Button
-          key={provider}
-          variant="outline"
-          leftIcon={<Icon />}
-          onClick={() => handleSignIn(provider)}
-          isLoading={loadingProvider === provider}
-          loadingText="Conectando"
-          isDisabled={loadingProvider !== null && loadingProvider !== provider}
-          width="full"
-        >
-          {label}
-        </Button>
-      ))}
-    </Stack>
+    <div className="flex flex-col gap-3">
+      {providers.map(({provider, label, icon: Icon}) => {
+        const isLoading = loadingProvider === provider;
+        const isDisabled = loadingProvider !== null && loadingProvider !== provider;
+
+        return (
+          <Button
+            key={provider}
+            variant="outline"
+            className="flex items-center justify-between gap-3"
+            onClick={() => handleSignIn(provider)}
+            disabled={isDisabled || isLoading}
+            aria-busy={isLoading}
+          >
+            <span className="flex items-center gap-3">
+              <Icon className="h-5 w-5" />
+              <span>{label}</span>
+            </span>
+            {isLoading ? (
+              <span className="flex items-center gap-2 text-xs font-medium text-muted-foreground">
+                <LoadingSpinner />
+                Conectando
+              </span>
+            ) : null}
+          </Button>
+        );
+      })}
+    </div>
+  );
+}
+
+function LoadingSpinner() {
+  return (
+    <span className="inline-flex h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
   );
 }

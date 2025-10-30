@@ -1,34 +1,21 @@
 "use client";
 
-import {
-  Alert,
-  AlertDescription,
-  AlertIcon,
-  AlertTitle,
-  Box,
-  Button,
-  FormControl,
-  FormLabel,
-  Heading,
-  Input,
-  SimpleGrid,
-  Stack,
-  Text
-} from "@chakra-ui/react";
-import type {AlertStatus} from "@chakra-ui/react";
-import {useEffect, useMemo, useState} from "react";
+import {useEffect, useMemo, useState, type ReactNode} from "react";
 
+import {Button} from "@/components/ui/button";
+import {Input} from "@/components/ui/input";
+import {Label} from "@/components/ui/label";
 import {useUser} from "@/providers/user-provider";
 import type {AddressInput} from "@/types/user";
 
-type Feedback = {type: Extract<AlertStatus, "success" | "error">; message: string};
+type Feedback = {type: "success" | "error"; message: string};
 
 const emptyAddress: AddressInput = {
   label: "",
   street: "",
   city: "",
   country: "",
-  postal: ""
+  postal: "",
 };
 
 export function AddressesManager() {
@@ -48,7 +35,7 @@ export function AddressesManager() {
         street,
         city,
         country,
-        postal
+        postal,
       }))
     );
   }, [user]);
@@ -61,10 +48,12 @@ export function AddressesManager() {
 
   if (!user) {
     return (
-      <Stack spacing={4}>
-        <Heading size="lg">Tus direcciones</Heading>
-        <Text color="whiteAlpha.700">Inicia sesión para gestionar tus direcciones de envío.</Text>
-      </Stack>
+      <div className="flex flex-col gap-4">
+        <h2 className="text-2xl font-semibold">Tus direcciones</h2>
+        <p className="text-sm text-foreground/70">
+          Inicia sesión para gestionar tus direcciones de envío.
+        </p>
+      </div>
     );
   }
 
@@ -93,7 +82,7 @@ export function AddressesManager() {
       street: address.street.trim(),
       city: address.city.trim(),
       country: address.country.trim(),
-      postal: address.postal.trim()
+      postal: address.postal.trim(),
     }));
 
     const hasEmptyField = sanitized.some((address) =>
@@ -111,105 +100,135 @@ export function AddressesManager() {
     } catch (error) {
       setFeedback({
         type: "error",
-        message: error instanceof Error ? error.message : "No se pudieron actualizar las direcciones"
+        message: error instanceof Error ? error.message : "No se pudieron actualizar las direcciones",
       });
     }
   };
 
   return (
-    <Stack spacing={6}>
-      <Stack spacing={1}>
-        <Heading size="lg">Tus direcciones</Heading>
-        <Text color="whiteAlpha.700">Administra tus ubicaciones de entrega habituales.</Text>
-      </Stack>
+    <div className="flex flex-col gap-6">
+      <div className="space-y-1">
+        <h2 className="text-2xl font-semibold">Tus direcciones</h2>
+        <p className="text-sm text-foreground/70">Administra tus ubicaciones de entrega habituales.</p>
+      </div>
 
-      {alert && (
-        <Alert status={alert.type} borderRadius="md">
-          <AlertIcon />
-          <Stack spacing={1}>
-            <AlertTitle>{alert.type === "success" ? "Direcciones guardadas" : "Error"}</AlertTitle>
-            <AlertDescription>{alert.message}</AlertDescription>
-          </Stack>
-        </Alert>
-      )}
+      {alert ? (
+        <div
+          className={`rounded-lg border p-4 text-sm ${
+            alert.type === "success"
+              ? "border-accent/60 bg-accent/10 text-foreground"
+              : "border-danger/60 bg-danger/10 text-danger-foreground"
+          }`}
+        >
+          <div className="font-semibold">
+            {alert.type === "success" ? "Direcciones guardadas" : "Error"}
+          </div>
+          <p>{alert.message}</p>
+        </div>
+      ) : null}
 
-      <Stack spacing={4}>
-        {addresses.length === 0 && (
-          <Box borderRadius="2xl" borderWidth="1px" p={6}>
-            <Text color="whiteAlpha.700">No tienes direcciones guardadas todavía.</Text>
-          </Box>
-        )}
+      <div className="flex flex-col gap-4">
+        {addresses.length === 0 ? (
+          <div className="rounded-2xl border border-white/10 p-6 text-sm text-foreground/70">
+            No tienes direcciones guardadas todavía.
+          </div>
+        ) : null}
 
         {addresses.map((address, index) => (
-          <Box key={`address-${index}`} borderRadius="2xl" borderWidth="1px" p={6}>
-            <Stack spacing={4}>
-              <SimpleGrid columns={{base: 1, md: 2}} spacing={4}>
-                <FormControl isRequired>
-                  <FormLabel>Etiqueta</FormLabel>
+          <div key={`address-${index}`} className="rounded-2xl border border-white/10 p-6">
+            <div className="flex flex-col gap-4">
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                <FormField label="Etiqueta" required>
                   <Input
                     placeholder="Casa, oficina, etc."
                     value={address.label}
                     onChange={(event) => updateAddressField(index, "label", event.target.value)}
+                    required
                   />
-                </FormControl>
-                <FormControl isRequired>
-                  <FormLabel>Calle y número</FormLabel>
+                </FormField>
+                <FormField label="Calle y número" required>
                   <Input
                     placeholder="Calle, número exterior e interior"
                     value={address.street}
                     onChange={(event) => updateAddressField(index, "street", event.target.value)}
+                    required
                   />
-                </FormControl>
-              </SimpleGrid>
+                </FormField>
+              </div>
 
-              <SimpleGrid columns={{base: 1, md: 3}} spacing={4}>
-                <FormControl isRequired>
-                  <FormLabel>Ciudad</FormLabel>
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+                <FormField label="Ciudad" required>
                   <Input
                     placeholder="Ciudad"
                     value={address.city}
                     onChange={(event) => updateAddressField(index, "city", event.target.value)}
+                    required
                   />
-                </FormControl>
-                <FormControl isRequired>
-                  <FormLabel>País</FormLabel>
+                </FormField>
+                <FormField label="País" required>
                   <Input
                     placeholder="País"
                     value={address.country}
                     onChange={(event) => updateAddressField(index, "country", event.target.value)}
+                    required
                   />
-                </FormControl>
-                <FormControl isRequired>
-                  <FormLabel>Código postal</FormLabel>
+                </FormField>
+                <FormField label="Código postal" required>
                   <Input
                     placeholder="Código postal"
                     value={address.postal}
                     onChange={(event) => updateAddressField(index, "postal", event.target.value)}
+                    required
                   />
-                </FormControl>
-              </SimpleGrid>
+                </FormField>
+              </div>
 
               <Button
-                variant="ghost"
-                colorScheme="red"
-                alignSelf="flex-start"
+                type="button"
+                variant="outline"
+                className="w-fit border-danger/40 text-danger hover:bg-danger/10"
                 onClick={() => removeAddress(index)}
-                isDisabled={isLoading}
+                disabled={isLoading}
               >
                 Eliminar dirección
               </Button>
-            </Stack>
-          </Box>
+            </div>
+          </div>
         ))}
 
-        <Button onClick={addAddress} isDisabled={isLoading} variant="outline">
+        <Button type="button" onClick={addAddress} disabled={isLoading} variant="outline" className="w-fit">
           Añadir dirección
         </Button>
 
-        <Button colorScheme="yellow" onClick={handleSave} isLoading={isLoading}>
-          Guardar direcciones
+        <Button type="button" onClick={handleSave} disabled={isLoading} className="w-fit gap-2">
+          {isLoading ? <Spinner /> : null}
+          {isLoading ? "Guardando..." : "Guardar direcciones"}
         </Button>
-      </Stack>
-    </Stack>
+      </div>
+    </div>
+  );
+}
+
+type FormFieldProps = {
+  label: string;
+  required?: boolean;
+  children: ReactNode;
+};
+
+function FormField({label, required, children}: FormFieldProps) {
+  return (
+    <div className="flex flex-col gap-2">
+      <Label className="text-sm font-medium text-foreground">
+        {label}
+        {required ? <span className="text-danger"> *</span> : null}
+      </Label>
+      {children}
+    </div>
+  );
+}
+
+function Spinner() {
+  return (
+    <span className="inline-flex h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
   );
 }
