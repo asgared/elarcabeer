@@ -1,8 +1,7 @@
-import {Container} from "@/components/ui/container";
-import {Box, Heading, Stack, Text} from "@chakra-ui/react";
 import {Metadata} from "next";
 import {notFound} from "next/navigation";
 
+import {Container} from "@/components/ui/container";
 import {stores} from "@/data/stores";
 import type {Store} from "@/types/catalog";
 
@@ -31,30 +30,30 @@ export default function StorePage({params}: {params: {slug: string}}) {
 
   return (
     <Container maxW="4xl">
-      <Stack spacing={8}>
-        <Stack spacing={2}>
-          <Heading size="2xl">{store.name}</Heading>
-          <Text color="whiteAlpha.700">{store.address}</Text>
-          <Text color="whiteAlpha.700">{store.hours}</Text>
-        </Stack>
-        <Box borderRadius="2xl" borderWidth="1px" overflow="hidden" p={0}>
+      <div className="flex flex-col gap-8">
+        <div className="flex flex-col gap-2">
+          <h1 className="text-3xl font-semibold md:text-4xl">{store.name}</h1>
+          <p className="text-white/70">{store.address}</p>
+          <p className="text-white/70">{store.hours}</p>
+        </div>
+        <div className="overflow-hidden rounded-2xl border border-white/10">
           <iframe
             allowFullScreen
-            height="480"
+            className="h-[480px] w-full"
             src="https://calendly.com/elarca/visit?hide_gdpr_banner=1"
-            style={{border: "none", width: "100%"}}
+            style={{border: "none"}}
             title="Reservar mesa"
           />
-        </Box>
-        <Stack spacing={3}>
-          <Heading size="md">Próximos eventos</Heading>
+        </div>
+        <div className="flex flex-col gap-3">
+          <h2 className="text-xl font-semibold">Próximos eventos</h2>
           {store.upcomingEvents.map((event) => (
-            <Text key={event} color="whiteAlpha.800">
+            <p key={event} className="text-white/80">
               • {event}
-            </Text>
+            </p>
           ))}
-        </Stack>
-      </Stack>
+        </div>
+      </div>
     </Container>
   );
 }

@@ -1,23 +1,12 @@
-import {Container} from "@/components/ui/container";
-import {
-  Box,
-  Grid,
-  GridItem,
-  Heading,
-  List,
-  ListIcon,
-  ListItem,
-  Stack,
-  Text
-} from "@chakra-ui/react";
 import {Metadata} from "next";
 import {notFound} from "next/navigation";
 import {FaCheck} from "react-icons/fa6";
 
 import {AddToCartButton} from "@/components/cart/add-to-cart-button";
+import {Container} from "@/components/ui/container";
 import {Price} from "@/components/ui/price";
-import {products} from "@/data/products";
 import {getBundleBySlug} from "@/components/ui/bundle-card";
+import {products} from "@/data/products";
 import type {Product} from "@/types/catalog";
 
 export async function generateMetadata({params}: {params: {slug: string}}): Promise<Metadata> {
@@ -51,44 +40,42 @@ export default function BundlePage({params}: {params: {slug: string}}) {
 
   return (
     <Container maxW="5xl">
-      <Stack spacing={8}>
-        <Heading size="2xl">{bundle.name}</Heading>
-        <Text color="whiteAlpha.700" fontSize="lg">
-          {bundle.description}
-        </Text>
-        <Grid gap={12} templateColumns={{base: "1fr", md: "1fr 1fr"}}>
-          <GridItem>
-            <Box borderRadius="2xl" borderWidth="1px" p={6}>
-              <Heading size="md" mb={4}>
-                Lo que incluye
-              </Heading>
-              <List spacing={2}>
-                {includedProducts.map(({product, quantity}) => (
-                  <ListItem key={product!.id} color="whiteAlpha.800">
-                    <ListIcon as={FaCheck} color="brand.400" />
+      <div className="flex flex-col gap-8">
+        <h1 className="text-3xl font-semibold md:text-4xl">{bundle.name}</h1>
+        <p className="text-lg text-white/70">{bundle.description}</p>
+        <div className="grid gap-12 md:grid-cols-2">
+          <div className="rounded-2xl border border-white/10 bg-background/40 p-6">
+            <h2 className="mb-4 text-xl font-semibold">Lo que incluye</h2>
+            <ul className="space-y-2 text-sm text-white/80">
+              {includedProducts.map(({product, quantity}) => (
+                <li key={product!.id} className="flex items-start gap-3">
+                  <span className="mt-1 text-emerald-400">
+                    <FaCheck className="h-4 w-4" />
+                  </span>
+                  <span>
                     {quantity}x {product!.name}
-                  </ListItem>
-                ))}
-              </List>
-            </Box>
-          </GridItem>
-          <GridItem>
-            <Stack spacing={6}>
-              <Price amount={bundle.price} fontSize="3xl" />
-              <Text color="whiteAlpha.600">Ahorra {bundle.savingsPercentage}% vs comprar por separado.</Text>
-              {includedProducts.map(({product}) => (
-                product?.variants[0] ? (
-                  <AddToCartButton
-                    key={product.id}
-                    productId={product.id}
-                    variant={product.variants[0]}
-                  />
-                ) : null
+                  </span>
+                </li>
               ))}
-            </Stack>
-          </GridItem>
-        </Grid>
-      </Stack>
+            </ul>
+          </div>
+          <div className="flex flex-col gap-6">
+            <Price amount={bundle.price} className="text-3xl" />
+            <p className="text-sm text-white/60">
+              Ahorra {bundle.savingsPercentage}% vs comprar por separado.
+            </p>
+            {includedProducts.map(({product}) => (
+              product?.variants[0] ? (
+                <AddToCartButton
+                  key={product.id}
+                  productId={product.id}
+                  variant={product.variants[0]}
+                />
+              ) : null
+            ))}
+          </div>
+        </div>
+      </div>
     </Container>
   );
 }

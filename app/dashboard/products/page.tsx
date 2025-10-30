@@ -1,42 +1,24 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import {useCallback, useEffect, useMemo, useState} from "react";
+import {Controller, useFieldArray, useForm} from "react-hook-form";
+
 import {
-  Badge,
-  Box,
-  Button,
-  Center,
-  Flex,
-  FormControl,
-  FormErrorMessage,
-  FormLabel,
-  FormHelperText,
-  Heading,
-  Image,
-  Input,
-  Modal,
-  ModalBody,
-  ModalCloseButton,
-  ModalContent,
-  ModalFooter,
-  ModalHeader,
-  ModalOverlay,
-  Spinner,
-  Stack,
-  Switch,
-  Table,
-  Tbody,
-  Td,
-  Text,
-  Textarea,
-  Th,
-  Thead,
-  Tr,
-  useDisclosure,
-  useToast,
-} from "@chakra-ui/react";
-import { Controller, useFieldArray, useForm } from "react-hook-form";
-import NextLink from "next/link";
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {Button} from "@/components/ui/button";
+import {Checkbox} from "@/components/ui/checkbox";
+import {Input} from "@/components/ui/input";
+import {Label} from "@/components/ui/label";
+import {Textarea} from "@/components/ui/textarea";
+import {useToast} from "@/hooks/use-toast";
+
+import NextImage from "next/image";
 
 type RawProduct = Record<string, unknown> & {
   id?: string;
@@ -100,27 +82,27 @@ type CreateProductFormValues = {
 };
 
 const normalizeProduct = (product: RawProduct): AdminProduct => {
-    const coerceNumber = (value: unknown): number | undefined => {
-        if (value === null || value === undefined || value === "") return undefined;
-        const num = Number(value);
-        return isNaN(num) ? undefined : num;
-    };
+  const coerceNumber = (value: unknown): number | undefined => {
+    if (value === null || value === undefined || value === "") return undefined;
+    const num = Number(value);
+    return Number.isNaN(num) ? undefined : num;
+  };
 
-    const id = product.id ?? product.sku ?? product.slug ?? crypto.randomUUID();
+  const id = product.id ?? product.sku ?? product.slug ?? crypto.randomUUID();
 
-    return {
-        id: String(id),
-        name: String(product.name ?? "Producto sin nombre"),
-        slug: String(product.slug ?? ""),
-        sku: String(product.sku ?? ""),
-        description: String(product.description ?? ""),
-        price: coerceNumber(product.price),
-        stock: coerceNumber(product.stock),
-        style: String(product.style ?? ""),
-        rating: coerceNumber(product.rating),
-        limited: Boolean(product.limited ?? product.limitedEdition),
-        imageUrl: String(product.imageUrl ?? product.heroImage ?? ""),
-    };
+  return {
+    id: String(id),
+    name: String(product.name ?? "Producto sin nombre"),
+    slug: String(product.slug ?? ""),
+    sku: String(product.sku ?? ""),
+    description: String(product.description ?? ""),
+    price: coerceNumber(product.price),
+    stock: coerceNumber(product.stock),
+    style: String(product.style ?? ""),
+    rating: coerceNumber(product.rating),
+    limited: Boolean(product.limited ?? product.limitedEdition),
+    imageUrl: String(product.imageUrl ?? product.heroImage ?? ""),
+  };
 };
 
 export default function ProductsPage() {
@@ -128,12 +110,12 @@ export default function ProductsPage() {
   const [isLoadingProducts, setIsLoadingProducts] = useState<boolean>(true);
   const [productsError, setProductsError] = useState<string | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
-  const { isOpen, onOpen, onClose } = useDisclosure();
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
   const toast = useToast();
 
   const {
     control,
-    formState: { errors, isSubmitting },
+    formState: {errors, isSubmitting},
     handleSubmit,
     register,
     reset,
@@ -165,8 +147,8 @@ export default function ProductsPage() {
   });
 
   const currencyFormatter = useMemo(
-    () => new Intl.NumberFormat("es-MX", { style: "currency", currency: "MXN" }),
-    []
+    () => new Intl.NumberFormat("es-MX", {style: "currency", currency: "MXN"}),
+    [],
   );
 
   const fetchProducts = useCallback(async () => {
@@ -189,13 +171,13 @@ export default function ProductsPage() {
     fetchProducts();
   }, [fetchProducts]);
 
-  const handleCloseModal = () => {
-    setFormError(null);
-    reset();
-    onClose();
-  };
+  useEffect(() => {
+    if (!isDialogOpen) {
+      setFormError(null);
+      reset();
+    }
+  }, [isDialogOpen, reset]);
 
-  // --- INICIO DE LA LÓGICA DE CREACIÓN DE PRODUCTOS ---
   const onSubmit = handleSubmit(async (values) => {
     setFormError(null);
     try {
@@ -235,7 +217,7 @@ export default function ProductsPage() {
 
       const galleryFiles = values.galleryFiles ? Array.from(values.galleryFiles) : [];
       const galleryUrls = await Promise.all(
-        galleryFiles.map((galleryFile) => uploadToCloudinary(galleryFile))
+        galleryFiles.map((galleryFile) => uploadToCloudinary(galleryFile)),
       );
 
       const parseMultiValueField = (value: string) =>
@@ -288,7 +270,7 @@ export default function ProductsPage() {
 
       const createResponse = await fetch("/api/dashboard/products", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {"Content-Type": "application/json"},
         body: JSON.stringify(productPayload),
       });
 
@@ -305,507 +287,455 @@ export default function ProductsPage() {
         status: "success",
       });
 
-      handleCloseModal();
+      setFormError(null);
+      reset();
+      setIsDialogOpen(false);
     } catch (error) {
       console.error("Error creating product:", error);
       const message = error instanceof Error ? error.message : "No se pudo crear el producto.";
       setFormError(message);
-      toast({ title: "Error", description: message, status: "error" });
+      toast({title: "Error", description: message, status: "error"});
     }
   });
-  // --- FIN DE LA LÓGICA DE CREACIÓN DE PRODUCTOS ---
 
   return (
-    <Box py={10} px={{ base: 4, md: 8 }}>
-      <Flex align="center" justify="space-between" mb={8} wrap="wrap" gap={4}>
-        <Box>
-          <Heading size="lg">Gestión de productos</Heading>
-          <Text mt={2} color="gray.600">
+    <div className="px-4 py-10 md:px-8">
+      <div className="mb-8 flex flex-wrap items-center justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-semibold">Gestión de productos</h1>
+          <p className="mt-2 text-sm text-white/70">
             Administra el catálogo: consulta los productos existentes y crea nuevos con su imagen principal.
-          </Text>
-        </Box>
-        <Button colorScheme="teal" onClick={onOpen}>
-          Añadir producto
-        </Button>
-      </Flex>
+          </p>
+        </div>
+        <Button onClick={() => setIsDialogOpen(true)}>Añadir producto</Button>
+      </div>
 
-      <Box bg="white" borderRadius="lg" boxShadow="sm" overflow="hidden">
+      <div className="overflow-hidden rounded-2xl border border-white/10 bg-background/60">
         {isLoadingProducts ? (
-          <Center py={16} flexDirection="column" gap={4}>
-            <Spinner size="lg" />
-            <Text color="gray.600">Cargando productos...</Text>
-          </Center>
+          <div className="flex flex-col items-center gap-3 py-16 text-white/70">
+            <div className="h-12 w-12 animate-spin rounded-full border-4 border-white/20 border-t-accent" />
+            <p>Cargando productos...</p>
+          </div>
         ) : productsError ? (
-          <Box bg="red.50" color="red.700" p={6}>
-            <Heading size="sm" mb={2}>
-              No se pudieron cargar los productos
-            </Heading>
-            <Text>{productsError}</Text>
-            <Button mt={4} size="sm" onClick={fetchProducts}>
+          <div className="space-y-3 bg-red-500/10 p-6 text-sm text-red-200">
+            <h2 className="text-lg font-semibold text-red-100">No se pudieron cargar los productos</h2>
+            <p>{productsError}</p>
+            <Button onClick={fetchProducts} size="sm" variant="outline">
               Reintentar
             </Button>
-          </Box>
+          </div>
         ) : products.length === 0 ? (
-          <Center py={16} flexDirection="column" gap={2}>
-            <Text fontWeight="semibold">Aún no hay productos registrados.</Text>
-            <Text color="gray.600">Crea tu primer producto usando el botón “Añadir producto”.</Text>
-          </Center>
+          <div className="flex flex-col items-center gap-2 py-16 text-sm text-white/70">
+            <p className="text-base font-semibold text-white">Aún no hay productos registrados.</p>
+            <p>Crea tu primer producto usando el botón “Añadir producto”.</p>
+          </div>
         ) : (
-          <Box overflowX="auto">
-            <Table variant="simple">
-              <Thead bg="gray.50">
-                <Tr>
-                  <Th>Imagen</Th>
-                  <Th>Nombre</Th>
-                  <Th>SKU</Th>
-                  <Th>Precio</Th>
-                  <Th>Stock</Th>
-                  <Th>Estado</Th>
-                </Tr>
-              </Thead>
-              <Tbody>
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-white/10 text-sm">
+              <thead className="bg-white/5 text-left uppercase tracking-wide text-white/70">
+                <tr>
+                  <th className="px-6 py-4 font-semibold">Imagen</th>
+                  <th className="px-6 py-4 font-semibold">Nombre</th>
+                  <th className="px-6 py-4 font-semibold">SKU</th>
+                  <th className="px-6 py-4 font-semibold">Precio</th>
+                  <th className="px-6 py-4 font-semibold">Stock</th>
+                  <th className="px-6 py-4 font-semibold">Estado</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-white/10">
                 {products.map((product) => (
-                  <Tr key={product.id}>
-                    <Td>
+                  <tr key={product.id} className="hover:bg-white/5">
+                    <td className="px-6 py-4">
                       {product.imageUrl ? (
-                        <Image
-                          alt={product.name}
-                          borderRadius="md"
-                          boxSize="60px"
-                          objectFit="cover"
-                          src={product.imageUrl}
-                        />
+          <div className="relative h-14 w-14 overflow-hidden rounded-md border border-white/10">
+            <NextImage
+              alt={product.name}
+              fill
+              className="object-cover"
+              sizes="56px"
+              src={product.imageUrl}
+            />
+          </div>
                       ) : (
-                        <Center
-                          bg="gray.100"
-                          borderRadius="md"
-                          boxSize="60px"
-                          color="gray.500"
-                          fontSize="xs"
-                          textAlign="center"
-                          px={2}
-                        >
+                        <div className="flex h-14 w-14 items-center justify-center rounded-md border border-dashed border-white/10 text-[10px] text-white/60">
                           Sin imagen
-                        </Center>
+                        </div>
                       )}
-                    </Td>
-                    <Td>
-                      <Stack spacing={1}>
-                        <Text fontWeight="semibold">{product.name}</Text>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="flex flex-col gap-1">
+                        <span className="font-semibold text-white">{product.name}</span>
                         {product.slug ? (
-                          <Text color="gray.500" fontSize="sm">
-                            /{product.slug}
-                          </Text>
+                          <span className="text-xs text-white/60">/{product.slug}</span>
                         ) : null}
-                      </Stack>
-                    </Td>
-                    <Td>
-                      <Text>{product.sku ?? "—"}</Text>
-                    </Td>
-                    <Td>
-                      <Text>
-                        {typeof product.price === "number"
-                          ? currencyFormatter.format(product.price / 100)
-                          : "—"}
-                      </Text>
-                    </Td>
-                    <Td>
-                      <Text>{typeof product.stock === "number" ? product.stock : "—"}</Text>
-                    </Td>
-                    <Td>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 text-white/80">{product.sku ?? "—"}</td>
+                    <td className="px-6 py-4 text-white">
+                      {typeof product.price === "number"
+                        ? currencyFormatter.format(product.price / 100)
+                        : "—"}
+                    </td>
+                    <td className="px-6 py-4 text-white/80">
+                      {typeof product.stock === "number" ? product.stock : "—"}
+                    </td>
+                    <td className="px-6 py-4">
                       {product.limited ? (
-                        <Badge colorScheme="purple">Edición limitada</Badge>
+                        <span className="inline-flex items-center rounded-full bg-purple-500/20 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-purple-200">
+                          Edición limitada
+                        </span>
                       ) : (
-                        <Badge colorScheme="green">Activo</Badge>
+                        <span className="inline-flex items-center rounded-full bg-emerald-500/20 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-emerald-200">
+                          Activo
+                        </span>
                       )}
-                    </Td>
-                  </Tr>
+                    </td>
+                  </tr>
                 ))}
-              </Tbody>
-            </Table>
-          </Box>
+              </tbody>
+            </table>
+          </div>
         )}
-      </Box>
+      </div>
 
-      <Modal isOpen={isOpen} onClose={handleCloseModal} size="xl">
-        <ModalOverlay />
-        <ModalContent>
-          <ModalHeader>Crear nuevo producto</ModalHeader>
-          <ModalCloseButton />
-          <form onSubmit={onSubmit} noValidate>
-            <ModalBody>
-              <Stack spacing={5}>
-                <FormControl isInvalid={!!errors.name} isRequired>
-                  <FormLabel htmlFor="name">Nombre</FormLabel>
-                  <Input
-                    id="name"
-                    placeholder="Nombre del producto"
-                    {...register("name", { required: "El nombre es obligatorio." })}
-                  />
-                  <FormErrorMessage>{errors.name?.message}</FormErrorMessage>
-                </FormControl>
+      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <DialogContent className="max-h-[90vh] overflow-y-auto">
+          <form className="space-y-5" noValidate onSubmit={onSubmit}>
+            <DialogHeader>
+              <DialogTitle>Crear nuevo producto</DialogTitle>
+            </DialogHeader>
 
-                <FormControl isInvalid={!!errors.slug} isRequired>
-                  <FormLabel htmlFor="slug">Slug</FormLabel>
-                  <Input
-                    id="slug"
-                    placeholder="slug-del-producto"
-                    {...register("slug", { required: "El slug es obligatorio." })}
-                  />
-                  <FormErrorMessage>{errors.slug?.message}</FormErrorMessage>
-                </FormControl>
+            <div className="grid gap-4">
+              <div className="grid gap-2">
+                <Label htmlFor="name">Nombre</Label>
+                <Input
+                  id="name"
+                  placeholder="Nombre del producto"
+                  {...register("name", {required: "El nombre es obligatorio."})}
+                />
+                {errors.name ? <p className="text-sm text-red-400">{errors.name.message}</p> : null}
+              </div>
 
-                <FormControl isInvalid={!!errors.categoryLabel} isRequired>
-                  <FormLabel htmlFor="categoryLabel">Etiqueta de categoría</FormLabel>
+              <div className="grid gap-2">
+                <Label htmlFor="slug">Slug</Label>
+                <Input
+                  id="slug"
+                  placeholder="slug-del-producto"
+                  {...register("slug", {required: "El slug es obligatorio."})}
+                />
+                {errors.slug ? <p className="text-sm text-red-400">{errors.slug.message}</p> : null}
+              </div>
+
+              <div className="grid gap-2">
+                <Label htmlFor="categoryLabel">Etiqueta de categoría</Label>
+                <Input
+                  id="categoryLabel"
+                  placeholder="Ej. IPA, Lager, Stout"
+                  {...register("categoryLabel", {required: "La categoría es obligatoria."})}
+                />
+                {errors.categoryLabel ? (
+                  <p className="text-sm text-red-400">{errors.categoryLabel.message}</p>
+                ) : null}
+              </div>
+
+              <div className="grid gap-2">
+                <Label htmlFor="sku">SKU</Label>
+                <Input
+                  id="sku"
+                  placeholder="SKU único"
+                  {...register("sku", {required: "El SKU es obligatorio."})}
+                />
+                {errors.sku ? <p className="text-sm text-red-400">{errors.sku.message}</p> : null}
+              </div>
+
+              <div className="grid gap-2">
+                <Label htmlFor="description">Descripción</Label>
+                <Textarea
+                  id="description"
+                  placeholder="Describe el producto"
+                  rows={4}
+                  {...register("description", {required: "La descripción es obligatoria."})}
+                />
+                {errors.description ? (
+                  <p className="text-sm text-red-400">{errors.description.message}</p>
+                ) : null}
+              </div>
+
+              <div className="grid gap-2">
+                <Label htmlFor="tastingNotes">Notas de cata</Label>
+                <Textarea
+                  id="tastingNotes"
+                  placeholder="Cítrica, tropical, herbal"
+                  rows={3}
+                  {...register("tastingNotes")}
+                />
+                <p className="text-xs text-white/60">Separa cada nota por comas o saltos de línea.</p>
+              </div>
+
+              <div className="grid gap-2">
+                <Label htmlFor="pairings">Maridaje sugerido</Label>
+                <Textarea
+                  id="pairings"
+                  placeholder="Hamburguesas, tacos, postres"
+                  rows={3}
+                  {...register("pairings")}
+                />
+                <p className="text-xs text-white/60">Separa cada opción por comas o saltos de línea.</p>
+              </div>
+
+              <div className="grid gap-4 md:grid-cols-2">
+                <div className="grid gap-2">
+                  <Label htmlFor="price">Precio (centavos)</Label>
                   <Input
-                    id="categoryLabel"
-                    placeholder="Ej. IPA, Lager, Stout"
-                    {...register("categoryLabel", {
-                      required: "La categoría es obligatoria.",
+                    id="price"
+                    type="number"
+                    min={0}
+                    step={1}
+                    {...register("price", {
+                      valueAsNumber: true,
+                      required: "El precio es obligatorio.",
+                      min: {value: 0, message: "El precio debe ser mayor o igual a 0."},
                     })}
                   />
-                  <FormErrorMessage>{errors.categoryLabel?.message}</FormErrorMessage>
-                </FormControl>
-
-                <FormControl isInvalid={!!errors.sku} isRequired>
-                  <FormLabel htmlFor="sku">SKU</FormLabel>
+                  {errors.price ? <p className="text-sm text-red-400">{errors.price.message}</p> : null}
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="stock">Stock</Label>
                   <Input
-                    id="sku"
-                    placeholder="SKU único"
-                    {...register("sku", { required: "El SKU es obligatorio." })}
+                    id="stock"
+                    type="number"
+                    min={0}
+                    step={1}
+                    {...register("stock", {
+                      valueAsNumber: true,
+                      required: "El stock es obligatorio.",
+                      min: {value: 0, message: "El stock debe ser mayor o igual a 0."},
+                    })}
                   />
-                  <FormErrorMessage>{errors.sku?.message}</FormErrorMessage>
-                </FormControl>
+                  {errors.stock ? <p className="text-sm text-red-400">{errors.stock.message}</p> : null}
+                </div>
+              </div>
 
-                <FormControl isInvalid={!!errors.description} isRequired>
-                  <FormLabel htmlFor="description">Descripción</FormLabel>
-                  <Textarea
-                    id="description"
-                    placeholder="Describe el producto"
-                    rows={4}
-                    {...register("description", { required: "La descripción es obligatoria." })}
+              <div className="grid gap-4 md:grid-cols-2">
+                <div className="grid gap-2">
+                  <Label htmlFor="style">Estilo</Label>
+                  <Input id="style" placeholder="IPA, Lager..." {...register("style")} />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="rating">Rating (0-5)</Label>
+                  <Input
+                    id="rating"
+                    type="number"
+                    min={0}
+                    max={5}
+                    step="0.1"
+                    {...register("rating", {
+                      valueAsNumber: true,
+                      min: {value: 0, message: "El rating mínimo es 0."},
+                      max: {value: 5, message: "El rating máximo es 5."},
+                    })}
                   />
-                  <FormErrorMessage>{errors.description?.message}</FormErrorMessage>
-                </FormControl>
+                  {errors.rating ? <p className="text-sm text-red-400">{errors.rating.message}</p> : null}
+                </div>
+              </div>
 
-                <FormControl>
-                  <FormLabel htmlFor="tastingNotes">Notas de cata</FormLabel>
-                  <Textarea
-                    id="tastingNotes"
-                    placeholder="Cítrica, tropical, herbal"
-                    rows={3}
-                    {...register("tastingNotes")}
-                  />
-                  <FormHelperText>
-                    Separa cada nota por comas o saltos de línea.
-                  </FormHelperText>
-                </FormControl>
-
-                <FormControl>
-                  <FormLabel htmlFor="pairings">Maridaje sugerido</FormLabel>
-                  <Textarea
-                    id="pairings"
-                    placeholder="Hamburguesas, tacos, postres"
-                    rows={3}
-                    {...register("pairings")}
-                  />
-                  <FormHelperText>
-                    Separa cada opción por comas o saltos de línea.
-                  </FormHelperText>
-                </FormControl>
-
-                <Flex gap={4} direction={{ base: "column", md: "row" }}>
-                  <FormControl isInvalid={!!errors.price} isRequired flex={1}>
-                    <FormLabel htmlFor="price">Precio (centavos)</FormLabel>
-                    <Input
-                      id="price"
-                      type="number"
-                      min={0}
-                      step="1"
-                      {...register("price", {
-                        valueAsNumber: true,
-                        required: "El precio es obligatorio.",
-                        min: { value: 0, message: "El precio debe ser mayor o igual a 0." },
-                      })}
+              <Controller
+                control={control}
+                name="limited"
+                render={({field}) => (
+                  <label className="flex items-center gap-2 text-sm text-white">
+                    <Checkbox
+                      checked={field.value}
+                      onCheckedChange={(value) => field.onChange(Boolean(value))}
                     />
-                    <FormErrorMessage>{errors.price?.message}</FormErrorMessage>
-                  </FormControl>
-
-                  <FormControl isInvalid={!!errors.stock} isRequired flex={1}>
-                    <FormLabel htmlFor="stock">Stock</FormLabel>
-                    <Input
-                      id="stock"
-                      type="number"
-                      min={0}
-                      step="1"
-                      {...register("stock", {
-                        valueAsNumber: true,
-                        required: "El stock es obligatorio.",
-                        min: { value: 0, message: "El stock debe ser mayor o igual a 0." },
-                      })}
-                    />
-                    <FormErrorMessage>{errors.stock?.message}</FormErrorMessage>
-                  </FormControl>
-                </Flex>
-
-                <Flex gap={4} direction={{ base: "column", md: "row" }}>
-                  <FormControl flex={1}>
-                    <FormLabel htmlFor="style">Estilo</FormLabel>
-                    <Input id="style" placeholder="Estilo de la cerveza" {...register("style")} />
-                  </FormControl>
-
-                  <FormControl flex={1}>
-                    <FormLabel htmlFor="rating">Rating</FormLabel>
-                    <Input
-                      id="rating"
-                      type="number"
-                      min={0}
-                      max={5}
-                      step="0.1"
-                      {...register("rating", {
-                        valueAsNumber: true,
-                        min: { value: 0, message: "El rating mínimo es 0." },
-                        max: { value: 5, message: "El rating máximo es 5." },
-                      })}
-                    />
-                    <FormErrorMessage>{errors.rating?.message}</FormErrorMessage>
-                  </FormControl>
-                </Flex>
-
-                <FormControl display="flex" alignItems="center">
-                  <FormLabel htmlFor="limited" mb="0">
                     ¿Es edición limitada?
-                  </FormLabel>
-                  <Controller
-                    control={control}
-                    name="limited"
-                    render={({ field }) => (
-                      <Switch
-                        id="limited"
-                        isChecked={field.value}
-                        onChange={(event) => field.onChange(event.target.checked)}
-                      />
-                    )}
-                  />
-                </FormControl>
-
-                <FormControl isInvalid={!!errors.imageFile} isRequired>
-                  <FormLabel htmlFor="imageFile">Imagen principal</FormLabel>
-                  <Input
-                    id="imageFile"
-                    type="file"
-                    accept="image/*"
-                    {...register("imageFile", {
-                      validate: (value) =>
-                        (value && value.length > 0) || "La imagen principal es obligatoria.",
-                    })}
-                  />
-                  <FormErrorMessage>{errors.imageFile?.message}</FormErrorMessage>
-                </FormControl>
-
-                <FormControl>
-                  <FormLabel htmlFor="galleryFiles">Galería de imágenes</FormLabel>
-                  <Input
-                    id="galleryFiles"
-                    type="file"
-                    accept="image/*"
-                    multiple
-                    {...register("galleryFiles")}
-                  />
-                  <FormHelperText>
-                    Puedes subir varias imágenes adicionales para la galería.
-                  </FormHelperText>
-                </FormControl>
-
-                <Box>
-                  <Flex align="center" justify="space-between" mb={3}>
-                    <Heading size="sm">Variantes</Heading>
-                    <Button
-                      size="sm"
-                      type="button"
-                      onClick={() =>
-                        appendVariant({
-                          sku: "",
-                          name: "",
-                          price: 0,
-                          packSize: 1,
-                          abv: 0,
-                          ibu: 0,
-                        })
-                      }
-                    >
-                      Añadir variante
-                    </Button>
-                  </Flex>
-                  <Stack spacing={4}>
-                    {variantFields.length === 0 ? (
-                      <Text color="gray.600" fontSize="sm">
-                        Añade variantes para definir presentaciones y precios específicos.
-                      </Text>
-                    ) : (
-                      variantFields.map((field, index) => {
-                        const variantErrors = errors.variants?.[index];
-                        return (
-                          <Box key={field.id} borderWidth="1px" borderRadius="md" p={4}>
-                            <Stack spacing={4}>
-                              <Flex align="center" justify="space-between">
-                                <Text fontWeight="semibold">Variante {index + 1}</Text>
-                                <Button
-                                  size="xs"
-                                  type="button"
-                                  colorScheme="red"
-                                  variant="ghost"
-                                  onClick={() => removeVariant(index)}
-                                >
-                                  Eliminar
-                                </Button>
-                              </Flex>
-
-                              <FormControl isInvalid={!!variantErrors?.sku} isRequired>
-                                <FormLabel htmlFor={`variant-${index}-sku`}>SKU</FormLabel>
-                                <Input
-                                  id={`variant-${index}-sku`}
-                                  placeholder="Ej. SKU-4PK"
-                                  {...register(`variants.${index}.sku`, {
-                                    required: "El SKU es obligatorio.",
-                                  })}
-                                />
-                                <FormErrorMessage>
-                                  {variantErrors?.sku?.message as string | undefined}
-                                </FormErrorMessage>
-                              </FormControl>
-
-                              <FormControl isInvalid={!!variantErrors?.name} isRequired>
-                                <FormLabel htmlFor={`variant-${index}-name`}>Nombre</FormLabel>
-                                <Input
-                                  id={`variant-${index}-name`}
-                                  placeholder="Ej. 4-pack"
-                                  {...register(`variants.${index}.name`, {
-                                    required: "El nombre es obligatorio.",
-                                  })}
-                                />
-                                <FormErrorMessage>
-                                  {variantErrors?.name?.message as string | undefined}
-                                </FormErrorMessage>
-                              </FormControl>
-
-                              <FormControl isInvalid={!!variantErrors?.packSize} isRequired>
-                                <FormLabel htmlFor={`variant-${index}-packSize`}>
-                                  Tamaño del paquete
-                                </FormLabel>
-                                <Input
-                                  id={`variant-${index}-packSize`}
-                                  type="number"
-                                  min={1}
-                                  step={1}
-                                  {...register(`variants.${index}.packSize`, {
-                                    valueAsNumber: true,
-                                    required: "El tamaño del paquete es obligatorio.",
-                                    min: {
-                                      value: 1,
-                                      message: "Debe ser al menos 1.",
-                                    },
-                                  })}
-                                />
-                                <FormErrorMessage>
-                                  {variantErrors?.packSize?.message as string | undefined}
-                                </FormErrorMessage>
-                              </FormControl>
-
-                              <FormControl isInvalid={!!variantErrors?.price} isRequired>
-                                <FormLabel htmlFor={`variant-${index}-price`}>
-                                  Precio (centavos)
-                                </FormLabel>
-                                <Input
-                                  id={`variant-${index}-price`}
-                                  type="number"
-                                  min={0}
-                                  step="1"
-                                  {...register(`variants.${index}.price`, {
-                                    valueAsNumber: true,
-                                    required: "El precio es obligatorio.",
-                                    min: {
-                                      value: 0,
-                                      message: "El precio debe ser mayor o igual a 0.",
-                                    },
-                                  })}
-                                />
-                                <FormErrorMessage>
-                                  {variantErrors?.price?.message as string | undefined}
-                                </FormErrorMessage>
-                              </FormControl>
-
-                              <FormControl isInvalid={!!variantErrors?.abv} isRequired>
-                                <FormLabel htmlFor={`variant-${index}-abv`}>
-                                  ABV (%)
-                                </FormLabel>
-                                <Input
-                                  id={`variant-${index}-abv`}
-                                  type="number"
-                                  min={0}
-                                  step="0.1"
-                                  {...register(`variants.${index}.abv`, {
-                                    valueAsNumber: true,
-                                    required: "El ABV es obligatorio.",
-                                    min: {
-                                      value: 0,
-                                      message: "El ABV debe ser mayor o igual a 0.",
-                                    },
-                                  })}
-                                />
-                                <FormErrorMessage>
-                                  {variantErrors?.abv?.message as string | undefined}
-                                </FormErrorMessage>
-                              </FormControl>
-
-                              <FormControl isInvalid={!!variantErrors?.ibu} isRequired>
-                                <FormLabel htmlFor={`variant-${index}-ibu`}>
-                                  IBU
-                                </FormLabel>
-                                <Input
-                                  id={`variant-${index}-ibu`}
-                                  type="number"
-                                  min={0}
-                                  step="1"
-                                  {...register(`variants.${index}.ibu`, {
-                                    valueAsNumber: true,
-                                    required: "El IBU es obligatorio.",
-                                    min: {
-                                      value: 0,
-                                      message: "El IBU debe ser mayor o igual a 0.",
-                                    },
-                                  })}
-                                />
-                                <FormErrorMessage>
-                                  {variantErrors?.ibu?.message as string | undefined}
-                                </FormErrorMessage>
-                              </FormControl>
-                            </Stack>
-                          </Box>
-                        );
-                      })
-                    )}
-                  </Stack>
-                </Box>
-
-                {formError && (
-                  <Box bg="red.50" borderRadius="md" color="red.700" p={3}>
-                    {formError}
-                  </Box>
+                  </label>
                 )}
-              </Stack>
-            </ModalBody>
-            <ModalFooter gap={3}>
-              <Button onClick={handleCloseModal} variant="ghost">
-                Cancelar
+              />
+
+              <div className="grid gap-2">
+                <Label htmlFor="imageFile">Imagen principal</Label>
+                <input
+                  id="imageFile"
+                  type="file"
+                  accept="image/*"
+                  className="text-sm text-white/80"
+                  {...register("imageFile", {
+                    validate: (value) => (value && value.length > 0) || "La imagen principal es obligatoria.",
+                  })}
+                />
+                {errors.imageFile ? <p className="text-sm text-red-400">{errors.imageFile.message}</p> : null}
+              </div>
+
+              <div className="grid gap-2">
+                <Label htmlFor="galleryFiles">Galería de imágenes</Label>
+                <input
+                  id="galleryFiles"
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  className="text-sm text-white/80"
+                  {...register("galleryFiles")}
+                />
+                <p className="text-xs text-white/60">Puedes subir varias imágenes adicionales para la galería.</p>
+              </div>
+
+              <div className="rounded-xl border border-white/10 bg-background/40 p-4">
+                <div className="mb-3 flex items-center justify-between">
+                  <h2 className="text-lg font-semibold">Variantes</h2>
+                  <Button
+                    size="sm"
+                    type="button"
+                    variant="outline"
+                    onClick={() =>
+                      appendVariant({sku: "", name: "", price: 0, packSize: 1, abv: 0, ibu: 0})
+                    }
+                  >
+                    Añadir variante
+                  </Button>
+                </div>
+                <div className="flex flex-col gap-4">
+                  {variantFields.length === 0 ? (
+                    <p className="text-sm text-white/60">Aún no has agregado variantes.</p>
+                  ) : (
+                    variantFields.map((variant, index) => {
+                      const variantErrors = errors.variants?.[index];
+                      return (
+                        <div key={variant.id} className="rounded-lg border border-white/10 bg-background/60 p-4">
+                          <div className="mb-4 flex items-center justify-between">
+                            <span className="text-sm font-semibold text-white">Variante {index + 1}</span>
+                            <Button
+                              size="sm"
+                              type="button"
+                              variant="ghost"
+                              onClick={() => removeVariant(index)}
+                            >
+                              Eliminar
+                            </Button>
+                          </div>
+                          <div className="grid gap-4 md:grid-cols-2">
+                            <div className="grid gap-2">
+                              <Label htmlFor={`variant-${index}-name`}>Nombre</Label>
+                              <Input
+                                id={`variant-${index}-name`}
+                                placeholder="Ej. 4-pack"
+                                {...register(`variants.${index}.name`, {required: "El nombre es obligatorio."})}
+                              />
+                              {variantErrors?.name ? (
+                                <p className="text-sm text-red-400">{variantErrors.name.message as string}</p>
+                              ) : null}
+                            </div>
+                            <div className="grid gap-2">
+                              <Label htmlFor={`variant-${index}-sku`}>SKU</Label>
+                              <Input
+                                id={`variant-${index}-sku`}
+                                placeholder="SKU variante"
+                                {...register(`variants.${index}.sku`, {required: "El SKU es obligatorio."})}
+                              />
+                              {variantErrors?.sku ? (
+                                <p className="text-sm text-red-400">{variantErrors.sku.message as string}</p>
+                              ) : null}
+                            </div>
+                          </div>
+                          <div className="grid gap-4 md:grid-cols-2">
+                            <div className="grid gap-2">
+                              <Label htmlFor={`variant-${index}-packSize`}>Tamaño del paquete</Label>
+                              <Input
+                                id={`variant-${index}-packSize`}
+                                type="number"
+                                min={1}
+                                step={1}
+                                {...register(`variants.${index}.packSize`, {
+                                  valueAsNumber: true,
+                                  required: "El tamaño del paquete es obligatorio.",
+                                  min: {value: 1, message: "Debe ser al menos 1."},
+                                })}
+                              />
+                              {variantErrors?.packSize ? (
+                                <p className="text-sm text-red-400">{variantErrors.packSize.message as string}</p>
+                              ) : null}
+                            </div>
+                            <div className="grid gap-2">
+                              <Label htmlFor={`variant-${index}-price`}>Precio (centavos)</Label>
+                              <Input
+                                id={`variant-${index}-price`}
+                                type="number"
+                                min={0}
+                                step={1}
+                                {...register(`variants.${index}.price`, {
+                                  valueAsNumber: true,
+                                  required: "El precio es obligatorio.",
+                                  min: {value: 0, message: "El precio debe ser mayor o igual a 0."},
+                                })}
+                              />
+                              {variantErrors?.price ? (
+                                <p className="text-sm text-red-400">{variantErrors.price.message as string}</p>
+                              ) : null}
+                            </div>
+                          </div>
+                          <div className="grid gap-4 md:grid-cols-2">
+                            <div className="grid gap-2">
+                              <Label htmlFor={`variant-${index}-abv`}>ABV (%)</Label>
+                              <Input
+                                id={`variant-${index}-abv`}
+                                type="number"
+                                min={0}
+                                step={0.1}
+                                {...register(`variants.${index}.abv`, {
+                                  valueAsNumber: true,
+                                  required: "El ABV es obligatorio.",
+                                  min: {value: 0, message: "El ABV debe ser mayor o igual a 0."},
+                                })}
+                              />
+                              {variantErrors?.abv ? (
+                                <p className="text-sm text-red-400">{variantErrors.abv.message as string}</p>
+                              ) : null}
+                            </div>
+                            <div className="grid gap-2">
+                              <Label htmlFor={`variant-${index}-ibu`}>IBU</Label>
+                              <Input
+                                id={`variant-${index}-ibu`}
+                                type="number"
+                                min={0}
+                                step={1}
+                                {...register(`variants.${index}.ibu`, {
+                                  valueAsNumber: true,
+                                  required: "El IBU es obligatorio.",
+                                  min: {value: 0, message: "El IBU debe ser mayor o igual a 0."},
+                                })}
+                              />
+                              {variantErrors?.ibu ? (
+                                <p className="text-sm text-red-400">{variantErrors.ibu.message as string}</p>
+                              ) : null}
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })
+                  )}
+                </div>
+              </div>
+
+              {formError ? (
+                <div className="rounded-lg border border-red-500/40 bg-red-500/10 px-4 py-3 text-sm text-red-200">
+                  {formError}
+                </div>
+              ) : null}
+            </div>
+
+            <DialogFooter>
+              <DialogClose asChild>
+                <Button type="button" variant="ghost">
+                  Cancelar
+                </Button>
+              </DialogClose>
+              <Button type="submit" disabled={isSubmitting}>
+                {isSubmitting ? "Creando producto..." : "Crear producto"}
               </Button>
-              <Button colorScheme="teal" type="submit" isLoading={isSubmitting}>
-                Crear producto
-              </Button>
-            </ModalFooter>
+            </DialogFooter>
           </form>
-        </ModalContent>
-      </Modal>
-    </Box>
+        </DialogContent>
+      </Dialog>
+    </div>
   );
 }

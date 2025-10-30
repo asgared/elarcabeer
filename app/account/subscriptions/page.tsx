@@ -1,8 +1,7 @@
 "use client";
 
+import {Button} from "@/components/ui/button";
 import {Container} from "@/components/ui/container";
-import {Badge, Box, Button, Heading, Spinner, Stack, Text} from "@chakra-ui/react";
-
 import {useUser} from "@/providers/user-provider";
 
 export const dynamic = "force-dynamic";
@@ -15,10 +14,10 @@ const SUBSCRIPTION_STATUS_LABELS: Record<string, string> = {
 };
 
 const SUBSCRIPTION_STATUS_COLORS: Record<string, string> = {
-  active: "green",
-  canceled: "red",
-  paused: "orange",
-  incomplete: "yellow"
+  active: "bg-emerald-500/20 text-emerald-300",
+  canceled: "bg-red-500/20 text-red-300",
+  paused: "bg-amber-500/20 text-amber-200",
+  incomplete: "bg-yellow-500/20 text-yellow-200"
 };
 
 const dateFormatter = new Intl.DateTimeFormat("es-MX", {dateStyle: "long"});
@@ -30,56 +29,58 @@ export default function AccountSubscriptionsPage() {
 
   return (
     <Container maxW="4xl">
-      <Stack spacing={6}>
-        <Heading size="2xl">Suscripciones</Heading>
+      <div className="flex flex-col gap-6">
+        <h1 className="text-3xl font-semibold md:text-4xl">Suscripciones</h1>
 
-        {isLoading && (
-          <Stack align="center" py={12} spacing={4}>
-            <Spinner size="xl" thickness="4px" />
-            <Text color="whiteAlpha.700">Cargando tus suscripciones...</Text>
-          </Stack>
-        )}
+        {isLoading ? (
+          <div className="flex flex-col items-center gap-4 py-12">
+            <div className="h-12 w-12 animate-spin rounded-full border-4 border-white/20 border-t-accent" />
+            <p className="text-white/70">Cargando tus suscripciones...</p>
+          </div>
+        ) : null}
 
-        {!user && !isLoading && (
-          <Box borderRadius="2xl" borderWidth="1px" p={6}>
-            <Text color="whiteAlpha.700">Inicia sesión para consultar o gestionar tus suscripciones activas.</Text>
-          </Box>
-        )}
+        {!user && !isLoading ? (
+          <div className="rounded-2xl border border-white/10 bg-background/40 p-6">
+            <p className="text-sm text-white/70">Inicia sesión para consultar o gestionar tus suscripciones activas.</p>
+          </div>
+        ) : null}
 
-        {user && !isLoading && (
-          <Stack spacing={4}>
+        {user && !isLoading ? (
+          <div className="flex flex-col gap-4">
             {user.subscriptions.length === 0 ? (
-              <Box borderRadius="2xl" borderWidth="1px" p={6}>
-                <Text color="whiteAlpha.700">Aún no tienes suscripciones activas.</Text>
-              </Box>
+              <div className="rounded-2xl border border-white/10 bg-background/40 p-6">
+                <p className="text-sm text-white/70">Aún no tienes suscripciones activas.</p>
+              </div>
             ) : (
               user.subscriptions.map((subscription) => {
                 const statusKey = subscription.status.toLowerCase();
                 const statusLabel = SUBSCRIPTION_STATUS_LABELS[statusKey] ?? subscription.status;
-                const statusColor = SUBSCRIPTION_STATUS_COLORS[statusKey] ?? "gray";
+                const statusClass = SUBSCRIPTION_STATUS_COLORS[statusKey] ?? "bg-white/10 text-white/70";
 
                 return (
-                  <Box key={subscription.id} borderRadius="2xl" borderWidth="1px" p={6}>
-                    <Stack spacing={2}>
-                      <Stack direction={{base: "column", md: "row"}} justify="space-between" align="flex-start">
-                        <Text fontWeight="bold">Plan: {subscription.plan}</Text>
-                        <Badge colorScheme={statusColor}>{statusLabel}</Badge>
-                      </Stack>
-                      <Text color="whiteAlpha.700">
+                  <div key={subscription.id} className="rounded-2xl border border-white/10 bg-background/40 p-6">
+                    <div className="flex flex-col gap-2">
+                      <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+                        <p className="font-semibold text-white">Plan: {subscription.plan}</p>
+                        <span className={`inline-flex items-center justify-center rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-wide ${statusClass}`}>
+                          {statusLabel}
+                        </span>
+                      </div>
+                      <p className="text-sm text-white/70">
                         Activada el {dateFormatter.format(new Date(subscription.createdAt))}
-                      </Text>
-                      <Text color="whiteAlpha.700">Gestiona cambios o cancelaciones desde el portal de pagos.</Text>
-                      <Button mt={4} variant="outline" isDisabled>
+                      </p>
+                      <p className="text-sm text-white/70">Gestiona cambios o cancelaciones desde el portal de pagos.</p>
+                      <Button className="mt-4 w-full sm:w-auto" disabled variant="outline">
                         Gestionar en Stripe Billing
                       </Button>
-                    </Stack>
-                  </Box>
+                    </div>
+                  </div>
                 );
               })
             )}
-          </Stack>
-        )}
-      </Stack>
+          </div>
+        ) : null}
+      </div>
     </Container>
   );
 }

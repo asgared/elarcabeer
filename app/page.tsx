@@ -1,6 +1,4 @@
 import {Container} from "@/components/ui/container";
-import {Grid, GridItem, Heading, SimpleGrid, Stack, Text} from "@chakra-ui/react";
-
 import {SiteAppLayout} from "@/components/layout/site-app-layout";
 import {BrandHero} from "@/components/ui/brand-hero";
 import {BundleCard} from "@/components/ui/bundle-card";
@@ -20,54 +18,54 @@ export default async function HomePage() {
 
   return (
     <SiteAppLayout>
-        <Container maxW="7xl">
-          <Stack spacing={16}>
-            <BrandHero
-              content={{
-                title: heroContent?.title,
-                subtitle: heroContent?.subtitle,
-                body: heroContent?.body,
-                imageUrl: heroContent?.imageUrl,
-              }}
-            />
+      <Container maxW="7xl">
+        <div className="flex flex-col gap-16">
+          <BrandHero
+            content={{
+              title: heroContent?.title,
+              subtitle: heroContent?.subtitle,
+              body: heroContent?.body,
+              imageUrl: heroContent?.imageUrl,
+            }}
+          />
 
-            <Stack spacing={6}>
-              <Heading size="lg">Cervezas destacadas</Heading>
-              <SimpleGrid columns={{base: 1, md: 3}} gap={8}>
+            <div className="flex flex-col gap-6">
+              <h2 className="text-2xl font-semibold md:text-3xl">Cervezas destacadas</h2>
+              <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
                 {products.slice(0, 3).map((product) => (
                   <ProductCard key={product.id} product={product} />
                 ))}
-              </SimpleGrid>
-            </Stack>
+              </div>
+            </div>
 
-            <Stack spacing={6}>
-              <Heading size="lg">Bundles que conquistan</Heading>
-              <SimpleGrid columns={{base: 1, md: 3}} gap={8}>
+            <div className="flex flex-col gap-6">
+              <h2 className="text-2xl font-semibold md:text-3xl">Bundles que conquistan</h2>
+              <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
                 {bundles.map((bundle) => (
                   <BundleCard key={bundle.id} bundle={bundle} />
                 ))}
-              </SimpleGrid>
-            </Stack>
+              </div>
+            </div>
 
-            <Grid gap={12} templateColumns={{base: "1fr", lg: "2fr 1fr"}}>
-              <GridItem>
-                <Heading size="lg" mb={4}>
+            <div className="grid gap-12 lg:grid-cols-[2fr_1fr]">
+              <div>
+                <h2 className="mb-4 text-2xl font-semibold md:text-3xl">
                   Descubre nuestras tabernas
-                </Heading>
+                </h2>
                 <StoreMap stores={stores} />
-              </GridItem>
-              <GridItem>
-                <Stack spacing={6}>
-                  <Heading size="lg">Programa de lealtad</Heading>
-                  <Text color="whiteAlpha.700">
+              </div>
+              <div>
+                <div className="flex flex-col gap-6">
+                  <h2 className="text-2xl font-semibold md:text-3xl">Programa de lealtad</h2>
+                  <p className="text-white/70">
                     Gana puntos con cada compra, desbloquea experiencias de catas privadas y acceso a lanzamientos.
-                  </Text>
+                  </p>
                   <LoyaltyProgress progress={loyaltyProgress} />
-                </Stack>
-              </GridItem>
-            </Grid>
-          </Stack>
-        </Container>
-      </SiteAppLayout>
+                </div>
+              </div>
+            </div>
+        </div>
+      </Container>
+    </SiteAppLayout>
   );
 }

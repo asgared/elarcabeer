@@ -1,22 +1,10 @@
 "use client";
 
-import {Container} from "@/components/ui/container";
-import {
-  Box,
-  Grid,
-  Heading,
-  SimpleGrid,
-  Spinner,
-  Stack,
-  Stat,
-  StatLabel,
-  StatNumber,
-  Text
-} from "@chakra-ui/react";
 import NextLink from "next/link";
 
 import {AccountAccessPanel} from "@/components/account/account-access";
 import {ProfileForm} from "@/components/account/profile-form";
+import {Container} from "@/components/ui/container";
 import {useUser} from "@/providers/user-provider";
 import {formatCurrency} from "@/utils/currency";
 
@@ -43,80 +31,79 @@ export default function AccountPage() {
 
   return (
     <Container maxW="5xl">
-      <Stack spacing={10}>
-        <Stack spacing={3}>
-          <Heading size="2xl">Tu cuenta</Heading>
+      <div className="flex flex-col gap-10">
+        <div className="flex flex-col gap-3">
+          <h1 className="text-3xl font-semibold md:text-4xl">Tu cuenta</h1>
           {user ? (
-            <Text color="whiteAlpha.700">Bienvenida, {user.name ?? user.email}. Gestiona tu perfil y tus pedidos recientes.</Text>
+            <p className="text-white/70">
+              Bienvenida, {user.name ?? user.email}. Gestiona tu perfil y tus pedidos recientes.
+            </p>
           ) : (
-            <Text color="whiteAlpha.700">Crea una cuenta o inicia sesión para seguir tus compras, pagos y direcciones favoritas.</Text>
+            <p className="text-white/70">
+              Crea una cuenta o inicia sesión para seguir tus compras, pagos y direcciones favoritas.
+            </p>
           )}
-        </Stack>
+        </div>
 
-        {isLoading && (
-          <Stack align="center" py={12}>
-            <Spinner size="xl" thickness="4px" />
-            <Text color="whiteAlpha.700">Cargando tu información...</Text>
-          </Stack>
-        )}
+        {isLoading ? (
+          <div className="flex flex-col items-center gap-4 py-12">
+            <div className="h-12 w-12 animate-spin rounded-full border-4 border-white/20 border-t-accent" />
+            <p className="text-white/70">Cargando tu información...</p>
+          </div>
+        ) : null}
 
-        {!user && !isLoading && <AccountAccessPanel />}
+        {!user && !isLoading ? <AccountAccessPanel /> : null}
 
-        {user && !isLoading && (
-          <Stack spacing={10}>
-            <SimpleGrid columns={{base: 1, md: 4}} spacing={4}>
-              <Box borderRadius="2xl" borderWidth="1px" p={6}>
-                <Stat>
-                  <StatLabel>Órdenes totales</StatLabel>
-                  <StatNumber>{totalOrders}</StatNumber>
-                </Stat>
-              </Box>
-              <Box borderRadius="2xl" borderWidth="1px" p={6}>
-                <Stat>
-                  <StatLabel>Gasto acumulado</StatLabel>
-                  <StatNumber>{formatCurrency(totalSpent)}</StatNumber>
-                </Stat>
-              </Box>
-              <Box borderRadius="2xl" borderWidth="1px" p={6}>
-                <Stat>
-                  <StatLabel>Puntos de lealtad</StatLabel>
-                  <StatNumber>{loyaltyPoints}</StatNumber>
-                </Stat>
-              </Box>
-              <Box borderRadius="2xl" borderWidth="1px" p={6}>
-                <Stat>
-                  <StatLabel>Suscripciones activas</StatLabel>
-                  <StatNumber>{activeSubscriptions}</StatNumber>
-                </Stat>
-              </Box>
-            </SimpleGrid>
+        {user && !isLoading ? (
+          <div className="flex flex-col gap-10">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
+              <div className="rounded-2xl border border-white/10 bg-background/40 p-6">
+                <p className="text-xs uppercase tracking-wide text-white/60">Órdenes totales</p>
+                <p className="mt-2 text-2xl font-semibold">{totalOrders}</p>
+              </div>
+              <div className="rounded-2xl border border-white/10 bg-background/40 p-6">
+                <p className="text-xs uppercase tracking-wide text-white/60">Gasto acumulado</p>
+                <p className="mt-2 text-2xl font-semibold">{formatCurrency(totalSpent)}</p>
+              </div>
+              <div className="rounded-2xl border border-white/10 bg-background/40 p-6">
+                <p className="text-xs uppercase tracking-wide text-white/60">Puntos de lealtad</p>
+                <p className="mt-2 text-2xl font-semibold">{loyaltyPoints}</p>
+              </div>
+              <div className="rounded-2xl border border-white/10 bg-background/40 p-6">
+                <p className="text-xs uppercase tracking-wide text-white/60">Suscripciones activas</p>
+                <p className="mt-2 text-2xl font-semibold">{activeSubscriptions}</p>
+              </div>
+            </div>
 
-            <Grid gap={6} templateColumns={{base: "1fr", md: "repeat(3, minmax(0, 1fr))"}}>
-              <Box borderRadius="2xl" borderWidth="1px" p={6}>
-                <Heading size="md">
+            <div className="grid gap-6 md:grid-cols-3">
+              <div className="rounded-2xl border border-white/10 bg-background/40 p-6">
+                <h2 className="text-lg font-semibold">
                   <NextLink href="/account/orders">Órdenes y pagos</NextLink>
-                </Heading>
-                <Text color="whiteAlpha.700">Revisa el detalle de tus compras, pagos y entregas.</Text>
-              </Box>
-              <Box borderRadius="2xl" borderWidth="1px" p={6}>
-                <Heading size="md">
+                </h2>
+                <p className="mt-2 text-sm text-white/70">
+                  Revisa el detalle de tus compras, pagos y entregas.
+                </p>
+              </div>
+              <div className="rounded-2xl border border-white/10 bg-background/40 p-6">
+                <h2 className="text-lg font-semibold">
                   <NextLink href="/account/subscriptions">Suscripciones</NextLink>
-                </Heading>
-                <Text color="whiteAlpha.700">Gestiona tus membresías del Beer Club.</Text>
-              </Box>
-              <Box borderRadius="2xl" borderWidth="1px" p={6}>
-                <Heading size="md">
+                </h2>
+                <p className="mt-2 text-sm text-white/70">Gestiona tus membresías del Beer Club.</p>
+              </div>
+              <div className="rounded-2xl border border-white/10 bg-background/40 p-6">
+                <h2 className="text-lg font-semibold">
                   <NextLink href="/account/addresses">Direcciones</NextLink>
-                </Heading>
-                <Text color="whiteAlpha.700">Mantén al día tus direcciones de entrega favoritas.</Text>
-              </Box>
-            </Grid>
+                </h2>
+                <p className="mt-2 text-sm text-white/70">
+                  Mantén al día tus direcciones de entrega favoritas.
+                </p>
+              </div>
+            </div>
 
             <ProfileForm />
-          
-          </Stack>
-        )}
-      </Stack>
+          </div>
+        ) : null}
+      </div>
     </Container>
   );
 }

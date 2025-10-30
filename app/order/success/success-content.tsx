@@ -1,11 +1,12 @@
 "use client";
 
-import { useEffect } from "react";
-import { useSearchParams } from "next/navigation";
+import {useEffect} from "react";
 import NextLink from "next/link";
-import { Container } from "@/components/ui/container";
-import { Box, Button, Heading, Stack, Text } from "@chakra-ui/react";
-import { useCartStore } from "@/stores/cart-store";
+import {useSearchParams} from "next/navigation";
+
+import {Button} from "@/components/ui/button";
+import {Container} from "@/components/ui/container";
+import {useCartStore} from "@/stores/cart-store";
 
 export default function SuccessContent() {
   const clearCart = useCartStore((state) => state.clearCart);
@@ -17,31 +18,24 @@ export default function SuccessContent() {
   }, [clearCart]);
 
   return (
-    <Container maxW="4xl" py={{ base: 16, md: 24 }}>
-      <Stack spacing={8} align="center" textAlign="center">
-        <Heading size="2xl">¡Gracias por tu compra!</Heading>
-        <Text fontSize="lg" color="gray.600">
+    <Container maxW="4xl" py={{base: 16, md: 24}}>
+      <div className="flex flex-col items-center gap-8 text-center">
+        <h1 className="text-3xl font-semibold md:text-4xl">¡Gracias por tu compra!</h1>
+        <p className="text-lg text-white/70">
           Tu pago se ha procesado correctamente y estamos preparando tu pedido.
-        </Text>
+        </p>
         {sessionId ? (
-          <Box borderWidth="1px" borderRadius="lg" px={6} py={4} bg="gray.50">
-            <Text fontSize="sm" color="gray.500">
-              Número de confirmación
-            </Text>
-            <Text
-              fontWeight="semibold"
-              fontSize="lg"
-              mt={1}
-              wordBreak="break-all"
-            >
+          <div className="rounded-xl border border-white/10 bg-white/5 px-6 py-4">
+            <p className="text-xs uppercase tracking-wide text-white/50">Número de confirmación</p>
+            <p className="mt-1 break-all text-lg font-semibold text-white">
               {sessionId}
-            </Text>
-          </Box>
+            </p>
+          </div>
         ) : null}
-        <Button as={NextLink} href="/shop" colorScheme="teal" size="lg">
-          Seguir explorando cervezas
+        <Button asChild size="lg">
+          <NextLink href="/shop">Seguir explorando cervezas</NextLink>
         </Button>
-      </Stack>
+      </div>
     </Container>
   );
 }

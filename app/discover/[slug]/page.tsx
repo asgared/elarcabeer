@@ -1,8 +1,7 @@
-import {Container} from "@/components/ui/container";
-import {Heading, Stack, Text} from "@chakra-ui/react";
 import {Metadata} from "next";
 import {notFound} from "next/navigation";
 
+import {Container} from "@/components/ui/container";
 import {posts} from "@/data/posts";
 import type {ContentPost} from "@/types/catalog";
 
@@ -31,18 +30,16 @@ export default function DiscoverDetailPage({params}: {params: {slug: string}}) {
 
   return (
     <Container maxW="4xl">
-      <Stack spacing={6}>
-        <Stack spacing={2}>
-          <Text fontSize="sm" letterSpacing="0.2em" textTransform="uppercase" color="gold.500">
+      <div className="flex flex-col gap-6">
+        <div className="flex flex-col gap-2">
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-amber-300">
             {post.category}
-          </Text>
-          <Heading size="2xl">{post.title}</Heading>
-          <Text color="whiteAlpha.500">Publicado el {post.publishedAt}</Text>
-        </Stack>
-        <Text color="whiteAlpha.800" fontSize="lg">
-          {post.body}
-        </Text>
-      </Stack>
+          </p>
+          <h1 className="text-3xl font-semibold md:text-4xl">{post.title}</h1>
+          <p className="text-sm text-white/50">Publicado el {post.publishedAt}</p>
+        </div>
+        <p className="text-lg text-white/80">{post.body}</p>
+      </div>
     </Container>
   );
 }

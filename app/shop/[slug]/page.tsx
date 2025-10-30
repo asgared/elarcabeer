@@ -1,17 +1,8 @@
-import {Container} from "@/components/ui/container";
-import {
-  Badge,
-  Box,
-  Grid,
-  GridItem,
-  Heading,
-  Image,
-  SimpleGrid,
-  Stack,
-  Text
-} from "@chakra-ui/react";
+import Image from "next/image";
 import {Metadata} from "next";
 import {notFound} from "next/navigation";
+
+import {Container} from "@/components/ui/container";
 import {AddToCartButton} from "@/components/cart/add-to-cart-button";
 import {CheckList} from "@/components/ui/check-list";
 import {Price} from "@/components/ui/price";
@@ -78,100 +69,91 @@ export default async function ProductDetailPage({params}: {params: {slug: string
 
   return (
     <Container maxW="6xl" py={{base: 6, md: 12}}>
-      <Grid gap={{base: 10, lg: 12}} templateColumns={{base: "1fr", lg: "1.2fr 1fr"}}>
-        <GridItem>
-          <Stack spacing={{base: 6, md: 8}}>
+      <div className="grid gap-10 lg:grid-cols-[1.2fr_1fr] lg:gap-12">
+        <div className="flex flex-col gap-6 md:gap-8">
+          <div className="overflow-hidden rounded-3xl border border-white/10 bg-[#102327]">
             <Image
               alt={product.name}
-              borderRadius="3xl"
-              fallbackSrc="/images/beer-bg.jpg"
-              src={product.heroImage}
+              className="h-full w-full object-cover"
+              height={720}
+              src={product.heroImage ?? "/images/beer-bg.jpg"}
+              width={720}
             />
-            {galleryImages.length > 1 ? (
-              <SimpleGrid columns={{base: 2, md: Math.min(4, galleryImages.length)}} spacing={4}>
-                {galleryImages.map((image) => (
+          </div>
+          {galleryImages.length > 1 ? (
+            <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+              {galleryImages.map((image) => (
+                <div key={image} className="overflow-hidden rounded-xl border border-white/10 bg-[#102327]">
                   <Image
-                    key={image}
                     alt={product.name}
-                    borderRadius="xl"
-                    fallbackSrc="/images/beer-bg.jpg"
-                    h={{base: 100, md: 120}}
-                    objectFit="cover"
-                    src={image}
+                    className="h-full w-full object-cover"
+                    height={160}
+                    src={image ?? "/images/beer-bg.jpg"}
+                    width={160}
                   />
-                ))}
-              </SimpleGrid>
+                </div>
+              ))}
+            </div>
+          ) : null}
+        </div>
+        <div className="flex flex-col gap-6 md:gap-8">
+          <div className="flex flex-col gap-2">
+            <h1 className="text-3xl font-semibold md:text-4xl">{product.name}</h1>
+            <p className="text-sm text-white/70 md:text-base">{product.style}</p>
+            {product.limitedEdition ? (
+              <span className="inline-flex w-max items-center rounded-full bg-amber-400/20 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-amber-200">
+                Edición limitada
+              </span>
             ) : null}
-          </Stack>
-        </GridItem>
-        <GridItem>
-          <Stack spacing={{base: 6, md: 8}}>
-            <Stack spacing={2}>
-              <Heading size="2xl">{product.name}</Heading>
-              <Text color="whiteAlpha.700">{product.style}</Text>
-              {product.limitedEdition ? <Badge colorScheme="yellow">Edición limitada</Badge> : null}
-            </Stack>
-            <Text fontSize="lg" color="whiteAlpha.800">
-              {product.description}
-            </Text>
-            <Box borderRadius="2xl" borderWidth="1px" p={6}>
-              <Text fontWeight="semibold" mb={3}>
-                Selecciona presentación
-              </Text>
-              {hasVariants ? (
-                <Stack spacing={4}>
-                  {product.variants.map((variant) => (
-                    <Box
-                      key={variant.id}
-                      alignItems={{base: "flex-start", sm: "center"}}
-                      borderRadius="xl"
-                      borderWidth="1px"
-                      display={{base: "grid", sm: "flex"}}
-                      gap={{base: 3, sm: 4}}
-                      justifyContent="space-between"
-                      p={4}
-                    >
-                      <Stack spacing={1}>
-                        <Text fontWeight="bold">{variant.name}</Text>
-                        <Text color="whiteAlpha.600">
-                          {variant.abv}% ABV · {variant.ibu} IBU · {variant.packSize} piezas
-                        </Text>
-                      </Stack>
-                      <Stack align={{base: "flex-start", sm: "flex-end"}} spacing={2}>
-                        <Price amount={variant.price} fontSize="lg" />
-                        <AddToCartButton productId={product.id} variant={variant} />
-                      </Stack>
-                    </Box>
-                  ))}
-                </Stack>
-              ) : (
-                <Text color="whiteAlpha.600">Este producto estará disponible próximamente.</Text>
-              )}
-            </Box>
-            {(tastingNotes.length > 0 || pairings.length > 0) && (
-              <Box borderRadius="2xl" borderWidth="1px" p={6}>
-                <Heading size="md" mb={4}>
-                  Tasting notes & maridajes
-                </Heading>
-                <Grid gap={6} templateColumns={{base: "1fr", md: "repeat(2, minmax(0, 1fr))"}}>
-                  {tastingNotes.length > 0 ? (
-                    <Stack>
-                      <Text fontWeight="semibold">Notas</Text>
-                      <CheckList items={tastingNotes} />
-                    </Stack>
-                  ) : null}
-                  {pairings.length > 0 ? (
-                    <Stack>
-                      <Text fontWeight="semibold">Maridaje sugerido</Text>
-                      <CheckList items={pairings} />
-                    </Stack>
-                  ) : null}
-                </Grid>
-              </Box>
+          </div>
+          <p className="text-base text-white/80 md:text-lg">{product.description}</p>
+          <div className="rounded-2xl border border-white/10 bg-background/40 p-6">
+            <p className="mb-3 text-sm font-semibold uppercase tracking-wide text-white">Selecciona presentación</p>
+            {hasVariants ? (
+              <div className="flex flex-col gap-4">
+                {product.variants.map((variant) => (
+                  <div
+                    key={variant.id}
+                    className="flex flex-col gap-3 rounded-xl border border-white/10 bg-background/60 p-4 sm:flex-row sm:items-center sm:justify-between"
+                  >
+                    <div className="flex flex-col gap-1">
+                      <span className="font-semibold text-white">{variant.name}</span>
+                      <span className="text-sm text-white/60">
+                        {variant.abv}% ABV · {variant.ibu} IBU · {variant.packSize} piezas
+                      </span>
+                    </div>
+                    <div className="flex flex-col items-start gap-2 sm:items-end">
+                      <Price amount={variant.price} className="text-lg" />
+                      <AddToCartButton productId={product.id} variant={variant} />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-sm text-white/60">Este producto estará disponible próximamente.</p>
             )}
-          </Stack>
-        </GridItem>
-      </Grid>
+          </div>
+          {(tastingNotes.length > 0 || pairings.length > 0) && (
+            <div className="rounded-2xl border border-white/10 bg-background/40 p-6">
+              <h2 className="mb-4 text-xl font-semibold">Tasting notes & maridajes</h2>
+              <div className="grid gap-6 md:grid-cols-2">
+                {tastingNotes.length > 0 ? (
+                  <div className="flex flex-col gap-2">
+                    <span className="text-sm font-semibold uppercase tracking-wide text-white">Notas</span>
+                    <CheckList items={tastingNotes} />
+                  </div>
+                ) : null}
+                {pairings.length > 0 ? (
+                  <div className="flex flex-col gap-2">
+                    <span className="text-sm font-semibold uppercase tracking-wide text-white">Maridaje sugerido</span>
+                    <CheckList items={pairings} />
+                  </div>
+                ) : null}
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
     </Container>
   );
 }

@@ -1,19 +1,10 @@
 "use client";
 
-import {Container} from "@/components/ui/container";
-import {
-  Badge,
-  Box,
-  Checkbox,
-  HStack,
-  Heading,
-  SimpleGrid,
-  Stack,
-  Text
-} from "@chakra-ui/react";
 import NextLink from "next/link";
 import {useMemo, useState} from "react";
 
+import {Checkbox} from "@/components/ui/checkbox";
+import {Container} from "@/components/ui/container";
 import {StoreMap} from "@/components/ui/store-map";
 import {stores} from "@/data/stores";
 import type {Store} from "@/types/catalog";
@@ -34,60 +25,79 @@ export function BarsContent() {
 
   return (
     <Container maxW="6xl">
-      <Stack spacing={10}>
-        <Stack spacing={2}>
-          <Heading size="2xl">Bares & taprooms</Heading>
-          <Text color="whiteAlpha.700">
+      <div className="flex flex-col gap-10">
+        <div className="flex flex-col gap-2">
+          <h1 className="text-3xl font-semibold md:text-4xl">Bares & taprooms</h1>
+          <p className="text-white/70">
             Navega por nuestros espacios físicos, agenda una reservación y descubre eventos especiales.
-          </Text>
-        </Stack>
+          </p>
+        </div>
         <StoreMap stores={filtered} />
-        <HStack spacing={6}>
-          <Checkbox isChecked={petFriendly} onChange={(event) => setPetFriendly(event.target.checked)}>
+        <div className="flex flex-wrap items-center gap-6">
+          <label className="flex items-center gap-2 text-sm text-white/80">
+            <Checkbox
+              checked={petFriendly}
+              onCheckedChange={(value) => setPetFriendly(Boolean(value))}
+            />
             Pet friendly
-          </Checkbox>
-          <Checkbox isChecked={kitchen} onChange={(event) => setKitchen(event.target.checked)}>
+          </label>
+          <label className="flex items-center gap-2 text-sm text-white/80">
+            <Checkbox checked={kitchen} onCheckedChange={(value) => setKitchen(Boolean(value))} />
             Cocina propia
-          </Checkbox>
-          <Checkbox isChecked={events} onChange={(event) => setEvents(event.target.checked)}>
+          </label>
+          <label className="flex items-center gap-2 text-sm text-white/80">
+            <Checkbox checked={events} onCheckedChange={(value) => setEvents(Boolean(value))} />
             Eventos
-          </Checkbox>
-        </HStack>
-        <SimpleGrid columns={{base: 1, md: 2}} gap={8}>
+          </label>
+        </div>
+        <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
           {filtered.map((store) => (
-            <Box key={store.id} borderRadius="2xl" borderWidth="1px" p={6}>
-              <Stack spacing={2}>
-                <Heading size="md">{store.name}</Heading>
-                <Text color="whiteAlpha.600">{store.address}</Text>
-                <Text color="whiteAlpha.600">{store.hours}</Text>
-                <HStack spacing={3}>
-                  {store.petFriendly ? <Badge colorScheme="teal">Pet friendly</Badge> : null}
-                  {store.kitchen ? <Badge colorScheme="gold">Cocina</Badge> : null}
-                  {store.events ? <Badge colorScheme="purple">Eventos</Badge> : null}
-                </HStack>
-                <Stack spacing={1}>
-                  <Text fontWeight="semibold">Próximos eventos</Text>
-                  {store.upcomingEvents.map((event) => (
-                    <Text key={event} color="whiteAlpha.700">
-                      • {event}
-                    </Text>
-                  ))}
-                </Stack>
-                <HStack spacing={4}>
-                  {store.menuUrl ? (
-                    <Text as="a" href={store.menuUrl} rel="noreferrer" target="_blank">
-                      Ver menú
-                    </Text>
-                  ) : null}
-                  <Text as={NextLink} href={`/bars/${store.slug}`}>
-                    Reservar
-                  </Text>
-                </HStack>
-              </Stack>
-            </Box>
+            <div
+              key={store.id}
+              className="flex flex-col gap-3 rounded-2xl border border-white/10 bg-background/40 p-6"
+            >
+              <h2 className="text-xl font-semibold">{store.name}</h2>
+              <p className="text-sm text-white/60">{store.address}</p>
+              <p className="text-sm text-white/60">{store.hours}</p>
+              <div className="flex flex-wrap items-center gap-2">
+                {store.petFriendly ? (
+                  <span className="rounded-full bg-emerald-500/15 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-emerald-300">
+                    Pet friendly
+                  </span>
+                ) : null}
+                {store.kitchen ? (
+                  <span className="rounded-full bg-amber-400/20 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-amber-200">
+                    Cocina
+                  </span>
+                ) : null}
+                {store.events ? (
+                  <span className="rounded-full bg-purple-500/20 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-purple-200">
+                    Eventos
+                  </span>
+                ) : null}
+              </div>
+              <div className="flex flex-col gap-1 text-sm text-white/80">
+                <span className="font-semibold text-white">Próximos eventos</span>
+                {store.upcomingEvents.map((event) => (
+                  <span key={event} className="text-white/70">
+                    • {event}
+                  </span>
+                ))}
+              </div>
+              <div className="flex flex-wrap items-center gap-4 text-sm font-medium text-accent">
+                {store.menuUrl ? (
+                  <a className="hover:underline" href={store.menuUrl} rel="noreferrer" target="_blank">
+                    Ver menú
+                  </a>
+                ) : null}
+                <NextLink className="hover:underline" href={`/bars/${store.slug}`}>
+                  Reservar
+                </NextLink>
+              </div>
+            </div>
           ))}
-        </SimpleGrid>
-      </Stack>
+        </div>
+      </div>
     </Container>
   );
 }

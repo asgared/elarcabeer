@@ -1,7 +1,7 @@
-import {Button, Heading, Icon, Stack, Table, Tbody, Td, Th, Thead, Tr} from "@chakra-ui/react";
 import Link from "next/link";
 import {FaPlus, FaRegPenToSquare} from "react-icons/fa6";
 
+import {Button} from "@/components/ui/button";
 import {getAllCmsContent} from "@/lib/cms";
 
 export const dynamic = "force-dynamic";
@@ -10,44 +10,44 @@ export default async function AdminContentPage() {
   const entries = await getAllCmsContent();
 
   return (
-    <Stack spacing={8}>
-      <Stack direction={{base: "column", md: "row"}} justify="space-between" align={{base: "stretch", md: "center"}}>
-        <Heading size="lg">Gestión de contenido</Heading>
-        <Button as={Link} href="/dashboard/content/new" leftIcon={<FaPlus />} colorScheme="teal">
-          Nueva sección
+    <div className="flex flex-col gap-8">
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+        <h1 className="text-2xl font-semibold">Gestión de contenido</h1>
+        <Button asChild className="w-full md:w-auto">
+          <Link href="/dashboard/content/new">
+            <FaPlus className="mr-2 h-4 w-4" /> Nueva sección
+          </Link>
         </Button>
-      </Stack>
+      </div>
 
-      <Table variant="simple" bg="background.800" borderRadius="xl" overflow="hidden">
-        <Thead>
-          <Tr>
-            <Th>Slug</Th>
-            <Th>Título</Th>
-            <Th>Actualizado</Th>
-            <Th></Th>
-          </Tr>
-        </Thead>
-        <Tbody>
-          {entries.map((entry) => (
-            <Tr key={entry.id}>
-              <Td fontFamily="mono">{entry.slug}</Td>
-              <Td>{entry.title}</Td>
-              <Td>{new Date(entry.updatedAt).toLocaleString()}</Td>
-              <Td textAlign="right">
-                <Button
-                  as={Link}
-                  href={`/dashboard/content/${entry.slug}`}
-                  size="sm"
-                  leftIcon={<Icon as={FaRegPenToSquare} />}
-                  variant="ghost"
-                >
-                  Editar
-                </Button>
-              </Td>
-            </Tr>
-          ))}
-        </Tbody>
-      </Table>
-    </Stack>
+      <div className="overflow-hidden rounded-2xl border border-white/10 bg-background/60">
+        <table className="min-w-full divide-y divide-white/10 text-sm">
+          <thead className="bg-white/5 text-left uppercase tracking-wide text-white/70">
+            <tr>
+              <th className="px-6 py-4 font-semibold">Slug</th>
+              <th className="px-6 py-4 font-semibold">Título</th>
+              <th className="px-6 py-4 font-semibold">Actualizado</th>
+              <th className="px-6 py-4 text-right font-semibold">Acciones</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-white/10">
+            {entries.map((entry) => (
+              <tr key={entry.id} className="hover:bg-white/5">
+                <td className="px-6 py-4 font-mono text-xs uppercase tracking-wide text-white/70">{entry.slug}</td>
+                <td className="px-6 py-4 text-white">{entry.title}</td>
+                <td className="px-6 py-4 text-white/70">{new Date(entry.updatedAt).toLocaleString()}</td>
+                <td className="px-6 py-4 text-right">
+                  <Button asChild size="sm" variant="ghost">
+                    <Link className="inline-flex items-center gap-2" href={`/dashboard/content/${entry.slug}`}>
+                      <FaRegPenToSquare className="h-4 w-4" /> Editar
+                    </Link>
+                  </Button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
   );
 }

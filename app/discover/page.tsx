@@ -1,34 +1,36 @@
-import {Container} from "@/components/ui/container";
-import {Heading, SimpleGrid, Stack, Text} from "@chakra-ui/react";
-
-import {posts} from "@/data/posts";
 import Link from "next/link";
+
+import {Container} from "@/components/ui/container";
+import {posts} from "@/data/posts";
 
 export default function DiscoverPage() {
   return (
     <Container maxW="5xl">
-      <Stack spacing={8}>
-        <Stack spacing={2}>
-          <Heading size="2xl">Discover</Heading>
-          <Text color="whiteAlpha.700">
+      <div className="flex flex-col gap-8">
+        <div className="flex flex-col gap-2">
+          <h1 className="text-3xl font-semibold md:text-4xl">Discover</h1>
+          <p className="text-white/70">
             Historias, recetas y noticias desde la cubierta de El Arca.
-          </Text>
-        </Stack>
-        <SimpleGrid columns={{base: 1, md: 2}} gap={8}>
+          </p>
+        </div>
+        <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
           {posts.map((post) => (
-            <Stack key={post.id} borderRadius="2xl" borderWidth="1px" p={6} spacing={3}>
-              <Text fontSize="sm" letterSpacing="0.2em" textTransform="uppercase" color="gold.500">
+            <div
+              key={post.id}
+              className="flex flex-col gap-3 rounded-2xl border border-white/10 bg-background/40 p-6"
+            >
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-amber-300">
                 {post.category}
-              </Text>
-              <Heading size="md">
+              </p>
+              <h2 className="text-xl font-semibold">
                 <Link href={`/discover/${post.slug}`}>{post.title}</Link>
-              </Heading>
-              <Text color="whiteAlpha.700">{post.excerpt}</Text>
-              <Text color="whiteAlpha.500">Publicado el {post.publishedAt}</Text>
-            </Stack>
+              </h2>
+              <p className="text-sm text-white/70">{post.excerpt}</p>
+              <p className="text-xs text-white/50">Publicado el {post.publishedAt}</p>
+            </div>
           ))}
-        </SimpleGrid>
-      </Stack>
+        </div>
+      </div>
     </Container>
   );
 }

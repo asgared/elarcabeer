@@ -1,8 +1,6 @@
 "use client";
 
 import {Container} from "@/components/ui/container";
-import {Spinner, Stack, Text} from "@chakra-ui/react";
-
 import {AddressesManager} from "@/components/account/addresses-manager";
 import {useUser} from "@/providers/user-provider";
 
@@ -15,16 +13,16 @@ export default function AddressesPage() {
 
   return (
     <Container maxW="4xl">
-      <Stack spacing={6}>
+      <div className="flex flex-col gap-6">
         {isLoading ? (
-          <Stack align="center" py={12} spacing={4}>
-            <Spinner size="xl" thickness="4px" />
-            <Text color="whiteAlpha.700">Cargando direcciones...</Text>
-          </Stack>
+          <div className="flex flex-col items-center gap-4 py-12">
+            <div className="h-12 w-12 animate-spin rounded-full border-4 border-white/20 border-t-accent" />
+            <p className="text-white/70">Cargando direcciones...</p>
+          </div>
         ) : (
           <AddressesManager />
         )}
-      </Stack>
+      </div>
     </Container>
   );
 }

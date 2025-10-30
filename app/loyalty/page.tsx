@@ -1,38 +1,37 @@
 import {Container} from "@/components/ui/container";
-import {Heading, List, ListItem, SimpleGrid, Stack, Text} from "@chakra-ui/react";
-
 import {LoyaltyProgress as LoyaltyProgressComponent} from "@/components/ui/loyalty-progress";
 import {loyaltyProgress, subscriptionPlans} from "@/data/subscriptions";
 
 export default function LoyaltyPage() {
   return (
     <Container maxW="5xl">
-      <Stack spacing={10}>
-        <Stack spacing={2}>
-          <Heading size="2xl">Arca Crew</Heading>
-          <Text color="whiteAlpha.700">
+      <div className="flex flex-col gap-10">
+        <div className="flex flex-col gap-2">
+          <h1 className="text-3xl font-semibold md:text-4xl">Arca Crew</h1>
+          <p className="text-white/70">
             Gana puntos, desbloquea niveles y recibe beneficios exclusivos en cada travesía.
-          </Text>
-        </Stack>
+          </p>
+        </div>
         <LoyaltyProgressComponent progress={loyaltyProgress} />
-        <SimpleGrid columns={{base: 1, md: 3}} gap={6}>
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
           {subscriptionPlans.map((plan) => (
-            <Stack key={plan.id} borderRadius="2xl" borderWidth="1px" p={6} spacing={4}>
-              <Heading size="md">{plan.name}</Heading>
-              <Text fontSize="lg" fontWeight="bold">
+            <div
+              key={plan.id}
+              className="flex flex-col gap-4 rounded-2xl border border-white/10 bg-background/40 p-6"
+            >
+              <h2 className="text-xl font-semibold">{plan.name}</h2>
+              <p className="text-lg font-bold">
                 ${plan.price / 100} MXN / {plan.cadence === "monthly" ? "mes" : "trimestre"}
-              </Text>
-              <List spacing={2}>
+              </p>
+              <ul className="space-y-2 text-sm text-white/70">
                 {plan.perks.map((perk) => (
-                  <ListItem key={perk} color="whiteAlpha.700">
-                    • {perk}
-                  </ListItem>
+                  <li key={perk}>• {perk}</li>
                 ))}
-              </List>
-            </Stack>
+              </ul>
+            </div>
           ))}
-        </SimpleGrid>
-      </Stack>
+        </div>
+      </div>
     </Container>
   );
 }
