@@ -1,16 +1,17 @@
 import {Container} from "@/components/ui/container";
-import {Heading, Stack, Text} from "@chakra-ui/react";
 
 export default function PrivacyPage() {
   return (
     <Container maxW="4xl">
-      <Stack spacing={4}>
-        <Heading size="2xl">Aviso de privacidad</Heading>
-        <Text color="whiteAlpha.700">
+      <div className="space-y-4">
+        <h1 className="text-3xl font-semibold tracking-tight text-foreground md:text-4xl">
+          Aviso de privacidad
+        </h1>
+        <p className="text-base text-white/70">
           Resguardamos tus datos conforme a la legislación mexicana. Utilizamos tu información únicamente para
           procesar pedidos, enviar comunicaciones del Arca Crew y mejorar nuestra experiencia digital.
-        </Text>
-      </Stack>
+        </p>
+      </div>
     </Container>
   );
 }
