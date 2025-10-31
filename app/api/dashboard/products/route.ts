@@ -38,6 +38,20 @@ type ProductWithVariants = Prisma.ProductGetPayload<{
   include: { variants: true };
 }>;
 
+type VariantAttributes = {
+  packSize?: number | null;
+  abv?: number | null;
+  ibu?: number | null;
+};
+
+function buildVariantAttributes({ packSize, abv, ibu }: VariantAttributes) {
+  return {
+    packSize: packSize ?? null,
+    abv: abv ?? null,
+    ibu: ibu ?? null,
+  } satisfies Prisma.InputJsonValue;
+}
+
 function mapProductForResponse(product: ProductWithVariants) {
   const primaryVariant = product.variants[0];
 
@@ -87,9 +101,11 @@ export async function POST(request: Request) {
       sku: variant.sku,
       name: variant.name,
       price: variant.price,
-      packSize: variant.packSize,
-      abv: variant.abv,
-      ibu: variant.ibu,
+      attributes: buildVariantAttributes({
+        packSize: variant.packSize,
+        abv: variant.abv,
+        ibu: variant.ibu,
+      }),
       stock,
     }));
 
@@ -98,7 +114,7 @@ export async function POST(request: Request) {
         sku,
         name: data.name,
         price,
-        packSize: 1,
+        attributes: buildVariantAttributes({ packSize: 1 }),
         stock,
       });
     }
