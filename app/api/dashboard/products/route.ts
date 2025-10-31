@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
-import type { Prisma } from "@prisma/client";
+import { ProductType, type Prisma } from "@prisma/client";
 
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/auth/admin";
@@ -11,9 +11,9 @@ const variantSchema = z.object({
   sku: z.string().min(1, "El SKU de la variante es requerido."),
   name: z.string().min(1, "El nombre de la variante es requerido."),
   price: z.number().int().min(0, "El precio no puede ser negativo."),
-  packSize: z.number().int().min(1, "El tamaño del paquete debe ser al menos 1."),
-  abv: z.number().min(0, "El ABV no puede ser negativo."),
-  ibu: z.number().int().min(0, "El IBU no puede ser negativo."),
+  packSize: z.number().int().min(1, "El tamaño del paquete debe ser al menos 1.").optional(),
+  abv: z.number().min(0, "El ABV no puede ser negativo.").optional(),
+  ibu: z.number().int().min(0, "El IBU no puede ser negativo.").optional(),
 });
 
 const createProductSchema = z.object({
@@ -21,6 +21,7 @@ const createProductSchema = z.object({
   slug: z.string().min(1, "El slug es requerido."),
   sku: z.string().min(1, "El SKU es requerido."),
   description: z.string().default(""),
+  type: z.nativeEnum(ProductType).default(ProductType.BEER),
   price: z.number().int().min(0, "El precio no puede ser negativo."),
   stock: z.number().int().min(0, "El stock no puede ser negativo."),
   style: z.string().optional(),
@@ -31,6 +32,8 @@ const createProductSchema = z.object({
   tastingNotes: z.array(z.string().min(1)).default([]),
   pairings: z.array(z.string().min(1)).default([]),
   gallery: z.array(z.string().url("La URL de la imagen no es válida.")).default([]),
+  metadata: z.record(z.any()).default({}),
+  images: z.any().optional(),
   variants: z.array(variantSchema).default([]),
 });
 
@@ -45,11 +48,21 @@ type VariantAttributes = {
 };
 
 function buildVariantAttributes({ packSize, abv, ibu }: VariantAttributes) {
-  return {
-    packSize: packSize ?? null,
-    abv: abv ?? null,
-    ibu: ibu ?? null,
-  } satisfies Prisma.InputJsonValue;
+  const attributes: Record<string, number | null> = {};
+
+  if (typeof packSize !== "undefined") {
+    attributes.packSize = packSize ?? null;
+  }
+
+  if (typeof abv !== "undefined") {
+    attributes.abv = abv ?? null;
+  }
+
+  if (typeof ibu !== "undefined") {
+    attributes.ibu = ibu ?? null;
+  }
+
+  return attributes satisfies Prisma.InputJsonValue;
 }
 
 function mapProductForResponse(product: ProductWithVariants) {
@@ -95,7 +108,22 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: validation.error.flatten() }, { status: 400 });
     }
     
-    const { limitedEdition, variants, description, sku, price, stock, ...data } = validation.data;
+    const {
+      limitedEdition,
+      variants,
+      description,
+      sku,
+      price,
+      stock,
+      imageUrl,
+      tastingNotes,
+      pairings,
+      gallery,
+      metadata: metadataInput,
+      images: imagesInput,
+      type,
+      ...productData
+    } = validation.data;
 
     const preparedVariants: Prisma.VariantCreateWithoutProductInput[] = variants.map((variant) => ({
       sku: variant.sku,
@@ -112,7 +140,7 @@ export async function POST(request: Request) {
     if (!preparedVariants.some((variant) => variant.sku === sku)) {
       preparedVariants.unshift({
         sku,
-        name: data.name,
+        name: productData.name,
         price,
         attributes: buildVariantAttributes({ packSize: 1 }),
         stock,
@@ -121,9 +149,19 @@ export async function POST(request: Request) {
 
     const product = await prisma.product.create({
       data: {
-        ...data,
+        ...productData,
         description,
         limitedEdition,
+        type: type ?? ProductType.BEER,
+        metadata: {
+          ...(metadataInput ?? {}),
+          tastingNotes,
+          pairings,
+        } satisfies Prisma.InputJsonValue,
+        images: (imagesInput ?? {
+          main: imageUrl,
+          gallery,
+        }) satisfies Prisma.InputJsonValue,
         variants:
           preparedVariants.length > 0
             ? {
