@@ -2,8 +2,10 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import type { LucideIcon } from "lucide-react";
-import { Facebook, Instagram, MessageCircle, Music2 } from "lucide-react";
+import type {LucideIcon} from "lucide-react";
+import {MessageCircle, Music2} from "lucide-react";
+
+import {Facebook, Instagram} from "@/lib/brand-icons";
 
 import type {SocialLink as CmsSocialLink} from "@/types/cms";
 
