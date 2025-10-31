@@ -50,12 +50,30 @@ function mapProductRecord(
       ? fallback.gallery
       : [heroImage];
 
+  const recordMetadata = (record.metadata as
+    | { tasting_notes?: unknown; pairings?: unknown }
+    | null
+    | undefined) ?? { tasting_notes: undefined, pairings: undefined };
+
+  const tastingNotesSource = Array.isArray(recordMetadata.tasting_notes)
+    ? recordMetadata.tasting_notes.filter(
+        (note): note is string => typeof note === "string",
+      )
+    : undefined;
+  const pairingsSource = Array.isArray(recordMetadata.pairings)
+    ? recordMetadata.pairings.filter(
+        (pairing): pairing is string => typeof pairing === "string",
+      )
+    : undefined;
+
   const tastingNotes =
-    record.tastingNotes.length > 0
-      ? record.tastingNotes
+    tastingNotesSource && tastingNotesSource.length > 0
+      ? tastingNotesSource
       : fallback?.tastingNotes ?? [];
   const pairings =
-    record.pairings.length > 0 ? record.pairings : fallback?.pairings ?? [];
+    pairingsSource && pairingsSource.length > 0
+      ? pairingsSource
+      : fallback?.pairings ?? [];
 
   return {
     id: record.id,
