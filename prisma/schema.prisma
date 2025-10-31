@@ -9,25 +9,29 @@ datasource db {
 }
 
 model Product {
-  id             String      @id @default(cuid())
-  slug           String      @unique
-  name           String
-  description    String
-  type           ProductType @default(BEER)
-  rating         Float?
-  imageUrl       String? // -> AÑADIDO: Faltaba el campo para la imagen principal.
-  limitedEdition Boolean     @default(false) // -> RENOMBRADO: De "limited" para ser más claro.
-  categoryLabel  String? // -> CAMBIADO A OPCIONAL: No todas las creaciones de producto tendrán esto al inicio.
-  attributes     Json?
-  gallery        String[]
+  id          String   @id @default(cuid())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
+  name        String
+  slug        String   @unique
+  description String?
+  type        ProductType
+  
+  style       String? // <--- ¡AÑADE ESTA LÍNEA DE VUELTA!
+
+  rating         Float?
+  limitedEdition Boolean  @default(false)
+  categoryLabel  String?
+
+  metadata    Json
+  images      Json
+
+  // Relaciones
   variants    Variant[]
   reviews     Review[]
   bundleItems BundleItem[]
-  categories  Category[]   @relation("ProductCategories")
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  categories  Category[] @relation("ProductCategories")
 }
 
 model Variant {
