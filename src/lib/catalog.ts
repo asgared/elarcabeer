@@ -33,11 +33,19 @@ function mapProductRecord(
   record: PrismaProductWithVariants,
   fallback?: Product,
 ): Product {
+  const recordImages = (record.images as
+    | { main?: unknown; gallery?: unknown }
+    | null
+    | undefined) ?? { main: undefined, gallery: undefined };
   const heroImage =
-    record.imageUrl ?? fallback?.heroImage ?? "/images/beer-bg.jpg";
+    (typeof recordImages.main === "string" ? recordImages.main : undefined) ??
+    fallback?.heroImage ??
+    "/images/beer-bg.jpg";
   const gallerySource =
-    record.gallery.length > 0
-      ? record.gallery
+    Array.isArray(recordImages.gallery) && recordImages.gallery.length > 0
+      ? recordImages.gallery.filter(
+          (image): image is string => typeof image === "string",
+        )
       : fallback?.gallery && fallback.gallery.length > 0
       ? fallback.gallery
       : [heroImage];
