@@ -9,6 +9,7 @@ import {
   type MouseEventHandler,
   type ReactElement,
   type ReactNode,
+  type MutableRefObject, // <-- Importante
   useContext,
   useEffect,
   useMemo,
@@ -22,8 +23,9 @@ type DropdownMenuContextValue = {
   isOpen: boolean;
   toggle: () => void;
   close: () => void;
-  triggerRef: React.RefObject<HTMLElement>;
-  contentRef: React.RefObject<HTMLDivElement>;
+  // --- CORRECCIÓN 1: Ambos 'Ref' deben ser 'Mutable' ---
+  triggerRef: MutableRefObject<HTMLElement | null>;
+  contentRef: MutableRefObject<HTMLDivElement | null>;
 };
 
 const DropdownMenuContext = createContext<DropdownMenuContextValue | null>(null);
@@ -42,8 +44,9 @@ type DropdownMenuRootProps = {
 
 function DropdownMenuRoot({children}: DropdownMenuRootProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const triggerRef = useRef<HTMLElement>(null);
-  const contentRef = useRef<HTMLDivElement>(null);
+  // --- CORRECCIÓN 2: Los 'useRef' deben ser 'null' ---
+  const triggerRef = useRef<HTMLElement | null>(null);
+  const contentRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -102,7 +105,7 @@ function setRef<T>(ref: React.Ref<T> | undefined, value: T) {
     try {
       (ref as React.MutableRefObject<T>).current = value;
     } catch {
-      // ignore
+      
     }
   }
 }
@@ -116,21 +119,25 @@ function DropdownMenuTrigger({children, asChild = false}: DropdownMenuTriggerPro
     throw new Error("DropdownMenu.Trigger requires a single React element child.");
   }
 
+  // --- CORRECCIÓN 3: La función 'handleClick' ---
   const handleClick: MouseEventHandler = (event) => {
-    if (isValidElement(child)) {
-      child.props.onClick?.(event);
+    // Forzamos un 'cast' a 'any' para evitar el error 'unknown'
+    const anyChild = child as any;
+    if (anyChild.props && typeof anyChild.props.onClick === "function") {
+      anyChild.props.onClick(event);
     }
+    
     if (!event.defaultPrevented) {
       toggle();
     }
   };
 
   const mergedRef = (node: HTMLElement | null) => {
-    triggerRef.current = node;
+    triggerRef.current = node; // Esto ahora es válido
     setRef((child as ReactElement & {ref?: React.Ref<HTMLElement>}).ref, node);
   };
 
-  return cloneElement(child, {
+  return cloneElement(child as React.ReactElement, {
     ref: mergedRef,
     "aria-expanded": isOpen,
     "aria-haspopup": "menu",
@@ -170,7 +177,7 @@ const DropdownMenuContent = forwardRef<HTMLDivElement, DropdownMenuContentProps>
     }
 
     const mergedRef = (node: HTMLDivElement | null) => {
-      contentRef.current = node;
+      contentRef.current = node; // Esto ahora es válido
       setRef(forwardedRef, node);
     };
 
