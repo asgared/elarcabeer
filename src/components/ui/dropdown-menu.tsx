@@ -117,7 +117,9 @@ function DropdownMenuTrigger({children, asChild = false}: DropdownMenuTriggerPro
   }
 
   const handleClick: MouseEventHandler = (event) => {
-    child.props.onClick?.(event);
+    if (isValidElement(child)) {
+      child.props.onClick?.(event);
+    }
     if (!event.defaultPrevented) {
       toggle();
     }
