@@ -1,4 +1,4 @@
-import {ReactNode} from "react";
+import type {ReactNode} from "react";
 import {
   FiBarChart2,
   FiFileText,
@@ -18,12 +18,18 @@ type Props = {
   children: ReactNode;
 };
 
-type SidebarSection = {
-  title: string;
-  links: {href: string; icon: ReactNode; label: string}[];
+type SidebarLink = {
+  href: string;
+  icon: ReactNode;
+  label: string;
 };
 
-const sidebarSections: SidebarSection[] = [
+type SidebarSection = {
+  title: string;
+  links: SidebarLink[];
+};
+
+const SIDEBAR_SECTIONS: SidebarSection[] = [
   {
     title: "Tienda",
     links: [
@@ -58,7 +64,7 @@ export default async function DashboardAdminLayout({children}: Props) {
           Dashboard
         </SideBarNavLink>
 
-        {sidebarSections.map((section) => (
+        {SIDEBAR_SECTIONS.map((section) => (
           <div key={section.title} className="mt-6">
             <p className="px-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
               {section.title}
