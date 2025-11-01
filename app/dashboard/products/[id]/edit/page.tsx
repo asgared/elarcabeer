@@ -1,6 +1,6 @@
 "use client";
 
-import {useCallback, useEffect, useState} from "react";
+import {useCallback, useEffect, useMemo, useState} from "react";
 import Link from "next/link";
 import {useParams, useRouter} from "next/navigation";
 import {Controller, useFieldArray, useForm} from "react-hook-form";
@@ -40,13 +40,15 @@ type CreateProductFormValues = {
   variants: VariantFormValues[];
 };
 
+type JsonRecord = Record<string, unknown>;
+
 type ApiVariant = {
+  id?: string;
   sku?: string | null;
   name?: string | null;
   price?: number | null;
-  packSize?: number | null;
-  abv?: number | null;
-  ibu?: number | null;
+  stock?: number | null;
+  attributes?: JsonRecord | null;
 };
 
 type ApiProduct = {
@@ -61,11 +63,9 @@ type ApiProduct = {
   rating?: number | null;
   limitedEdition?: boolean | null;
   limited?: boolean | null;
-  imageUrl?: string | null;
   categoryLabel?: string | null;
-  tastingNotes?: string[] | null;
-  pairings?: string[] | null;
-  gallery?: string[] | null;
+  metadata?: JsonRecord | null;
+  images?: JsonRecord | null;
   variants?: ApiVariant[] | null;
 };
 
@@ -81,14 +81,36 @@ const parseNumberValue = (
   return Number.isFinite(numericValue) ? transform(numericValue) : 0;
 };
 
-const normalizeVariant = (variant: ApiVariant): VariantFormValues => ({
-  sku: variant.sku ? String(variant.sku) : "",
-  name: variant.name ? String(variant.name) : "",
-  price: parseNumberValue(variant.price, (num) => num / 100),
-  packSize: parseNumberValue(variant.packSize),
-  abv: parseNumberValue(variant.abv),
-  ibu: parseNumberValue(variant.ibu),
-});
+const isRecord = (value: unknown): value is JsonRecord =>
+  typeof value === "object" && value !== null && !Array.isArray(value);
+
+const normalizeVariant = (variant: ApiVariant): VariantFormValues => {
+  const attributes = isRecord(variant.attributes) ? variant.attributes : {};
+
+  const packSizeSource = attributes.unit_count ?? attributes.packSize;
+  const abvSource = attributes.abv;
+  const ibuSource = attributes.ibu;
+
+  return {
+    sku: variant.sku ? String(variant.sku) : "",
+    name: variant.name ? String(variant.name) : "",
+    price: parseNumberValue(variant.price, (num) => num / 100),
+    packSize: parseNumberValue(packSizeSource),
+    abv: parseNumberValue(abvSource),
+    ibu: parseNumberValue(ibuSource),
+  };
+};
+
+const parseMultiValueField = (value: string) =>
+  value
+    .split(/,|\n/)
+    .map((item) => item.trim())
+    .filter(Boolean);
+
+const toStringArray = (value: unknown) =>
+  Array.isArray(value)
+    ? value.filter((item): item is string => typeof item === "string")
+    : [];
 
 export default function EditProductPage() {
   const params = useParams<{id: string}>();
@@ -139,6 +161,24 @@ export default function EditProductPage() {
   const [existingHeroImageUrl, setExistingHeroImageUrl] = useState<string>("");
   const [existingGalleryUrls, setExistingGalleryUrls] = useState<string[]>([]);
   const [productName, setProductName] = useState<string>("");
+  const [existingMetadata, setExistingMetadata] = useState<JsonRecord>({});
+  const [existingImages, setExistingImages] = useState<JsonRecord>({});
+
+  const sanitizedExistingMetadata = useMemo(() => {
+    const metadataCopy: JsonRecord = {...existingMetadata};
+    delete metadataCopy.tastingNotes;
+    delete metadataCopy.tasting_notes;
+    delete metadataCopy.pairings;
+    return metadataCopy;
+  }, [existingMetadata]);
+
+  const sanitizedExistingImages = useMemo(() => {
+    const imagesCopy: JsonRecord = {...existingImages};
+    delete imagesCopy.main;
+    delete imagesCopy.imageUrl;
+    delete imagesCopy.gallery;
+    return imagesCopy;
+  }, [existingImages]);
 
   const fetchProduct = useCallback(async () => {
     if (!productId) {
@@ -163,13 +203,39 @@ export default function EditProductPage() {
         throw new Error("La API no devolvió información del producto.");
       }
 
+      const metadata = isRecord(product.metadata) ? {...product.metadata} : {};
+      const images = isRecord(product.images) ? {...product.images} : {};
+
+      const metadataWithCamel = metadata as JsonRecord & {
+        tastingNotes?: unknown;
+        pairings?: unknown;
+      };
+
+      const imagesWithCamel = images as JsonRecord & {
+        main?: unknown;
+        imageUrl?: unknown;
+        gallery?: unknown;
+      };
+
+      const tastingNotes = toStringArray(
+        metadata["tasting_notes"] ?? metadataWithCamel.tastingNotes,
+      ).join("\n");
+
+      const pairings = toStringArray(
+        metadata["pairings"] ?? metadataWithCamel.pairings,
+      ).join("\n");
+
+      const mainImageSource =
+        imagesWithCamel.main ?? imagesWithCamel.imageUrl ?? images["main"] ?? "";
+      const mainImage = typeof mainImageSource === "string" ? mainImageSource : "";
+
+      const gallery = toStringArray(imagesWithCamel.gallery ?? images["gallery"]);
+
       setProductName(product.name ? String(product.name) : "");
-      setExistingHeroImageUrl(product.imageUrl ? String(product.imageUrl) : "");
-      setExistingGalleryUrls(
-        Array.isArray(product.gallery)
-          ? product.gallery.filter(Boolean).map((url) => String(url))
-          : [],
-      );
+      setExistingHeroImageUrl(mainImage);
+      setExistingGalleryUrls(gallery);
+      setExistingMetadata(metadata);
+      setExistingImages(images);
 
       reset({
         name: product.name ? String(product.name) : "",
@@ -183,12 +249,8 @@ export default function EditProductPage() {
         limited: Boolean(product.limitedEdition ?? product.limited ?? false),
         imageFile: null,
         categoryLabel: product.categoryLabel ? String(product.categoryLabel) : "",
-        tastingNotes: Array.isArray(product.tastingNotes)
-          ? product.tastingNotes.filter(Boolean).join("\n")
-          : "",
-        pairings: Array.isArray(product.pairings)
-          ? product.pairings.filter(Boolean).join("\n")
-          : "",
+        tastingNotes,
+        pairings,
         galleryFiles: null,
         variants: Array.isArray(product.variants)
           ? product.variants
@@ -268,12 +330,6 @@ export default function EditProductPage() {
         galleryUrls = [...existingGalleryUrls, ...uploadedGallery];
       }
 
-      const parseMultiValueField = (value: string) =>
-        value
-          .split(/,|\n/)
-          .map((item) => item.trim())
-          .filter(Boolean);
-
       const tastingNotes = parseMultiValueField(values.tastingNotes);
       const pairings = parseMultiValueField(values.pairings);
 
@@ -285,34 +341,56 @@ export default function EditProductPage() {
             return null;
           }
 
+          const priceValue = Number.isFinite(variant.price) ? variant.price : 0;
+          const priceInCents = Math.round(priceValue * 100);
+          const packSizeValue = Number.isFinite(variant.packSize) ? variant.packSize : undefined;
+          const abvValue = Number.isFinite(variant.abv) ? variant.abv : undefined;
+          const ibuValue = Number.isFinite(variant.ibu) ? variant.ibu : undefined;
+
           return {
             sku: trimmedSku,
             name: trimmedName,
-            price: Math.round(variant.price * 100),
-            packSize: variant.packSize,
-            abv: variant.abv,
-            ibu: variant.ibu,
+            price: priceInCents,
+            stock: values.stock,
+            attributes: {
+              abv: typeof abvValue === "number" ? abvValue : null,
+              ibu: typeof ibuValue === "number" ? ibuValue : null,
+              unit_count: typeof packSizeValue === "number" ? packSizeValue : null,
+            },
           };
         })
         .filter((variant): variant is NonNullable<typeof variant> => Boolean(variant));
 
       const ratingValue = Number.isFinite(values.rating) ? values.rating : 0;
 
+      const productPriceValue = Number.isFinite(values.price) ? values.price : 0;
+      const stockValue = Number.isFinite(values.stock) ? values.stock : 0;
+
+      const metadataPayload: JsonRecord = {
+        ...sanitizedExistingMetadata,
+        tasting_notes: tastingNotes,
+        pairings,
+      };
+
+      const imagesPayload: JsonRecord = {
+        ...sanitizedExistingImages,
+        main: heroImageUrl,
+        gallery: galleryUrls,
+      };
+
       const productPayload = {
         name: values.name,
         slug: values.slug,
         sku: values.sku,
         description: values.description,
-        price: Math.round(values.price * 100),
-        stock: values.stock,
+        price: Math.round(productPriceValue * 100),
+        stock: stockValue,
         style: values.style,
         rating: ratingValue,
         limitedEdition: values.limited,
-        imageUrl: heroImageUrl,
         categoryLabel: values.categoryLabel,
-        tastingNotes,
-        pairings,
-        gallery: galleryUrls,
+        metadata: metadataPayload,
+        images: imagesPayload,
         variants: variantsPayload,
       };
 
@@ -324,11 +402,17 @@ export default function EditProductPage() {
 
       const payload = await response.json();
       if (!response.ok) {
-        throw new Error(payload.error || "No se pudo actualizar el producto.");
+        const apiError =
+          typeof payload?.error === "string"
+            ? payload.error
+            : payload?.error?.message ?? "No se pudo actualizar el producto.";
+        throw new Error(apiError);
       }
 
       setExistingHeroImageUrl(heroImageUrl);
       setExistingGalleryUrls(galleryUrls);
+      setExistingMetadata(metadataPayload);
+      setExistingImages(imagesPayload);
 
       toast({
         title: "Producto actualizado",
@@ -520,92 +604,77 @@ export default function EditProductPage() {
                       checked={field.value}
                       onCheckedChange={(value) => field.onChange(Boolean(value))}
                     />
-                    ¿Es edición limitada?
+                    Producto de edición limitada
                   </label>
                 )}
               />
 
               <div className="grid gap-2">
                 <Label htmlFor="imageFile">Imagen principal</Label>
-                <input
-                  id="imageFile"
-                  type="file"
-                  accept="image/*"
-                  className="text-sm text-white/80"
-                  {...register("imageFile", {
-                    validate: (value) => {
-                      if (existingHeroImageUrl) {
-                        return true;
-                      }
-                      return (value && value.length > 0) || "La imagen principal es obligatoria.";
-                    },
-                  })}
-                />
+                <Input id="imageFile" type="file" accept="image/*" {...register("imageFile")} />
                 {existingHeroImageUrl ? (
-                  <p className="text-xs text-white/60">
-                    Imagen actual: <a href={existingHeroImageUrl} rel="noreferrer" target="_blank">Ver imagen</a>
-                  </p>
+                  <p className="text-xs text-white/60">Imagen actual: {existingHeroImageUrl}</p>
                 ) : null}
-                {errors.imageFile ? <p className="text-sm text-red-400">{errors.imageFile.message}</p> : null}
               </div>
 
               <div className="grid gap-2">
-                <Label htmlFor="galleryFiles">Galería de imágenes</Label>
-                <input
-                  id="galleryFiles"
-                  type="file"
-                  accept="image/*"
-                  multiple
-                  className="text-sm text-white/80"
-                  {...register("galleryFiles")}
-                />
-                <p className="text-xs text-white/60">Puedes subir varias imágenes adicionales para la galería.</p>
+                <Label htmlFor="galleryFiles">Galería</Label>
+                <Input id="galleryFiles" type="file" accept="image/*" multiple {...register("galleryFiles")} />
                 {existingGalleryUrls.length > 0 ? (
-                  <ul className="list-disc space-y-1 pl-5 text-xs text-white/60">
-                    {existingGalleryUrls.map((url) => (
-                      <li key={url}>
-                        <a href={url} rel="noreferrer" target="_blank">
-                          Imagen guardada
-                        </a>
-                      </li>
-                    ))}
-                  </ul>
+                  <div className="text-xs text-white/60">
+                    <p className="font-medium text-white/70">Galería actual:</p>
+                    <ul className="list-inside list-disc space-y-1">
+                      {existingGalleryUrls.map((url) => (
+                        <li key={url}>{url}</li>
+                      ))}
+                    </ul>
+                  </div>
                 ) : null}
               </div>
 
-              <div className="rounded-xl border border-white/10 bg-background/40 p-4">
-                <div className="mb-3 flex items-center justify-between">
-                  <h2 className="text-lg font-semibold">Variantes</h2>
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-lg font-semibold text-white">Variantes</h3>
                   <Button
-                    size="sm"
                     type="button"
+                    size="sm"
                     variant="outline"
                     onClick={() =>
-                      appendVariant({sku: "", name: "", price: 0, packSize: 1, abv: 0, ibu: 0})
+                      appendVariant({
+                        name: "",
+                        sku: "",
+                        price: 0,
+                        packSize: 0,
+                        abv: 0,
+                        ibu: 0,
+                      })
                     }
                   >
                     Añadir variante
                   </Button>
                 </div>
-                <div className="flex flex-col gap-4">
-                  {variantFields.length === 0 ? (
-                    <p className="text-sm text-white/60">Aún no has agregado variantes.</p>
-                  ) : (
-                    variantFields.map((variant, index) => {
+
+                {variantFields.length === 0 ? (
+                  <p className="text-sm text-white/60">Todavía no hay variantes registradas.</p>
+                ) : (
+                  <div className="space-y-6">
+                    {variantFields.map((field, index) => {
                       const variantErrors = errors.variants?.[index];
+
                       return (
-                        <div key={variant.id} className="rounded-lg border border-white/10 bg-background/60 p-4">
-                          <div className="mb-4 flex items-center justify-between">
-                            <span className="text-sm font-semibold text-white">Variante {index + 1}</span>
+                        <div key={field.id} className="rounded-xl border border-white/10 p-4">
+                          <div className="flex items-center justify-between pb-4">
+                            <h4 className="font-medium text-white/80">Variante #{index + 1}</h4>
                             <Button
-                              size="sm"
                               type="button"
                               variant="ghost"
+                              size="sm"
                               onClick={() => removeVariant(index)}
                             >
                               Eliminar
                             </Button>
                           </div>
+
                           <div className="grid gap-4 md:grid-cols-2">
                             <div className="grid gap-2">
                               <Label htmlFor={`variant-${index}-name`}>Nombre</Label>
@@ -704,9 +773,9 @@ export default function EditProductPage() {
                           </div>
                         </div>
                       );
-                    })
-                  )}
-                </div>
+                    })}
+                  </div>
+                )}
               </div>
 
               {formError ? (
