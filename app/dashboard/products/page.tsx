@@ -3,6 +3,7 @@
 import {useCallback, useEffect, useMemo, useState} from "react";
 import {Controller, useFieldArray, useForm} from "react-hook-form";
 import {FiEdit, FiMoreVertical, FiTrash} from "react-icons/fi";
+import {useRouter} from "next/navigation";
 
 import {
   Dialog,
@@ -20,6 +21,16 @@ import {Textarea} from "@/components/ui/textarea";
 import {useToast} from "@/hooks/use-toast";
 import {AdminPageHeader} from "@/components/admin/admin-page-header";
 import {DropdownMenu} from "@/components/ui/dropdown-menu";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 import NextImage from "next/image";
 
@@ -114,6 +125,9 @@ export default function ProductsPage() {
   const [productsError, setProductsError] = useState<string | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [productToDelete, setProductToDelete] = useState<AdminProduct | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const router = useRouter();
   const toast = useToast();
 
   const {
@@ -301,6 +315,43 @@ export default function ProductsPage() {
     }
   });
 
+  const handleDeleteProduct = useCallback(async () => {
+    if (!productToDelete) return;
+
+    try {
+      setIsDeleting(true);
+      const response = await fetch(`/api/dashboard/products/${productToDelete.id}`, {
+        method: "DELETE",
+      });
+
+      if (!response.ok) {
+        let errorMessage = "No se pudo eliminar el producto.";
+        try {
+          const errorPayload = await response.json();
+          errorMessage = errorPayload.error || errorMessage;
+        } catch {
+          // ignore json parse error
+        }
+        throw new Error(errorMessage);
+      }
+
+      toast({
+        title: "Producto eliminado",
+        description: `${productToDelete.name} se eliminó correctamente.`,
+        status: "success",
+      });
+
+      setProductToDelete(null);
+      await fetchProducts();
+    } catch (error) {
+      console.error("Error deleting product:", error);
+      const message = error instanceof Error ? error.message : "No se pudo eliminar el producto.";
+      toast({title: "Error", description: message, status: "error"});
+    } finally {
+      setIsDeleting(false);
+    }
+  }, [fetchProducts, productToDelete, toast]);
+
   return (
     <div className="px-4 py-10 md:px-8">
       <AdminPageHeader
@@ -410,12 +461,14 @@ export default function ProductsPage() {
                           >
                             <DropdownMenu.Item
                               className="flex cursor-pointer items-center gap-2 rounded-md px-3 py-2 text-left transition-colors focus:outline-none data-[highlighted]:bg-white/10 data-[highlighted]:text-white"
+                              onClick={() => router.push(`/dashboard/products/${product.id}/edit`)}
                             >
                               <FiEdit className="h-4 w-4" />
                               Editar
                             </DropdownMenu.Item>
                             <DropdownMenu.Item
                               className="flex cursor-pointer items-center gap-2 rounded-md px-3 py-2 text-left text-red-200 transition-colors focus:outline-none data-[highlighted]:bg-red-500/20 data-[highlighted]:text-red-100"
+                              onClick={() => setProductToDelete(product)}
                             >
                               <FiTrash className="h-4 w-4" />
                               Eliminar
@@ -770,6 +823,23 @@ export default function ProductsPage() {
           </form>
         </DialogContent>
       </Dialog>
+
+      <AlertDialog open={!!productToDelete} onOpenChange={() => setProductToDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>¿Confirmar eliminación?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Estás a punto de eliminar «{productToDelete?.name}».
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDeleting}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction disabled={isDeleting} onClick={handleDeleteProduct}>
+              {isDeleting ? "Eliminando..." : "Confirmar"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
