@@ -2,6 +2,7 @@
 
 import {useCallback, useEffect, useMemo, useState} from "react";
 import {Controller, useFieldArray, useForm} from "react-hook-form";
+import {FiEdit, FiMoreVertical, FiTrash} from "react-icons/fi";
 
 import {
   Dialog,
@@ -17,6 +18,8 @@ import {Input} from "@/components/ui/input";
 import {Label} from "@/components/ui/label";
 import {Textarea} from "@/components/ui/textarea";
 import {useToast} from "@/hooks/use-toast";
+import {AdminPageHeader} from "@/components/admin/admin-page-header";
+import {DropdownMenu} from "@/components/ui/dropdown-menu";
 
 import NextImage from "next/image";
 
@@ -300,15 +303,12 @@ export default function ProductsPage() {
 
   return (
     <div className="px-4 py-10 md:px-8">
-      <div className="mb-8 flex flex-wrap items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-semibold">Gestión de productos</h1>
-          <p className="mt-2 text-sm text-white/70">
-            Administra el catálogo: consulta los productos existentes y crea nuevos con su imagen principal.
-          </p>
-        </div>
+      <AdminPageHeader
+        description="Administra el catálogo: consulta los productos existentes y crea nuevos con su imagen principal."
+        title="Gestión de productos"
+      >
         <Button onClick={() => setIsDialogOpen(true)}>Añadir producto</Button>
-      </div>
+      </AdminPageHeader>
 
       <div className="overflow-hidden rounded-2xl border border-white/10 bg-background/60">
         {isLoadingProducts ? (
@@ -340,6 +340,7 @@ export default function ProductsPage() {
                   <th className="px-6 py-4 font-semibold">Precio</th>
                   <th className="px-6 py-4 font-semibold">Stock</th>
                   <th className="px-6 py-4 font-semibold">Estado</th>
+                  <th className="px-6 py-4 text-right font-semibold">Acciones</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-white/10">
@@ -347,15 +348,15 @@ export default function ProductsPage() {
                   <tr key={product.id} className="hover:bg-white/5">
                     <td className="px-6 py-4">
                       {product.imageUrl ? (
-          <div className="relative h-14 w-14 overflow-hidden rounded-md border border-white/10">
-            <NextImage
-              alt={product.name}
-              fill
-              className="object-cover"
-              sizes="56px"
-              src={product.imageUrl}
-            />
-          </div>
+                        <div className="relative h-14 w-14 overflow-hidden rounded-md border border-white/10">
+                          <NextImage
+                            alt={product.name}
+                            className="object-cover"
+                            fill
+                            sizes="56px"
+                            src={product.imageUrl}
+                          />
+                        </div>
                       ) : (
                         <div className="flex h-14 w-14 items-center justify-center rounded-md border border-dashed border-white/10 text-[10px] text-white/60">
                           Sin imagen
@@ -389,6 +390,39 @@ export default function ProductsPage() {
                           Activo
                         </span>
                       )}
+                    </td>
+                    <td className="px-6 py-4 text-right">
+                      <DropdownMenu.Root>
+                        <DropdownMenu.Trigger asChild>
+                          <Button
+                            aria-label={`Acciones para ${product.name}`}
+                            size="icon"
+                            variant="ghost"
+                          >
+                            <FiMoreVertical className="h-5 w-5" />
+                          </Button>
+                        </DropdownMenu.Trigger>
+                        <DropdownMenu.Portal>
+                          <DropdownMenu.Content
+                            align="end"
+                            className="min-w-[160px] rounded-lg border border-white/10 bg-background/95 p-1 text-sm text-white shadow-lg backdrop-blur"
+                            sideOffset={8}
+                          >
+                            <DropdownMenu.Item
+                              className="flex cursor-pointer items-center gap-2 rounded-md px-3 py-2 text-left transition-colors focus:outline-none data-[highlighted]:bg-white/10 data-[highlighted]:text-white"
+                            >
+                              <FiEdit className="h-4 w-4" />
+                              Editar
+                            </DropdownMenu.Item>
+                            <DropdownMenu.Item
+                              className="flex cursor-pointer items-center gap-2 rounded-md px-3 py-2 text-left text-red-200 transition-colors focus:outline-none data-[highlighted]:bg-red-500/20 data-[highlighted]:text-red-100"
+                            >
+                              <FiTrash className="h-4 w-4" />
+                              Eliminar
+                            </DropdownMenu.Item>
+                          </DropdownMenu.Content>
+                        </DropdownMenu.Portal>
+                      </DropdownMenu.Root>
                     </td>
                   </tr>
                 ))}
