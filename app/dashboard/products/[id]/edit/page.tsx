@@ -112,6 +112,18 @@ const toStringArray = (value: unknown) =>
     ? value.filter((item): item is string => typeof item === "string")
     : [];
 
+const buildMetadataPayload = (
+  values: Pick<CreateProductFormValues, "tastingNotes" | "pairings">,
+  baseMetadata: JsonRecord,
+): JsonRecord => ({
+  ...baseMetadata,
+  tasting_notes: parseMultiValueField(values.tastingNotes ?? ""),
+  pairings: parseMultiValueField(values.pairings ?? ""),
+});
+
+const toNullableFiniteNumber = (value: unknown) =>
+  typeof value === "number" && Number.isFinite(value) ? value : null;
+
 export default function EditProductPage() {
   const params = useParams<{id: string}>();
   const productIdParam = params?.id;
@@ -217,13 +229,13 @@ export default function EditProductPage() {
         gallery?: unknown;
       };
 
-      const tastingNotes = toStringArray(
+      const tastingNotesList = toStringArray(
         metadata["tasting_notes"] ?? metadataWithCamel.tastingNotes,
-      ).join("\n");
+      );
 
-      const pairings = toStringArray(
+      const pairingsList = toStringArray(
         metadata["pairings"] ?? metadataWithCamel.pairings,
-      ).join("\n");
+      );
 
       const mainImageSource =
         imagesWithCamel.main ?? imagesWithCamel.imageUrl ?? images["main"] ?? "";
@@ -249,8 +261,8 @@ export default function EditProductPage() {
         limited: Boolean(product.limitedEdition ?? product.limited ?? false),
         imageFile: null,
         categoryLabel: product.categoryLabel ? String(product.categoryLabel) : "",
-        tastingNotes,
-        pairings,
+        tastingNotes: tastingNotesList.join(", "),
+        pairings: pairingsList.join(", "),
         galleryFiles: null,
         variants: Array.isArray(product.variants)
           ? product.variants
@@ -330,8 +342,12 @@ export default function EditProductPage() {
         galleryUrls = [...existingGalleryUrls, ...uploadedGallery];
       }
 
-      const tastingNotes = parseMultiValueField(values.tastingNotes);
-      const pairings = parseMultiValueField(values.pairings);
+      const ratingValue = Number.isFinite(values.rating) ? values.rating : 0;
+
+      const productPriceValue = Number.isFinite(values.price) ? values.price : 0;
+      const stockValue = Number.isFinite(values.stock) ? values.stock : 0;
+
+      const metadataPayload = buildMetadataPayload(values, sanitizedExistingMetadata);
 
       const variantsPayload = (values.variants ?? [])
         .map((variant) => {
@@ -343,34 +359,23 @@ export default function EditProductPage() {
 
           const priceValue = Number.isFinite(variant.price) ? variant.price : 0;
           const priceInCents = Math.round(priceValue * 100);
-          const packSizeValue = Number.isFinite(variant.packSize) ? variant.packSize : undefined;
-          const abvValue = Number.isFinite(variant.abv) ? variant.abv : undefined;
-          const ibuValue = Number.isFinite(variant.ibu) ? variant.ibu : undefined;
+          const packSizeValue = toNullableFiniteNumber(variant.packSize);
+          const abvValue = toNullableFiniteNumber(variant.abv);
+          const ibuValue = toNullableFiniteNumber(variant.ibu);
 
           return {
             sku: trimmedSku,
             name: trimmedName,
             price: priceInCents,
-            stock: values.stock,
+            stock: stockValue,
             attributes: {
-              abv: typeof abvValue === "number" ? abvValue : null,
-              ibu: typeof ibuValue === "number" ? ibuValue : null,
-              unit_count: typeof packSizeValue === "number" ? packSizeValue : null,
+              abv: abvValue,
+              ibu: ibuValue,
+              unit_count: packSizeValue,
             },
           };
         })
         .filter((variant): variant is NonNullable<typeof variant> => Boolean(variant));
-
-      const ratingValue = Number.isFinite(values.rating) ? values.rating : 0;
-
-      const productPriceValue = Number.isFinite(values.price) ? values.price : 0;
-      const stockValue = Number.isFinite(values.stock) ? values.stock : 0;
-
-      const metadataPayload: JsonRecord = {
-        ...sanitizedExistingMetadata,
-        tasting_notes: tastingNotes,
-        pairings,
-      };
 
       const imagesPayload: JsonRecord = {
         ...sanitizedExistingImages,
