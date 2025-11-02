@@ -1,23 +1,77 @@
 "use client";
 
 import {useCallback, useEffect, useMemo, useState} from "react";
-import Link from "next/link";
-import {useParams, useRouter} from "next/navigation";
 import {Controller, useFieldArray, useForm} from "react-hook-form";
+import {FiEdit, FiMoreVertical, FiTrash} from "react-icons/fi";
+import {useRouter} from "next/navigation";
 
-import {AdminPageHeader} from "@/components/admin/admin-page-header";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import {Button} from "@/components/ui/button";
 import {Checkbox} from "@/components/ui/checkbox";
 import {Input} from "@/components/ui/input";
 import {Label} from "@/components/ui/label";
 import {Textarea} from "@/components/ui/textarea";
 import {useToast} from "@/hooks/use-toast";
+import {AdminPageHeader} from "@/components/admin/admin-page-header";
+import {DropdownMenu} from "@/components/ui/dropdown-menu";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+
+import NextImage from "next/image";
+
+type RawProduct = Record<string, unknown> & {
+  id?: string;
+  name?: string;
+  slug?: string;
+  sku?: string;
+  description?: string;
+  price?: number | string;
+  stock?: number | string;
+  style?: string;
+  rating?: number | string;
+  limited?: boolean;
+  limitedEdition?: boolean;
+  imageUrl?: string;
+  heroImage?: string;
+};
+
+type AdminProduct = {
+  id: string;
+  name: string;
+  slug?: string;
+  sku?: string;
+  description?: string;
+  price?: number;
+  stock?: number;
+  style?: string;
+  rating?: number;
+  limited?: boolean;
+  imageUrl?: string;
+  categoryLabel?: string;
+  tastingNotes?: string[];
+  pairings?: string[];
+  gallery?: string[];
+};
 
 type VariantFormValues = {
   sku: string;
   name: string;
   price: number;
-  stock: number; // <-- AÑADIDO
   packSize: number;
   abv: number;
   ibu: number;
@@ -28,8 +82,8 @@ type CreateProductFormValues = {
   slug: string;
   sku: string;
   description: string;
-  // price: number; <-- ELIMINADO
-  // stock: number; <-- ELIMINADO
+  price: number;
+  stock: number;
   style: string;
   rating: number;
   limited: boolean;
@@ -41,96 +95,38 @@ type CreateProductFormValues = {
   variants: VariantFormValues[];
 };
 
-type JsonRecord = Record<string, unknown>;
+const normalizeProduct = (product: RawProduct): AdminProduct => {
+  const coerceNumber = (value: unknown): number | undefined => {
+    if (value === null || value === undefined || value === "") return undefined;
+    const num = Number(value);
+    return Number.isNaN(num) ? undefined : num;
+  };
 
-type ApiVariant = {
-  id?: string;
-  sku?: string | null;
-  name?: string | null;
-  price?: number | null;
-  stock?: number | null;
-  attributes?: JsonRecord | null;
-};
-
-type ApiProduct = {
-  id: string;
-  name?: string | null;
-  slug?: string | null;
-  sku?: string | null;
-  description?: string | null;
-  // price?: number | null; <-- ELIMINADO
-  // stock?: number | null; <-- ELIMINADO
-  style?: string | null;
-  rating?: number | null;
-  limitedEdition?: boolean | null;
-  limited?: boolean | null;
-  categoryLabel?: string | null;
-  metadata?: JsonRecord | null;
-  images?: JsonRecord | null;
-  variants?: ApiVariant[] | null;
-};
-
-const parseNumberValue = (
-  value: unknown,
-  transform: (num: number) => number = (num) => num,
-) => {
-  if (value === null || value === undefined || value === "") {
-    return 0;
-  }
-
-  const numericValue = typeof value === "number" ? value : Number(value);
-  return Number.isFinite(numericValue) ? transform(numericValue) : 0;
-};
-
-const isRecord = (value: unknown): value is JsonRecord =>
-  typeof value === "object" && value !== null && !Array.isArray(value);
-
-const normalizeVariant = (variant: ApiVariant): VariantFormValues => {
-  const attributes = isRecord(variant.attributes) ? variant.attributes : {};
-
-  const packSizeSource = attributes.unit_count ?? attributes.packSize;
-  const abvSource = attributes.abv;
-  const ibuSource = attributes.ibu;
+  const id = product.id ?? product.sku ?? product.slug ?? crypto.randomUUID();
 
   return {
-    sku: variant.sku ? String(variant.sku) : "",
-    name: variant.name ? String(variant.name) : "",
-    price: parseNumberValue(variant.price, (num) => num / 100),
-    stock: parseNumberValue(variant.stock), // <-- AÑADIDO
-    packSize: parseNumberValue(packSizeSource),
-    abv: parseNumberValue(abvSource),
-    ibu: parseNumberValue(ibuSource),
+    id: String(id),
+    name: String(product.name ?? "Producto sin nombre"),
+    slug: String(product.slug ?? ""),
+    sku: String(product.sku ?? ""),
+    description: String(product.description ?? ""),
+    price: coerceNumber(product.price),
+    stock: coerceNumber(product.stock),
+    style: String(product.style ?? ""),
+    rating: coerceNumber(product.rating),
+    limited: Boolean(product.limited ?? product.limitedEdition),
+    imageUrl: String(product.imageUrl ?? product.heroImage ?? ""),
   };
 };
 
-const parseMultiValueField = (value: string) =>
-  value
-    .split(/,|\n/)
-    .map((item) => item.trim())
-    .filter(Boolean);
-
-const toStringArray = (value: unknown) =>
-  Array.isArray(value)
-    ? value.filter((item): item is string => typeof item === "string")
-    : [];
-
-const buildMetadataPayload = (
-  values: Pick<CreateProductFormValues, "tastingNotes" | "pairings">,
-  baseMetadata: JsonRecord,
-): JsonRecord => ({
-  ...baseMetadata,
-  tasting_notes: parseMultiValueField(values.tastingNotes ?? ""),
-  pairings: parseMultiValueField(values.pairings ?? ""),
-});
-
-const toNullableFiniteNumber = (value: unknown) =>
-  typeof value === "number" && Number.isFinite(value) ? value : null;
-
-export default function EditProductPage() {
-  const params = useParams<{id: string}>();
-  const productIdParam = params?.id;
-  const productId = Array.isArray(productIdParam) ? productIdParam[0] : productIdParam;
-
+export default function ProductsPage() {
+  const [products, setProducts] = useState<AdminProduct[]>([]);
+  const [isLoadingProducts, setIsLoadingProducts] = useState<boolean>(true);
+  const [productsError, setProductsError] = useState<string | null>(null);
+  const [formError, setFormError] = useState<string | null>(null);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [productToDelete, setProductToDelete] = useState<AdminProduct | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
   const router = useRouter();
   const toast = useToast();
 
@@ -146,16 +142,14 @@ export default function EditProductPage() {
       slug: "",
       sku: "",
       description: "",
-      // price: 0, <-- ELIMINADO
-      // stock: 0, <-- ELIMINADO
+      price: 0,
+      stock: 0,
       style: "",
       rating: 0,
       limited: false,
-      imageFile: null,
       categoryLabel: "",
       tastingNotes: "",
       pairings: "",
-      galleryFiles: null,
       variants: [],
     },
   });
@@ -169,149 +163,54 @@ export default function EditProductPage() {
     name: "variants",
   });
 
-  const [isLoadingProduct, setIsLoadingProduct] = useState<boolean>(true);
-  const [loadError, setLoadError] = useState<string | null>(null);
-  const [formError, setFormError] = useState<string | null>(null);
-  const [existingHeroImageUrl, setExistingHeroImageUrl] = useState<string>("");
-  const [existingGalleryUrls, setExistingGalleryUrls] = useState<string[]>([]);
-  const [productName, setProductName] = useState<string>("");
-  const [existingMetadata, setExistingMetadata] = useState<JsonRecord>({});
-  const [existingImages, setExistingImages] = useState<JsonRecord>({});
+  const currencyFormatter = useMemo(
+    () => new Intl.NumberFormat("es-MX", {style: "currency", currency: "MXN"}),
+    [],
+  );
 
-  const sanitizedExistingMetadata = useMemo(() => {
-    const metadataCopy: JsonRecord = {...existingMetadata};
-    delete metadataCopy.tastingNotes;
-    delete metadataCopy.tasting_notes;
-    delete metadataCopy.pairings;
-    return metadataCopy;
-  }, [existingMetadata]);
-
-  const sanitizedExistingImages = useMemo(() => {
-    const imagesCopy: JsonRecord = {...existingImages};
-    delete imagesCopy.main;
-    delete imagesCopy.imageUrl;
-    delete imagesCopy.gallery;
-    return imagesCopy;
-  }, [existingImages]);
-
-  const fetchProduct = useCallback(async () => {
-    if (!productId) {
-      setLoadError("No se pudo determinar el identificador del producto.");
-      setIsLoadingProduct(false);
-      return;
-    }
-
+  const fetchProducts = useCallback(async () => {
     try {
-      setIsLoadingProduct(true);
-      setLoadError(null);
-
-      const response = await fetch(`/api/dashboard/products/${productId}`);
-      if (!response.ok) {
-        throw new Error("No se pudo obtener la información del producto.");
-      }
-
-      const payload = await response.json();
-      const product: ApiProduct | undefined = payload?.product;
-
-      if (!product) {
-        throw new Error("La API no devolvió información del producto.");
-      }
-
-      const metadata = isRecord(product.metadata) ? {...product.metadata} : {};
-      const images = isRecord(product.images) ? {...product.images} : {};
-
-      const metadataWithCamel = metadata as JsonRecord & {
-        tastingNotes?: unknown;
-        pairings?: unknown;
-      };
-
-      const imagesWithCamel = images as JsonRecord & {
-        main?: unknown;
-        imageUrl?: unknown;
-        gallery?: unknown;
-      };
-
-      const tastingNotesList = toStringArray(
-        metadata["tasting_notes"] ?? metadataWithCamel.tastingNotes,
-      );
-
-      const pairingsList = toStringArray(
-        metadata["pairings"] ?? metadataWithCamel.pairings,
-      );
-
-      const mainImageSource =
-        imagesWithCamel.main ?? imagesWithCamel.imageUrl ?? images["main"] ?? "";
-      const mainImage = typeof mainImageSource === "string" ? mainImageSource : "";
-
-      const gallery = toStringArray(imagesWithCamel.gallery ?? images["gallery"]);
-
-      setProductName(product.name ? String(product.name) : "");
-      setExistingHeroImageUrl(mainImage);
-      setExistingGalleryUrls(gallery);
-      setExistingMetadata(metadata);
-      setExistingImages(images);
-
-      reset({
-        name: product.name ? String(product.name) : "",
-        slug: product.slug ? String(product.slug) : "",
-        sku: product.sku ? String(product.sku) : "",
-        description: product.description ? String(product.description) : "",
-        // price: parseNumberValue(product.price, (num) => num / 100), <-- ELIMINADO
-        // stock: parseNumberValue(product.stock), <-- ELIMINADO
-        style: product.style ? String(product.style) : "",
-        rating: parseNumberValue(product.rating),
-        limited: Boolean(product.limitedEdition ?? product.limited ?? false),
-        imageFile: null,
-        categoryLabel: product.categoryLabel ? String(product.categoryLabel) : "",
-        tastingNotes: tastingNotesList.join(", "),
-        pairings: pairingsList.join(", "),
-        galleryFiles: null,
-        variants: Array.isArray(product.variants)
-          ? product.variants
-              .filter((variant): variant is ApiVariant => Boolean(variant))
-              .map((variant) => normalizeVariant(variant))
-          : [],
-      });
+      setIsLoadingProducts(true);
+      setProductsError(null);
+      const response = await fetch("/api/dashboard/products");
+      if (!response.ok) throw new Error("No se pudieron cargar los productos.");
+      const data = await response.json();
+      setProducts((data.products || []).map(normalizeProduct));
     } catch (error) {
-      console.error("Error fetching product:", error);
-      const message =
-        error instanceof Error ? error.message : "Ocurrió un error al cargar el producto.";
-      setLoadError(message);
+      console.error("Error loading products:", error);
+      setProductsError(error instanceof Error ? error.message : "Error desconocido.");
     } finally {
-      setIsLoadingProduct(false);
+      setIsLoadingProducts(false);
     }
-  }, [productId, reset]);
+  }, []);
 
   useEffect(() => {
-    fetchProduct();
-  }, [fetchProduct]);
+    fetchProducts();
+  }, [fetchProducts]);
+
+  useEffect(() => {
+    if (!isDialogOpen) {
+      setFormError(null);
+      reset();
+    }
+  }, [isDialogOpen, reset]);
 
   const onSubmit = handleSubmit(async (values) => {
-    if (!productId) {
-      setFormError("No se pudo determinar el identificador del producto.");
-      return;
-    }
-
     setFormError(null);
-
     try {
-      const mainImageFile = values.imageFile?.[0] ?? null;
-      const galleryFiles = values.galleryFiles ? Array.from(values.galleryFiles) : [];
-
-      let heroImageUrl = existingHeroImageUrl;
-      let galleryUrls = existingGalleryUrls;
-
-      const shouldUploadHeroImage = Boolean(mainImageFile);
-      const shouldUploadGallery = galleryFiles.length > 0;
+      const mainImageFile = values.imageFile?.[0];
+      if (!mainImageFile) {
+        throw new Error("Selecciona una imagen para el producto.");
+      }
 
       const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
       const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET;
 
-      const uploadToCloudinary = async (file: File) => {
-        if (!cloudName || !uploadPreset) {
-          throw new Error("La configuración pública de Cloudinary no está disponible.");
-        }
+      if (!cloudName || !uploadPreset) {
+        throw new Error("La configuración pública de Cloudinary no está disponible.");
+      }
 
+      const uploadToCloudinary = async (file: File) => {
         const formData = new FormData();
         formData.append("file", file);
         formData.append("upload_preset", uploadPreset);
@@ -331,25 +230,21 @@ export default function EditProductPage() {
         return result.secure_url as string;
       };
 
-      if (shouldUploadHeroImage && mainImageFile) {
-        heroImageUrl = await uploadToCloudinary(mainImageFile);
-      }
+      const heroImageUrl = await uploadToCloudinary(mainImageFile);
 
-      if (!heroImageUrl) {
-        throw new Error("Selecciona o conserva una imagen principal para el producto.");
-      }
+      const galleryFiles = values.galleryFiles ? Array.from(values.galleryFiles) : [];
+      const galleryUrls = await Promise.all(
+        galleryFiles.map((galleryFile) => uploadToCloudinary(galleryFile)),
+      );
 
-      if (shouldUploadGallery) {
-        const uploadedGallery = await Promise.all(galleryFiles.map(uploadToCloudinary));
-        galleryUrls = [...existingGalleryUrls, ...uploadedGallery];
-      }
+      const parseMultiValueField = (value: string) =>
+        value
+          .split(/,|\n/)
+          .map((item) => item.trim())
+          .filter(Boolean);
 
-      const ratingValue = Number.isFinite(values.rating) ? values.rating : 0;
-
-      // const productPriceValue = Number.isFinite(values.price) ? values.price : 0; // <-- ELIMINADO
-      // const stockValue = Number.isFinite(values.stock) ? values.stock : 0; // <-- ELIMINADO
-
-      const metadataPayload = buildMetadataPayload(values, sanitizedExistingMetadata);
+      const tastingNotes = parseMultiValueField(values.tastingNotes);
+      const pairings = parseMultiValueField(values.pairings);
 
       const variantsPayload = (values.variants ?? [])
         .map((variant) => {
@@ -359,116 +254,244 @@ export default function EditProductPage() {
             return null;
           }
 
-          const priceValue = Number.isFinite(variant.price) ? variant.price : 0;
-          const priceInCents = Math.round(priceValue * 100);
-          const stockValue = parseNumberValue(variant.stock); // <-- AÑADIDO
-          const packSizeValue = toNullableFiniteNumber(variant.packSize);
-          const abvValue = toNullableFiniteNumber(variant.abv);
-          const ibuValue = toNullableFiniteNumber(variant.ibu);
-
           return {
             sku: trimmedSku,
             name: trimmedName,
-            price: priceInCents,
-            stock: stockValue, // <-- AÑADIDO
-            attributes: {
-              abv: abvValue,
-              ibu: ibuValue,
-              unit_count: packSizeValue,
-            },
+            price: Math.round(variant.price * 100),
+            packSize: variant.packSize,
+            abv: variant.abv,
+            ibu: variant.ibu,
           };
         })
         .filter((variant): variant is NonNullable<typeof variant> => Boolean(variant));
 
-      const imagesPayload: JsonRecord = {
-        ...sanitizedExistingImages,
-        main: heroImageUrl,
-        gallery: galleryUrls,
-      };
+      const ratingValue = Number.isFinite(values.rating) ? values.rating : 0;
 
       const productPayload = {
         name: values.name,
         slug: values.slug,
         sku: values.sku,
         description: values.description,
-        // price: Math.round(productPriceValue * 100), // <-- ELIMINADO
-        // stock: stockValue, // <-- ELIMINADO
+        price: Math.round(values.price * 100),
+        stock: values.stock,
         style: values.style,
         rating: ratingValue,
         limitedEdition: values.limited,
+        imageUrl: heroImageUrl,
         categoryLabel: values.categoryLabel,
-        metadata: metadataPayload,
-        images: imagesPayload,
+        tastingNotes,
+        pairings,
+        gallery: galleryUrls,
         variants: variantsPayload,
       };
 
-      const response = await fetch(`/api/dashboard/products/${productId}`, {
-        method: "PUT",
+      const createResponse = await fetch("/api/dashboard/products", {
+        method: "POST",
         headers: {"Content-Type": "application/json"},
         body: JSON.stringify(productPayload),
       });
 
-      const payload = await response.json();
-      if (!response.ok) {
-        const apiError =
-          typeof payload?.error === "string"
-            ? payload.error
-            : payload?.error?.message ?? "No se pudo actualizar el producto.";
-        throw new Error(apiError);
+      const createPayload = await createResponse.json();
+      if (!createResponse.ok) {
+        throw new Error(createPayload.error || "No se pudo crear el producto.");
       }
 
-      setExistingHeroImageUrl(heroImageUrl);
-      setExistingGalleryUrls(galleryUrls);
-      setExistingMetadata(metadataPayload);
-      setExistingImages(imagesPayload);
+      setProducts((prev) => [normalizeProduct(createPayload.product), ...prev]);
 
       toast({
-        title: "Producto actualizado",
-        description: `${payload.product?.name ?? values.name} se actualizó correctamente.`,
+        title: "Producto creado",
+        description: `${createPayload.product.name} se añadió correctamente.`,
         status: "success",
       });
 
-      router.push("/dashboard/products");
-      router.refresh();
+      setFormError(null);
+      reset();
+      setIsDialogOpen(false);
     } catch (error) {
-      console.error("Error updating product:", error);
-      const message = error instanceof Error ? error.message : "No se pudo actualizar el producto.";
+      console.error("Error creating product:", error);
+      const message = error instanceof Error ? error.message : "No se pudo crear el producto.";
       setFormError(message);
       toast({title: "Error", description: message, status: "error"});
     }
   });
 
+  const handleDeleteProduct = useCallback(async () => {
+    if (!productToDelete) return;
+
+    try {
+      setIsDeleting(true);
+      const response = await fetch(`/api/dashboard/products/${productToDelete.id}`, {
+        method: "DELETE",
+      });
+
+      if (!response.ok) {
+        let errorMessage = "No se pudo eliminar el producto.";
+        try {
+          const errorPayload = await response.json();
+          errorMessage = errorPayload.error || errorMessage;
+        } catch {
+          // ignore json parse error
+        }
+        throw new Error(errorMessage);
+      }
+
+      toast({
+        title: "Producto eliminado",
+        description: `${productToDelete.name} se eliminó correctamente.`,
+        status: "success",
+      });
+
+      setProductToDelete(null);
+      await fetchProducts();
+    } catch (error) {
+      console.error("Error deleting product:", error);
+      const message = error instanceof Error ? error.message : "No se pudo eliminar el producto.";
+      toast({title: "Error", description: message, status: "error"});
+    } finally {
+      setIsDeleting(false);
+    }
+  }, [fetchProducts, productToDelete, toast]);
+
   return (
     <div className="px-4 py-10 md:px-8">
       <AdminPageHeader
-        description={
-          productName
-            ? `Actualiza la información de «${productName}».`
-            : "Actualiza la información del producto seleccionado."
-        }
-        title="Editar Producto"
+        description="Administra el catálogo: consulta los productos existentes y crea nuevos con su imagen principal."
+        title="Gestión de productos"
       >
-        <Button asChild variant="outline">
-          <Link href="/dashboard/products">Volver</Link>
-        </Button>
+        <Button onClick={() => setIsDialogOpen(true)}>Añadir producto</Button>
       </AdminPageHeader>
 
-      <div className="mt-8 rounded-2xl border border-white/10 bg-background/60 p-6">
-        {isLoadingProduct ? (
+      <div className="overflow-hidden rounded-2xl border border-white/10 bg-background/60">
+        {isLoadingProducts ? (
           <div className="flex flex-col items-center gap-3 py-16 text-white/70">
             <div className="h-12 w-12 animate-spin rounded-full border-4 border-white/20 border-t-accent" />
-            <p>Cargando información del producto...</p>
+            <p>Cargando productos...</p>
           </div>
-        ) : loadError ? (
+        ) : productsError ? (
           <div className="space-y-3 bg-red-500/10 p-6 text-sm text-red-200">
-            <h2 className="text-lg font-semibold text-red-100">No se pudo cargar el producto</h2>
-            <p>{loadError}</p>
-            <Button onClick={fetchProduct} size="sm" variant="outline">
+            <h2 className="text-lg font-semibold text-red-100">No se pudieron cargar los productos</h2>
+            <p>{productsError}</p>
+            <Button onClick={fetchProducts} size="sm" variant="outline">
               Reintentar
             </Button>
           </div>
+        ) : products.length === 0 ? (
+          <div className="flex flex-col items-center gap-2 py-16 text-sm text-white/70">
+            <p className="text-base font-semibold text-white">Aún no hay productos registrados.</p>
+            <p>Crea tu primer producto usando el botón “Añadir producto”.</p>
+          </div>
         ) : (
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-white/10 text-sm">
+              <thead className="bg-white/5 text-left uppercase tracking-wide text-white/70">
+                <tr>
+                  <th className="px-6 py-4 font-semibold">Imagen</th>
+                  <th className="px-6 py-4 font-semibold">Nombre</th>
+                  <th className="px-6 py-4 font-semibold">SKU</th>
+                  <th className="px-6 py-4 font-semibold">Precio</th>
+                  <th className="px-6 py-4 font-semibold">Stock</th>
+                  <th className="px-6 py-4 font-semibold">Estado</th>
+                  <th className="px-6 py-4 text-right font-semibold">Acciones</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-white/10">
+                {products.map((product) => (
+                  <tr key={product.id} className="hover:bg-white/5">
+                    <td className="px-6 py-4">
+                      {product.imageUrl ? (
+                        <div className="relative h-14 w-14 overflow-hidden rounded-md border border-white/10">
+                          <NextImage
+                            alt={product.name}
+                            className="object-cover"
+                            fill
+                            sizes="56px"
+                            src={product.imageUrl}
+                          />
+                        </div>
+                      ) : (
+                        <div className="flex h-14 w-14 items-center justify-center rounded-md border border-dashed border-white/10 text-[10px] text-white/60">
+                          Sin imagen
+                        </div>
+                      )}
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="flex flex-col gap-1">
+                        <span className="font-semibold text-white">{product.name}</span>
+                        {product.slug ? (
+                          <span className="text-xs text-white/60">/{product.slug}</span>
+                        ) : null}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 text-white/80">{product.sku ?? "—"}</td>
+                    <td className="px-6 py-4 text-white">
+                      {typeof product.price === "number"
+                        ? currencyFormatter.format(product.price / 100)
+                        : "—"}
+                    </td>
+                    <td className="px-6 py-4 text-white/80">
+                      {typeof product.stock === "number" ? product.stock : "—"}
+                    </td>
+                    <td className="px-6 py-4">
+                      {product.limited ? (
+                        <span className="inline-flex items-center rounded-full bg-purple-500/20 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-purple-200">
+                          Edición limitada
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center rounded-full bg-emerald-500/20 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-emerald-200">
+                          Activo
+                        </span>
+                      )}
+                    </td>
+                    <td className="px-6 py-4 text-right">
+                      <DropdownMenu.Root>
+                        <DropdownMenu.Trigger asChild>
+                          <Button
+                            aria-label={`Acciones para ${product.name}`}
+                            size="icon"
+                            variant="ghost"
+                          >
+                            <FiMoreVertical className="h-5 w-5" />
+                          </Button>
+                        </DropdownMenu.Trigger>
+                        <DropdownMenu.Portal>
+                          <DropdownMenu.Content
+                            align="end"
+                            className="min-w-[160px] rounded-lg border border-white/10 bg-background/95 p-1 text-sm text-white shadow-lg backdrop-blur"
+                            sideOffset={8}
+                          >
+                            <DropdownMenu.Item
+                              className="flex cursor-pointer items-center gap-2 rounded-md px-3 py-2 text-left transition-colors focus:outline-none data-[highlighted]:bg-white/10 data-[highlighted]:text-white"
+                              onClick={() => router.push(`/dashboard/products/${product.id}/edit`)}
+                            >
+                              <FiEdit className="h-4 w-4" />
+                              Editar
+                            </DropdownMenu.Item>
+                            <DropdownMenu.Item
+                              className="flex cursor-pointer items-center gap-2 rounded-md px-3 py-2 text-left text-red-200 transition-colors focus:outline-none data-[highlighted]:bg-red-500/20 data-[highlighted]:text-red-100"
+                              onClick={() => setProductToDelete(product)}
+                            >
+                              <FiTrash className="h-4 w-4" />
+                              Eliminar
+                            </DropdownMenu.Item>
+                          </DropdownMenu.Content>
+                        </DropdownMenu.Portal>
+                      </DropdownMenu.Root>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+
+      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <DialogContent className="max-h-[90vh] overflow-y-auto">
           <form className="space-y-5" noValidate onSubmit={onSubmit}>
+            <DialogHeader>
+              <DialogTitle>Crear nuevo producto</DialogTitle>
+            </DialogHeader>
+
             <div className="grid gap-4">
               <div className="grid gap-2">
                 <Label htmlFor="name">Nombre</Label>
@@ -491,7 +514,7 @@ export default function EditProductPage() {
               </div>
 
               <div className="grid gap-2">
-                <Label htmlFor="categoryLabel">Categoría</Label>
+                <Label htmlFor="categoryLabel">Etiqueta de categoría</Label>
                 <Input
                   id="categoryLabel"
                   placeholder="Ej. IPA, Lager, Stout"
@@ -547,9 +570,38 @@ export default function EditProductPage() {
                 <p className="text-xs text-white/60">Separa cada opción por comas o saltos de línea.</p>
               </div>
 
-              {/* --- INICIO DE ELIMINACIÓN --- */}
-              {/* Los campos de Precio y Stock del producto principal se han eliminado */}
-              {/* --- FIN DE ELIMINACIÓN --- */}
+              <div className="grid gap-4 md:grid-cols-2">
+                <div className="grid gap-2">
+                  <Label htmlFor="price">Precio (centavos)</Label>
+                  <Input
+                    id="price"
+                    type="number"
+                    min={0}
+                    step={1}
+                    {...register("price", {
+                      valueAsNumber: true,
+                      required: "El precio es obligatorio.",
+                      min: {value: 0, message: "El precio debe ser mayor o igual a 0."},
+                    })}
+                  />
+                  {errors.price ? <p className="text-sm text-red-400">{errors.price.message}</p> : null}
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="stock">Stock</Label>
+                  <Input
+                    id="stock"
+                    type="number"
+                    min={0}
+                    step={1}
+                    {...register("stock", {
+                      valueAsNumber: true,
+                      required: "El stock es obligatorio.",
+                      min: {value: 0, message: "El stock debe ser mayor o igual a 0."},
+                    })}
+                  />
+                  {errors.stock ? <p className="text-sm text-red-400">{errors.stock.message}</p> : null}
+                </div>
+              </div>
 
               <div className="grid gap-4 md:grid-cols-2">
                 <div className="grid gap-2">
@@ -583,78 +635,71 @@ export default function EditProductPage() {
                       checked={field.value}
                       onCheckedChange={(value) => field.onChange(Boolean(value))}
                     />
-                    Producto de edición limitada
+                    ¿Es edición limitada?
                   </label>
                 )}
               />
 
               <div className="grid gap-2">
                 <Label htmlFor="imageFile">Imagen principal</Label>
-                <Input id="imageFile" type="file" accept="image/*" {...register("imageFile")} />
-                {existingHeroImageUrl ? (
-                  <p className="text-xs text-white/60">Imagen actual: {existingHeroImageUrl}</p>
-                ) : null}
+                <input
+                  id="imageFile"
+                  type="file"
+                  accept="image/*"
+                  className="text-sm text-white/80"
+                  {...register("imageFile", {
+                    validate: (value) => (value && value.length > 0) || "La imagen principal es obligatoria.",
+                  })}
+                />
+                {errors.imageFile ? <p className="text-sm text-red-400">{errors.imageFile.message}</p> : null}
               </div>
 
               <div className="grid gap-2">
-                <Label htmlFor="galleryFiles">Galería</Label>
-                <Input id="galleryFiles" type="file" accept="image/*" multiple {...register("galleryFiles")} />
-                {existingGalleryUrls.length > 0 ? (
-                  <div className="text-xs text-white/60">
-                    <p className="font-medium text-white/70">Galería actual:</p>
-                    <ul className="list-inside list-disc space-y-1">
-                      {existingGalleryUrls.map((url) => (
-                        <li key={url}>{url}</li>
-                      ))}
-                    </ul>
-                  </div>
-                ) : null}
+                <Label htmlFor="galleryFiles">Galería de imágenes</Label>
+                <input
+                  id="galleryFiles"
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  className="text-sm text-white/80"
+                  {...register("galleryFiles")}
+                />
+                <p className="text-xs text-white/60">Puedes subir varias imágenes adicionales para la galería.</p>
               </div>
 
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-lg font-semibold text-white">Variantes</h3>
+              <div className="rounded-xl border border-white/10 bg-background/40 p-4">
+                <div className="mb-3 flex items-center justify-between">
+                  <h2 className="text-lg font-semibold">Variantes</h2>
                   <Button
-                    type="button"
                     size="sm"
+                    type="button"
                     variant="outline"
                     onClick={() =>
-                      appendVariant({
-                        name: "",
-                        sku: "",
-                        price: 0,
-                        stock: 0, // <-- AÑADIDO
-                        packSize: 0,
-                        abv: 0,
-                        ibu: 0,
-                      })
+                      appendVariant({sku: "", name: "", price: 0, packSize: 1, abv: 0, ibu: 0})
                     }
                   >
                     Añadir variante
                   </Button>
                 </div>
-
-                {variantFields.length === 0 ? (
-                  <p className="text-sm text-white/60">Todavía no hay variantes registradas.</p>
-                ) : (
-                  <div className="space-y-6">
-                    {variantFields.map((field, index) => {
+                <div className="flex flex-col gap-4">
+                  {variantFields.length === 0 ? (
+                    <p className="text-sm text-white/60">Aún no has agregado variantes.</p>
+                  ) : (
+                    variantFields.map((variant, index) => {
                       const variantErrors = errors.variants?.[index];
-
                       return (
-                        <div key={field.id} className="rounded-xl border border-white/10 p-4">
-                          <div className="flex items-center justify-between pb-4">
-                            <h4 className="font-medium text-white/80">Variante #{index + 1}</h4>
+                        <div key={variant.id} className="rounded-lg border border-white/10 bg-background/60 p-4">
+                          <div className="mb-4 flex items-center justify-between">
+                            <span className="text-sm font-semibold text-white">Variante {index + 1}</span>
                             <Button
+                              size="sm"
                               type="button"
                               variant="ghost"
-                              size="sm"
                               onClick={() => removeVariant(index)}
                             >
                               Eliminar
                             </Button>
                           </div>
-
                           <div className="grid gap-4 md:grid-cols-2">
                             <div className="grid gap-2">
                               <Label htmlFor={`variant-${index}-name`}>Nombre</Label>
@@ -715,27 +760,6 @@ export default function EditProductPage() {
                               ) : null}
                             </div>
                           </div>
-                          {/* --- INICIO DE ADICIÓN DE 'STOCK' A LA VARIANTE --- */}
-                          <div className="grid gap-4 md:grid-cols-2">
-                            <div className="grid gap-2">
-                              <Label htmlFor={`variant-${index}-stock`}>Stock</Label>
-                              <Input
-                                id={`variant-${index}-stock`}
-                                type="number"
-                                min={0}
-                                step={1}
-                                {...register(`variants.${index}.stock`, {
-                                  valueAsNumber: true,
-                                  required: "El stock es obligatorio.",
-                                  min: {value: 0, message: "El stock debe ser 0 o más."},
-                                })}
-                              />
-                              {variantErrors?.stock ? (
-                                <p className="text-sm text-red-400">{variantErrors.stock.message as string}</p>
-                              ) : null}
-                            </div>
-                          </div>
-                          {/* --- FIN DE ADICIÓN DE 'STOCK' A LA VARIANTE --- */}
                           <div className="grid gap-4 md:grid-cols-2">
                             <div className="grid gap-2">
                               <Label htmlFor={`variant-${index}-abv`}>ABV (%)</Label>
@@ -774,9 +798,9 @@ export default function EditProductPage() {
                           </div>
                         </div>
                       );
-                    })}
-                  </div>
-                )}
+                    })
+                  )}
+                </div>
               </div>
 
               {formError ? (
@@ -786,17 +810,36 @@ export default function EditProductPage() {
               ) : null}
             </div>
 
-            <div className="flex items-center justify-end gap-3">
-              <Button type="button" variant="ghost" onClick={() => router.push("/dashboard/products")}>
-                Cancelar
-              </Button>
+            <DialogFooter>
+              <DialogClose asChild>
+                <Button type="button" variant="ghost">
+                  Cancelar
+                </Button>
+              </DialogClose>
               <Button type="submit" disabled={isSubmitting}>
-                {isSubmitting ? "Actualizando producto..." : "Guardar cambios"}
+                {isSubmitting ? "Creando producto..." : "Crear producto"}
               </Button>
-            </div>
+            </DialogFooter>
           </form>
-        )}
-      </div>
+        </DialogContent>
+      </Dialog>
+
+      <AlertDialog open={!!productToDelete} onOpenChange={() => setProductToDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>¿Confirmar eliminación?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Estás a punto de eliminar «{productToDelete?.name}».
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDeleting}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction disabled={isDeleting} onClick={handleDeleteProduct}>
+              {isDeleting ? "Eliminando..." : "Confirmar"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
