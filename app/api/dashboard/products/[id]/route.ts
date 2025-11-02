@@ -6,32 +6,50 @@ import {Prisma} from "@prisma/client";
 import {requireAdmin} from "@/lib/auth/admin";
 import {prisma} from "@/lib/prisma";
 
+// --- CAMBIOS AQUÍ ---
+
+// 1. Definir el esquema para los atributos JSON de la variante
+const variantAttributesSchema = z
+  .object({
+    unit_count: z.number().int().min(1).optional().nullable(),
+    packSize: z.number().int().min(1).optional().nullable(),
+    abv: z.number().min(0).optional().nullable(),
+    ibu: z.number().int().min(0).optional().nullable(),
+  })
+  .passthrough(); // Permite otros campos que no validemos explícitamente
+
+// 2. Actualizar el esquema de la variante para que coincida con el payload del frontend
 const variantSchema = z.object({
   sku: z.string().min(1, "El SKU de la variante es requerido."),
   name: z.string().min(1, "El nombre de la variante es requerido."),
   price: z.number().int().min(0, "El precio no puede ser negativo."),
-  packSize: z.number().int().min(1, "El tamaño del paquete debe ser al menos 1.").optional(),
-  abv: z.number().min(0, "El ABV no puede ser negativo.").optional(),
-  ibu: z.number().int().min(0, "El IBU no puede ser negativo.").optional(),
+  stock: z.number().int().min(0, "El stock no puede ser negativo."), // <-- AÑADIDO
+  attributes: variantAttributesSchema, // <-- AÑADIDO
+  // 'packSize', 'abv', 'ibu' eliminados de la raíz de la variante
 });
 
+// 3. Actualizar el esquema principal del producto
 const updateProductSchema = z.object({
   name: z.string().min(1, "El nombre es requerido."),
   slug: z.string().min(1, "El slug es requerido."),
-  sku: z.string().min(1, "El SKU es requerido."),
+  sku: z.string().min(1, "El SKU es requerido."), // El frontend aún envía esto
   description: z.string().optional().nullable(),
   style: z.string().optional().nullable(),
   rating: z.number().min(0).max(5).optional().nullable(),
   limitedEdition: z.boolean().optional(),
   categoryLabel: z.string().optional().nullable(),
-  imageUrl: z.string().url("La URL de la imagen no es válida."),
-  tastingNotes: z.array(z.string()).default([]),
-  pairings: z.array(z.string()).default([]),
-  gallery: z.array(z.string().url("La URL de la imagen no es válida.")).default([]),
-  price: z.number().int().min(0, "El precio no puede ser negativo."),
-  stock: z.number().int().min(0, "El stock no puede ser negativo."),
+
+  // CAMPOS JSON NUEVOS (en lugar de los campos raíz antiguos)
+  metadata: z.record(z.unknown()),
+  images: z.record(z.unknown()),
+
+  // ARRAY DE VARIANTES ACTUALIZADO
   variants: z.array(variantSchema).default([]),
+
+  // --- CAMPOS ANTIGUOS ELIMINADOS DE LA RAÍZ ---
+  // price, stock, imageUrl, tastingNotes, pairings, gallery
 });
+// --- FIN DE CAMBIOS EN ESQUEMAS ---
 
 type ProductWithVariants = Prisma.ProductGetPayload<{
   include: {variants: true};
@@ -51,30 +69,18 @@ function toJsonValue(value: Record<string, unknown>): Prisma.InputJsonValue {
   return value as Prisma.InputJsonValue;
 }
 
-function buildVariantAttributes({packSize, abv, ibu}: VariantAttributes) {
-  const attributes: Record<string, number | null> = {};
-
-  if (typeof packSize !== "undefined") {
-    attributes.packSize = packSize ?? null;
-  }
-
-  if (typeof abv !== "undefined") {
-    attributes.abv = abv ?? null;
-  }
-
-  if (typeof ibu !== "undefined") {
-    attributes.ibu = ibu ?? null;
-  }
-
-  return toJsonValue(attributes);
-}
+// ... (Las funciones 'buildVariantAttributes' y 'extractVariantAttributes' ya no son
+// estrictamente necesarias para el 'update', pero 'mapProductForResponse' aún las usa,
+// así que las dejamos. Solo necesitamos 'extractVariantAttributes' y 'map...')
 
 function extractVariantAttributes(attributes: Prisma.JsonValue | null | undefined) {
   if (!isRecord(attributes)) {
     return {} as VariantAttributes;
   }
 
-  const packSize = Number(attributes.packSize);
+  // El frontend guarda 'packSize' o 'unit_count', normalizamos al leer
+  const packSizeSource = attributes.packSize ?? attributes.unit_count;
+  const packSize = Number(packSizeSource);
   const abv = Number(attributes.abv);
   const ibu = Number(attributes.ibu);
 
@@ -105,11 +111,15 @@ function mapProductForResponse(product: ProductWithVariants) {
   const metadata = isRecord(product.metadata) ? product.metadata : {};
   const images = isRecord(product.images) ? product.images : {};
 
-  const tastingNotes = Array.isArray(metadata.tastingNotes)
-    ? metadata.tastingNotes.filter((note): note is string => typeof note === "string")
+  // El frontend guarda 'tasting_notes', pero normalizamos al leer
+  const tastingNotesList = metadata.tasting_notes ?? metadata.tastingNotes;
+  const pairingsList = metadata.pairings;
+
+  const tastingNotes = Array.isArray(tastingNotesList)
+    ? tastingNotesList.filter((note): note is string => typeof note === "string")
     : [];
-  const pairings = Array.isArray(metadata.pairings)
-    ? metadata.pairings.filter((pairing): pairing is string => typeof pairing === "string")
+  const pairings = Array.isArray(pairingsList)
+    ? pairingsList.filter((pairing): pairing is string => typeof pairing === "string")
     : [];
   const gallery = Array.isArray(images.gallery)
     ? images.gallery.filter((url): url is string => typeof url === "string")
@@ -158,6 +168,8 @@ export async function GET(
   }
 }
 
+// --- CAMBIOS GRANDES AQUÍ ---
+
 async function updateProduct(
   request: Request,
   params: {id?: string},
@@ -173,7 +185,6 @@ async function updateProduct(
 
     const existingProduct = await prisma.product.findUnique({
       where: {id},
-      include: {variants: true},
     });
 
     if (!existingProduct) {
@@ -183,68 +194,58 @@ async function updateProduct(
     const body = await request.json();
     const validation = updateProductSchema.safeParse(body);
 
+    // Aquí es donde estabas recibiendo el 400
     if (!validation.success) {
+      console.error("Fallo en validación Zod:", validation.error.flatten());
       return NextResponse.json({error: validation.error.flatten()}, {status: 400});
     }
 
+    // Los datos ya vienen en el nuevo formato desde el frontend
     const {
       name,
       slug,
-      sku,
       description,
       style,
       rating,
       limitedEdition,
       categoryLabel,
-      imageUrl,
-      tastingNotes,
-      pairings,
-      gallery,
-      price,
-      stock,
-      variants,
+      metadata, // <-- Directo
+      images,   // <-- Directo
+      variants, // <-- Directo
     } = validation.data;
 
-    const existingMetadata = isRecord(existingProduct.metadata) ? {...existingProduct.metadata} : {};
-    const existingImages = isRecord(existingProduct.images) ? {...existingProduct.images} : {};
+    // Convertimos a Prisma.InputJsonValue
+    const metadataValue = toJsonValue(metadata);
+    const imagesValue = toJsonValue(images);
 
-    const metadataValue = toJsonValue({
-      ...existingMetadata,
-      tastingNotes,
-      pairings,
+    // El frontend ya preparó las variantes.
+    // Solo estandarizamos 'packSize' en la BD
+    const preparedVariants = [...variants].map((variant) => {
+      const attributes = variant.attributes;
+      const packSize = attributes.unit_count ?? attributes.packSize ?? null;
+
+      return {
+        sku: variant.sku,
+        name: variant.name,
+        price: variant.price, // Ya en centavos
+        stock: variant.stock, // Ya en la variante
+        attributes: toJsonValue({
+          abv: attributes.abv ?? null,
+          ibu: attributes.ibu ?? null,
+          packSize: packSize,
+        }),
+      };
     });
 
-    const imagesValue = toJsonValue({
-      ...existingImages,
-      main: imageUrl,
-      gallery,
-    });
-
-    const preparedVariants = [...variants].map((variant) => ({
-      sku: variant.sku,
-      name: variant.name,
-      price: variant.price,
-      stock,
-      attributes: buildVariantAttributes({
-        packSize: variant.packSize,
-        abv: variant.abv,
-        ibu: variant.ibu,
-      }),
-    }));
-
-    if (!preparedVariants.some((variant) => variant.sku === sku)) {
-      preparedVariants.unshift({
-        sku,
-        name,
-        price,
-        stock,
-        attributes: buildVariantAttributes({packSize: 1}),
-      });
-    }
+    // La lógica de `unshift` que usaba el 'sku', 'price' y 'stock' raíz
+    // ya no es necesaria, pues el frontend ya no envía 'price' y 'stock' raíz.
+    // Asumimos que `variants` es la única fuente de verdad.
 
     const updatedProduct = await prisma.$transaction(async (tx) => {
+      // 1. Borrar variantes antiguas
       await tx.variant.deleteMany({where: {productId: id}});
 
+      // 2. Actualizar el producto
       await tx.product.update({
         where: {id},
         data: {
@@ -261,6 +262,7 @@ async function updateProduct(
         },
       });
 
+      // 3. Crear las nuevas variantes
       await Promise.all(
         preparedVariants.map((variant) =>
           tx.variant.create({
@@ -272,6 +274,7 @@ async function updateProduct(
         ),
       );
 
+      // 4. Devolver el producto actualizado
       return tx.product.findUnique({
         where: {id},
         include: {variants: true},
@@ -297,6 +300,8 @@ export async function PUT(request: Request, context: {params: {id?: string}}) {
 export async function PATCH(request: Request, context: {params: {id?: string}}) {
   return updateProduct(request, context.params);
 }
+
+// ... (DELETE se mantiene igual) ...
 
 export async function DELETE(
   _request: Request,
