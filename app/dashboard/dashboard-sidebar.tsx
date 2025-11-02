@@ -1,6 +1,6 @@
 import { Home, Package, ShoppingCart, Users } from "lucide-react";
-import { SideBar, SideBarNav } from "@/components/admin/sidebar";
-import { SideBarNavLink } from "@/components/admin/sidebar-nav-link";
+import { SideBar, SideBarNav } from "@/components/dashboard/sidebar";
+import { SideBarNavLink } from "@/components/dashboard/sidebar-nav-link";
 
 export function DashboardSidebar() {
   return (
