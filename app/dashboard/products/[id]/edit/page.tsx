@@ -342,8 +342,7 @@ export default function EditProductPage({params}: {params: {id: string}}) {
 
       const ratingValue = Number.isFinite(values.rating) ? values.rating : 0;
 
-      const productPriceValue = Number.isFinite(values.price) ? values.price : 0;
-      const stockValue = Number.isFinite(values.stock) ? values.stock : 0;
+      const stockValue = Number.isFinite(values.stock) ? Math.round(values.stock) : 0; // ensure integer stock per variant
 
       const metadataPayload = buildMetadataPayload(values, sanitizedExistingMetadata);
 
@@ -381,13 +380,12 @@ export default function EditProductPage({params}: {params: {id: string}}) {
         gallery: galleryUrls,
       };
 
+      // Product-level price and stock removed per updated API contract.
       const productPayload = {
         name: values.name,
         slug: values.slug,
         sku: values.sku,
         description: values.description,
-        price: Math.round(productPriceValue * 100),
-        stock: stockValue,
         style: values.style,
         rating: ratingValue,
         limitedEdition: values.limited,
