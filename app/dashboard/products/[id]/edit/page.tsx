@@ -2,7 +2,7 @@
 
 import {useCallback, useEffect, useMemo, useState} from "react";
 import Link from "next/link";
-import {useParams, useRouter} from "next/navigation";
+import {useRouter} from "next/navigation";
 import {Controller, useFieldArray, useForm} from "react-hook-form";
 
 import {AdminPageHeader} from "@/components/admin/admin-page-header";
@@ -124,10 +124,8 @@ const buildMetadataPayload = (
 const toNullableFiniteNumber = (value: unknown) =>
   typeof value === "number" && Number.isFinite(value) ? value : null;
 
-export default function EditProductPage() {
-  const params = useParams<{id: string}>();
-  const productIdParam = params?.id;
-  const productId = Array.isArray(productIdParam) ? productIdParam[0] : productIdParam;
+export default function EditProductPage({params}: {params: {id: string}}) {
+  const productId = params.id;
 
   const router = useRouter();
   const toast = useToast();
