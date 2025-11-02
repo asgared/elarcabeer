@@ -1,4 +1,4 @@
-import { Home, Package, ShoppingCart, Users } from "lucide-react";
+import { Home, Package, ShoppingCart, Users, FileText } from "lucide-react";
 import { SideBar, SideBarNav } from "@/components/dashboard/sidebar";
 import { SideBarNavLink } from "@/components/dashboard/sidebar-nav-link";
 
@@ -20,6 +20,11 @@ export function DashboardSidebar() {
           <SideBarNavLink href="/dashboard/users" icon={<Users />}>
             Clientes
           </SideBarNavLink>
+          {/* --- NUEVO ENLACE AÑADIDO --- */}
+          <SideBarNavLink href="/dashboard/content" icon={<FileText />}>
+            Contenido (CMS)
+          </SideBarNavLink>
+          {/* --- FIN DEL NUEVO ENLACE --- */}
           {/* Añadir futuros enlaces aquí */}
         </SideBarNav>
       </div>
