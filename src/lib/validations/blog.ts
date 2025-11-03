@@ -13,10 +13,7 @@ export const blogPostSchema = z.object({
   body: z.string().min(1, "El cuerpo del post es requerido"),
   tags: z.string().optional(),
   category: z.string().min(1, "La categoría es requerida"),
-  published: z.coerce.date({
-    required_error: "La fecha de publicación es requerida",
-    invalid_type_error: "Fecha inválida",
-  }),
+  published: z.string().min(1, "La fecha de publicación es requerida"),
 });
 
 export type BlogPostSchema = z.infer<typeof blogPostSchema>;

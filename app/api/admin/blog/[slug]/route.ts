@@ -26,10 +26,11 @@ export async function PUT(
     const dataForPrisma = {
       ...payload,
       tags: payload.tags ?? "",
+      published: new Date(payload.published),
     };
     const post = await prisma.contentPost.update({
       where: { slug },
-      data: dataForPrisma, // 'published' ya es un objeto Date
+      data: dataForPrisma,
     });
 
     return NextResponse.json({ post });
