@@ -4,38 +4,34 @@ import { PlusCircle } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { AdminPageHeader } from "@/components/admin/admin-page-header";
 import { Button } from "@/components/ui/button";
-
-import { columns, CmsContentRow } from "./columns";
 import { DataTable } from "@/components/admin/data-table";
+
+import { columns } from "./columns";
 
 export const dynamic = "force-dynamic";
 
-async function getCmsContentData(): Promise<CmsContentRow[]> {
-  const data = await prisma.cmsContent.findMany({
+async function getBlogPosts() {
+  const data = await prisma.contentPost.findMany({
     orderBy: {
-      updatedAt: "desc",
+      published: "desc",
     },
   });
 
-  return data.map((item) => ({
-    ...item,
-    createdAt: item.createdAt.toISOString(),
-    updatedAt: item.updatedAt.toISOString(),
-  }));
+  return data;
 }
 
-export default async function CmsContentPage() {
-  const data = await getCmsContentData();
+export default async function BlogPostsPage() {
+  const data = await getBlogPosts();
 
   return (
     <div className="px-4 py-10 md:px-8">
       <AdminPageHeader
-        title="Contenido (CMS)"
-        description="Administra las secciones de contenido estático de tu sitio web (ej. 'Quiénes Somos')."
+        title="Blog"
+        description="Administra las entradas del blog, noticias y artículos."
       >
         <Button asChild>
-          <Link href="/dashboard/content/new">
-            <PlusCircle className="mr-2 h-4 w-4" /> Nueva sección
+          <Link href="/dashboard/blog/new">
+            <PlusCircle className="mr-2 h-4 w-4" /> Nueva entrada
           </Link>
         </Button>
       </AdminPageHeader>
