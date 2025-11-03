@@ -6,8 +6,8 @@ import {useForm} from "react-hook-form";
 import {zodResolver} from "@hookform/resolvers/zod";
 import type {ContentPost} from "@prisma/client";
 
-import {blogPostSchema} from "@/app/dashboard/blog/validation";
-import type {BlogPostSchema} from "@/app/dashboard/blog/validation";
+import {blogPostSchema} from "../../../app/dashboard/blog/validation";
+import type {BlogPostSchema} from "../../../app/dashboard/blog/validation";
 import {Button} from "@/components/ui/button";
 import {Input} from "@/components/ui/input";
 import {Label} from "@/components/ui/label";
