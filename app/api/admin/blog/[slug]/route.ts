@@ -22,9 +22,14 @@ export async function PUT(
     const json = await request.json();
     // Omitimos 'slug' de la validación PUT, ya que no se puede cambiar
     const payload = blogPostSchema.omit({ slug: true }).parse(json);
+    // Coalesce 'tags' de undefined a string vacío para Prisma
+    const dataForPrisma = {
+      ...payload,
+      tags: payload.tags ?? "",
+    };
     const post = await prisma.contentPost.update({
       where: { slug },
-      data: payload, // 'published' ya es un objeto Date
+      data: dataForPrisma, // 'published' ya es un objeto Date
     });
 
     return NextResponse.json({ post });

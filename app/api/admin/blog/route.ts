@@ -16,9 +16,13 @@ export async function POST(request: Request) {
 
     const json = await request.json();
     const payload = blogPostSchema.parse(json);
-    // 'payload' ya está validado y 'published' es un objeto Date
+    // Coalesce 'tags' de undefined a string vacío para Prisma
+    const dataForPrisma = {
+      ...payload,
+      tags: payload.tags ?? "",
+    };
     const post = await prisma.contentPost.create({
-      data: payload,
+      data: dataForPrisma,
     });
 
     return NextResponse.json({ post }, { status: 201 });
