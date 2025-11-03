@@ -1,4 +1,4 @@
-import { Home, Package, ShoppingCart, Users, FileText, Newspaper} from "lucide-react";
+import { Home, Package, ShoppingCart, Users, FileText, Newspaper, Store } from "lucide-react";
 import { SideBar, SideBarNav } from "@/components/dashboard/sidebar";
 import { SideBarNavLink } from "@/components/dashboard/sidebar-nav-link";
 
@@ -24,6 +24,9 @@ export function DashboardSidebar() {
           </SideBarNavLink>
           <SideBarNavLink href="/dashboard/blog" icon={<Newspaper />}>
             Blog
+          </SideBarNavLink>
+          <SideBarNavLink href="/dashboard/stores" icon={<Store />}>
+            Tiendas
           </SideBarNavLink>
         </SideBarNav>
       </div>
