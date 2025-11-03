@@ -3,7 +3,7 @@ import { ZodError } from "zod";
 
 import { getAdminSession } from "@/lib/auth/admin";
 import { prisma } from "@/lib/prisma";
-import { blogPostSchema } from "../../../dashboard/blog/validation";
+import { blogPostSchema } from "../../../../dashboard/blog/validation";
 
 export const dynamic = "force-dynamic";
 
