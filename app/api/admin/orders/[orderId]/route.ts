@@ -45,6 +45,16 @@ export async function GET(_request: Request, {params}: RouteContext) {
             name: true,
             lastName: true,
             email: true,
+            addresses: {
+              select: {
+                id: true,
+                label: true,
+                street: true,
+                city: true,
+                country: true,
+                postal: true,
+              },
+            },
           },
         },
         items: true,
@@ -84,6 +94,16 @@ export async function PATCH(request: Request, {params}: RouteContext) {
             name: true,
             lastName: true,
             email: true,
+            addresses: {
+              select: {
+                id: true,
+                label: true,
+                street: true,
+                city: true,
+                country: true,
+                postal: true,
+              },
+            },
           },
         },
         items: true,

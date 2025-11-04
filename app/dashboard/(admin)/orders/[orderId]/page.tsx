@@ -14,6 +14,16 @@ import {formatCurrency} from "@/utils/currency";
 export const dynamic = "force-dynamic";
 
 type OrderDetail = Order & {
+  user: Order["user"] & {
+    addresses?: Array<{
+      id: string;
+      label: string;
+      street: string;
+      city: string;
+      country: string;
+      postal: string;
+    }>;
+  };
   payment: {
     id: string;
     amount: number;
@@ -73,7 +83,7 @@ function resolveBaseUrl() {
   return process.env.NEXT_PUBLIC_APP_URL ?? process.env.NEXTAUTH_URL ?? "http://localhost:3000";
 }
 
-async function getOrder(orderId: string): Promise<OrderDetail> {
+async function getOrderDetails(orderId: string): Promise<OrderDetail> {
   const baseUrl = resolveBaseUrl();
   const cookieStore = cookies();
   const cookieHeader = cookieStore
@@ -101,9 +111,7 @@ async function getOrder(orderId: string): Promise<OrderDetail> {
   if (!response.ok) {
     const errorBody = await response.json().catch(() => null);
     const message =
-      typeof errorBody?.error === "string"
-        ? errorBody.error
-        : "No se pudo cargar la orden.";
+      typeof errorBody?.error === "string" ? errorBody.error : "No se pudo cargar la orden.";
 
     throw new Error(message);
   }
@@ -123,7 +131,7 @@ export default async function OrderDetailPage({params}: OrderDetailPageProps) {
   let error: string | null = null;
 
   try {
-    order = await getOrder(params.orderId);
+    order = await getOrderDetails(params.orderId);
   } catch (err) {
     error = err instanceof Error ? err.message : "No se pudo cargar la orden.";
   }
@@ -152,16 +160,14 @@ export default async function OrderDetailPage({params}: OrderDetailPageProps) {
   const statusVariant = ORDER_STATUS_VARIANTS[statusKey] ?? "secondary";
 
   const paymentStatusKey = order.payment?.status?.toUpperCase() ?? "";
-  const paymentLabel = order.payment
-    ? PAYMENT_STATUS_LABELS[paymentStatusKey] ?? order.payment.status
-    : null;
-  const paymentVariant = order.payment
-    ? PAYMENT_STATUS_VARIANTS[paymentStatusKey] ?? "secondary"
-    : "secondary";
+  const paymentLabel = order.payment ? PAYMENT_STATUS_LABELS[paymentStatusKey] ?? order.payment.status : null;
+  const paymentVariant = order.payment ? PAYMENT_STATUS_VARIANTS[paymentStatusKey] ?? "secondary" : "secondary";
+
+  const primaryAddress = order.user.addresses?.[0];
 
   return (
     <div className="px-4 py-10 md:px-8">
-      <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-6">
         <AdminPageHeader
           title={`Orden ${orderNumber}`}
           description="Consulta el detalle completo de la orden, sus artículos y el estado de pago."
@@ -171,87 +177,67 @@ export default async function OrderDetailPage({params}: OrderDetailPageProps) {
           </Button>
         </AdminPageHeader>
 
-        <div className="flex flex-col gap-6 rounded-2xl border border-white/10 bg-background/50 p-6">
-          <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-            <div className="flex flex-col gap-1">
-              <span className="text-sm uppercase text-white/60">Estado actual</span>
-              <Badge variant={statusVariant}>{statusLabel}</Badge>
-              <span className="text-sm text-white/60">
-                Creada el {dateFormatter.format(new Date(order.createdAt))}
-              </span>
-            </div>
-            <OrderStatusForm orderId={order.id} initialStatus={order.status} />
-          </div>
-
-          <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-            <Card className="border-white/10 bg-background/60">
-              <CardHeader>
-                <CardTitle className="text-lg">Información del cliente</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3 text-sm text-white/80">
-                <div>
-                  <span className="text-white/60">Nombre</span>
-                  <p className="font-medium text-white">
-                    {[order.user.name, order.user.lastName].filter(Boolean).join(" ") || order.user.email}
-                  </p>
-                </div>
-                <div>
-                  <span className="text-white/60">Correo electrónico</span>
-                  <p className="font-medium text-white">{order.user.email}</p>
-                </div>
-                <div>
-                  <span className="text-white/60">Total de la orden</span>
-                  <p className="font-semibold text-white">{formatCurrency(order.total)}</p>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="border-white/10 bg-background/60">
-              <CardHeader>
-                <CardTitle className="text-lg">Pago</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3 text-sm text-white/80">
+        <div className="grid gap-6 lg:grid-cols-2">
+          <Card className="border-white/10 bg-background/60">
+            <CardHeader>
+              <CardTitle className="text-lg">Resumen de la orden</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3 text-sm text-white/80">
+              <div className="flex items-center justify-between">
+                <span className="text-white/60">Identificador</span>
+                <span className="font-semibold text-white">{orderNumber}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-white/60">Monto total</span>
+                <span className="font-semibold text-white">{formatCurrency(order.total)}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-white/60">Fecha de creación</span>
+                <span className="text-white">{dateFormatter.format(new Date(order.createdAt))}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-white/60">Estado de pago</span>
                 {order.payment ? (
-                  <>
-                    <div className="flex items-center justify-between">
-                      <span className="text-white/60">Monto pagado</span>
-                      <span className="font-semibold text-white">
-                        {formatCurrency(order.payment.amount)}
-                      </span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-white/60">Estado del pago</span>
-                      <Badge variant={paymentVariant}>{paymentLabel}</Badge>
-                    </div>
-                    <div>
-                      <span className="text-white/60">Referencia</span>
-                      <p className="font-mono text-sm text-white">
-                        {order.payment.stripeSessionId}
-                      </p>
-                    </div>
-                  </>
+                  <Badge variant={paymentVariant}>{paymentLabel}</Badge>
                 ) : (
-                  <p className="text-white/70">No se registró información de pago para esta orden.</p>
+                  <span className="text-white/70">Sin información de pago</span>
                 )}
-              </CardContent>
-            </Card>
+              </div>
+            </CardContent>
+          </Card>
 
-            <Card className="border-white/10 bg-background/60">
-              <CardHeader>
-                <CardTitle className="text-lg">Envío</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3 text-sm text-white/80">
-                <p className="text-white/70">
-                  No hay información de envío disponible para esta orden.
+          <Card className="border-white/10 bg-background/60">
+            <CardHeader>
+              <CardTitle className="text-lg">Detalles del cliente</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3 text-sm text-white/80">
+              <div>
+                <span className="text-white/60">Nombre</span>
+                <p className="font-medium text-white">
+                  {[order.user.name, order.user.lastName].filter(Boolean).join(" ") || order.user.email}
                 </p>
-              </CardContent>
-            </Card>
-          </div>
+              </div>
+              <div>
+                <span className="text-white/60">Correo electrónico</span>
+                <p className="font-medium text-white">{order.user.email}</p>
+              </div>
+              <div>
+                <span className="text-white/60">Dirección</span>
+                {primaryAddress ? (
+                  <p className="font-medium text-white">
+                    {primaryAddress.street}, {primaryAddress.city}, {primaryAddress.country} {primaryAddress.postal}
+                  </p>
+                ) : (
+                  <p className="text-white/70">Sin dirección registrada</p>
+                )}
+              </div>
+            </CardContent>
+          </Card>
         </div>
 
         <Card className="border-white/10 bg-background/60">
           <CardHeader>
-            <CardTitle className="text-lg">Artículos</CardTitle>
+            <CardTitle className="text-lg">Ítems de la orden</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="overflow-hidden rounded-xl border border-white/10">
@@ -285,6 +271,19 @@ export default async function OrderDetailPage({params}: OrderDetailPageProps) {
                 </TableBody>
               </Table>
             </div>
+          </CardContent>
+        </Card>
+
+        <Card className="border-white/10 bg-background/60">
+          <CardHeader>
+            <CardTitle className="text-lg">Gestión de estado</CardTitle>
+          </CardHeader>
+          <CardContent className="flex flex-col gap-4">
+            <div className="flex items-center gap-2 text-sm">
+              <span className="text-white/60">Estado actual:</span>
+              <Badge variant={statusVariant}>{statusLabel}</Badge>
+            </div>
+            <OrderStatusForm orderId={order.id} initialStatus={order.status} />
           </CardContent>
         </Card>
       </div>
