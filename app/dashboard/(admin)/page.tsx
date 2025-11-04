@@ -35,7 +35,7 @@ export default async function DashboardPage() {
         <Link href="/dashboard/blog" className="block">
           <MetricCard
             title="Notas de Blog"
-            value={metrics.totalPosts.toString()}
+            value={metrics.totalBlogPosts.toString()}
             description="Administra las entradas del blog"
             icon={<NotebookText className="h-4 w-4 text-muted-foreground" />}
           />
