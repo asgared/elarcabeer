@@ -10,7 +10,7 @@ import { ProductType } from "@prisma/client";
 import { toast } from "@/components/ui/use-toast";
 import { Button } from "@/components/ui/button";
 import {
-  Form,
+  Form, // Debe ser una exportación nombrada del archivo base
   FormControl,
   FormField,
   FormItem,
