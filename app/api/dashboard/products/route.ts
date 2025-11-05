@@ -1,183 +1,90 @@
 import { NextResponse } from "next/server";
-import { z } from "zod";
-
-import { ProductType, type Prisma } from "@prisma/client";
 
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/auth/admin";
+import { productInputSchema } from "@/lib/validations/product";
 
-// Esquema de validación con Zod para la creación de productos
-const variantSchema = z.object({
-  sku: z.string().min(1, "El SKU de la variante es requerido."),
-  name: z.string().min(1, "El nombre de la variante es requerido."),
-  price: z.number().int().min(0, "El precio no puede ser negativo."),
-  packSize: z.number().int().min(1, "El tamaño del paquete debe ser al menos 1.").optional(),
-  abv: z.number().min(0, "El ABV no puede ser negativo.").optional(),
-  ibu: z.number().int().min(0, "El IBU no puede ser negativo.").optional(),
-});
+import { mapProductForResponse, parseJsonField } from "./utils";
 
-const createProductSchema = z.object({
-  name: z.string().min(1, "El nombre es requerido."),
-  slug: z.string().min(1, "El slug es requerido."),
-  sku: z.string().min(1, "El SKU es requerido."),
-  description: z.string().default(""),
-  type: z.nativeEnum(ProductType).default(ProductType.BEER),
-  price: z.number().int().min(0, "El precio no puede ser negativo."),
-  stock: z.number().int().min(0, "El stock no puede ser negativo."),
-  style: z.string().optional(),
-  rating: z.number().min(0).max(5).optional(),
-  limitedEdition: z.boolean().default(false),
-  imageUrl: z.string().url("La URL de la imagen no es válida."),
-  categoryLabel: z.string().min(1, "La categoría es requerida."),
-  tastingNotes: z.array(z.string().min(1)).default([]),
-  pairings: z.array(z.string().min(1)).default([]),
-  gallery: z.array(z.string().url("La URL de la imagen no es válida.")).default([]),
-  metadata: z.record(z.any()).default({}),
-  images: z.any().optional(),
-  variants: z.array(variantSchema).default([]),
-});
+export const dynamic = "force-dynamic";
 
-type ProductWithVariants = Prisma.ProductGetPayload<{
-  include: { variants: true };
-}>;
-
-type VariantAttributes = {
-  packSize?: number | null;
-  abv?: number | null;
-  ibu?: number | null;
-};
-
-function buildVariantAttributes({ packSize, abv, ibu }: VariantAttributes) {
-  const attributes: Record<string, number | null> = {};
-
-  if (typeof packSize !== "undefined") {
-    attributes.packSize = packSize ?? null;
-  }
-
-  if (typeof abv !== "undefined") {
-    attributes.abv = abv ?? null;
-  }
-
-  if (typeof ibu !== "undefined") {
-    attributes.ibu = ibu ?? null;
-  }
-
-  return attributes satisfies Prisma.InputJsonValue;
-}
-
-function mapProductForResponse(product: ProductWithVariants) {
-  const primaryVariant = product.variants[0];
-
-  return {
-    ...product,
-    sku: primaryVariant?.sku ?? null,
-    price: primaryVariant?.price ?? null,
-    stock: primaryVariant?.stock ?? null,
-  };
-}
-
-// --- GET: Para obtener todos los productos ---
 export async function GET() {
   try {
-    await requireAdmin(); // Seguridad: solo admins pueden listar productos
+    await requireAdmin();
 
     const products = await prisma.product.findMany({
       orderBy: { createdAt: "desc" },
-      include: {
-        variants: true, // Incluimos variantes para derivar información adicional
-      },
+      include: { variants: { orderBy: { createdAt: "asc" } } },
     });
 
-    return NextResponse.json({ products: products.map(mapProductForResponse) });
+    return NextResponse.json({
+      products: products.map(mapProductForResponse),
+    });
   } catch (error) {
     console.error("Error fetching products:", error);
-    const message = error instanceof Error ? error.message : "Error desconocido.";
+    const message =
+      error instanceof Error ? error.message : "No se pudieron obtener los productos.";
+
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }
 
-// --- POST: Para crear un nuevo producto ---
 export async function POST(request: Request) {
   try {
-    await requireAdmin(); // Seguridad: solo admins pueden crear productos
+    await requireAdmin();
 
     const body = await request.json();
-    const validation = createProductSchema.safeParse(body);
+    const validation = productInputSchema.safeParse(body);
 
     if (!validation.success) {
       return NextResponse.json({ error: validation.error.flatten() }, { status: 400 });
     }
-    
-    const {
-      limitedEdition,
-      variants,
-      description,
-      sku,
-      price,
-      stock,
-      imageUrl,
-      tastingNotes,
-      pairings,
-      gallery,
-      metadata: metadataInput,
-      images: imagesInput,
-      type,
-      ...productData
-    } = validation.data;
 
-    const preparedVariants: Prisma.VariantCreateWithoutProductInput[] = variants.map((variant) => ({
-      sku: variant.sku,
-      name: variant.name,
-      price: variant.price,
-      attributes: buildVariantAttributes({
-        packSize: variant.packSize,
-        abv: variant.abv,
-        ibu: variant.ibu,
-      }),
-      stock,
-    }));
+    const data = validation.data;
 
-    if (!preparedVariants.some((variant) => variant.sku === sku)) {
-      preparedVariants.unshift({
-        sku,
-        name: productData.name,
-        price,
-        attributes: buildVariantAttributes({ packSize: 1 }),
-        stock,
-      });
+    let metadataValue;
+    let imagesValue;
+
+    try {
+      metadataValue = parseJsonField(data.metadata, "metadata");
+      imagesValue = parseJsonField(data.images, "images");
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Datos JSON inválidos.";
+      return NextResponse.json({ error: message }, { status: 400 });
     }
 
     const product = await prisma.product.create({
       data: {
-        ...productData,
-        description,
-        limitedEdition,
-        type: type ?? ProductType.BEER,
-        metadata: {
-          ...(metadataInput ?? {}),
-          tastingNotes,
-          pairings,
-        } satisfies Prisma.InputJsonValue,
-        images: (imagesInput ?? {
-          main: imageUrl,
-          gallery,
-        }) satisfies Prisma.InputJsonValue,
-        variants:
-          preparedVariants.length > 0
-            ? {
-                create: preparedVariants,
-              }
-            : undefined,
+        name: data.name,
+        slug: data.slug,
+        description: data.description ?? null,
+        type: data.type,
+        style: data.style ?? null,
+        rating: typeof data.rating === "number" ? data.rating : null,
+        limitedEdition: data.limitedEdition ?? false,
+        categoryLabel: data.categoryLabel ?? null,
+        metadata: metadataValue,
+        images: imagesValue,
+        variants: {
+          create: {
+            name: data.name,
+            sku: data.sku,
+            price: data.price,
+            stock: data.stock,
+          },
+        },
       },
-      include: {
-        variants: true,
-      },
+      include: { variants: { orderBy: { createdAt: "asc" } } },
     });
 
-    return NextResponse.json({ product: mapProductForResponse(product) }, { status: 201 });
+    return NextResponse.json(
+      { product: mapProductForResponse(product) },
+      { status: 201 }
+    );
   } catch (error) {
     console.error("Error creating product:", error);
-    const message = error instanceof Error ? error.message : "Error desconocido.";
+    const message = error instanceof Error ? error.message : "No se pudo crear el producto.";
+
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }
