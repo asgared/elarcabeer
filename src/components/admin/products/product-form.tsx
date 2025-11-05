@@ -1,4 +1,4 @@
-"use client";
+"use client"; // CRÍTICO: Debe ser un componente de cliente para usar RHF y shadcn/ui
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -7,6 +7,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { ProductType } from "@prisma/client";
 
+import { toast } from "@/components/ui/use-toast";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -26,7 +27,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
-import { useToast } from "@/hooks/use-toast";
 
 import type { Product } from "./product-columns";
 
@@ -113,7 +113,6 @@ type ProductFormProps = {
 
 export function ProductForm({ initialProduct = null }: ProductFormProps) {
   const router = useRouter();
-  const toast = useToast();
   const [serverError, setServerError] = useState<string | null>(null);
 
   const defaultValues = useMemo<ProductFormValues>(() => ({
