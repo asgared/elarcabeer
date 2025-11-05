@@ -61,7 +61,7 @@ export const columns: ColumnDef<Order>[] = [
 
       return (
         <Link
-          href={`/dashboard/(admin)/orders/${id}`}
+          href={`/dashboard/orders/${id}`}
           className="font-semibold text-white hover:text-white/90 hover:underline"
         >
           {orderNumber}
@@ -123,7 +123,7 @@ export const columns: ColumnDef<Order>[] = [
     header: "Acciones",
     cell: ({row}) => (
       <Button asChild size="sm" variant="outline">
-        <Link href={`/dashboard/(admin)/orders/${row.original.id}`}>
+        <Link href={`/dashboard/orders/${row.original.id}`}>
           Ver detalle
         </Link>
       </Button>
