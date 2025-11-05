@@ -2,7 +2,7 @@
 
 import {useEffect, useMemo, useState} from "react";
 import {useRouter} from "next/navigation";
-import {useForm} from "react-hook-form";
+import {FormProvider, useForm} from "react-hook-form";
 import {zodResolver} from "@hookform/resolvers/zod";
 import type {Store} from "@prisma/client";
 
@@ -13,7 +13,6 @@ import {Input} from "@/components/ui/input";
 import {Textarea} from "@/components/ui/textarea";
 import {Checkbox} from "@/components/ui/checkbox";
 import {
-  Form,
   FormControl,
   FormDescription,
   FormField,
@@ -126,7 +125,7 @@ export function AdminStoreForm({initialStore}: AdminStoreFormProps) {
   };
 
   return (
-    <Form {...form}>
+    <FormProvider {...form}>
       <form
         onSubmit={handleSubmit(onSubmit)}
         className="max-w-4xl rounded-xl border border-white/10 bg-background/80 p-8 shadow-soft"
@@ -300,6 +299,6 @@ export function AdminStoreForm({initialStore}: AdminStoreFormProps) {
           </div>
         </div>
       </form>
-    </Form>
+    </FormProvider>
   );
 }

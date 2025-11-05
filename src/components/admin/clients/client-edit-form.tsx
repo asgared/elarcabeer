@@ -4,12 +4,11 @@ import {useEffect, useState} from "react";
 import {useRouter} from "next/navigation";
 import {User, UserRole} from "@prisma/client";
 import {zodResolver} from "@hookform/resolvers/zod";
-import {useForm} from "react-hook-form";
+import {FormProvider, useForm} from "react-hook-form";
 import {z} from "zod";
 
 import {Button} from "@/components/ui/button";
 import {
-  Form,
   FormControl,
   FormField,
   FormItem,
@@ -134,7 +133,7 @@ export function ClientEditForm({client, onSuccess}: ClientEditFormProps) {
   };
 
   return (
-    <Form {...form}>
+    <FormProvider {...form}>
       <form className="space-y-6" onSubmit={handleSubmit(onSubmit)}>
         <div className="space-y-4">
           <FormField
@@ -214,6 +213,6 @@ export function ClientEditForm({client, onSuccess}: ClientEditFormProps) {
           </Button>
         </div>
       </form>
-    </Form>
+    </FormProvider>
   );
 }

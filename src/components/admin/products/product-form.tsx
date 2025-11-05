@@ -3,14 +3,13 @@
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
+import { FormProvider, useForm } from "react-hook-form";
 import { z } from "zod";
 import { ProductType } from "@prisma/client";
 
 import { toast } from "@/components/ui/use-toast";
 import { Button } from "@/components/ui/button";
 import {
-  Form, // Debe ser una exportación nombrada del archivo base
   FormControl,
   FormField,
   FormItem,
@@ -197,7 +196,7 @@ export function ProductForm({ initialProduct = null }: ProductFormProps) {
   };
 
   return (
-    <Form {...form}>
+    <FormProvider {...form}>
       <form
         onSubmit={form.handleSubmit(onSubmit)}
         className="space-y-8 rounded-2xl border border-white/10 bg-background/80 p-6 shadow-soft"
@@ -429,6 +428,6 @@ export function ProductForm({ initialProduct = null }: ProductFormProps) {
           </Button>
         </div>
       </form>
-    </Form>
+    </FormProvider>
   );
 }
