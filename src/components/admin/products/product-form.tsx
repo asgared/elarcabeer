@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm, FormProvider } from "react-hook-form";
+import { useForm, FormProvider, UseFormReturn } from "react-hook-form";
 import { z } from "zod";
 import { ProductType } from "@prisma/client";
 
@@ -110,35 +110,17 @@ type ProductFormProps = {
   initialProduct?: Product | null;
 };
 
-export function ProductForm({ initialProduct = null }: ProductFormProps) {
+type ProductFormContentProps = {
+  form: UseFormReturn<ProductFormValues>;
+  initialProduct: Product | null;
+};
+
+function ProductFormContent({
+  form,
+  initialProduct,
+}: ProductFormContentProps) {
   const router = useRouter();
   const [serverError, setServerError] = useState<string | null>(null);
-
-  const defaultValues = useMemo<ProductFormValues>(() => ({
-    name: initialProduct?.name ?? "",
-    slug: initialProduct?.slug ?? "",
-    description: initialProduct?.description ?? "",
-    type: initialProduct?.type ?? ProductType.BEER,
-    price: initialProduct?.price ?? 0,
-    stock: initialProduct?.stock ?? 0,
-    sku: initialProduct?.sku ?? "",
-    style: initialProduct?.style ?? "",
-    rating: initialProduct?.rating ?? null,
-    limitedEdition: initialProduct?.limitedEdition ?? false,
-    categoryLabel: initialProduct?.categoryLabel ?? "",
-    metadata: stringifyJson(initialProduct?.metadata),
-    images: stringifyJson(initialProduct?.images),
-  }), [initialProduct]);
-
-  const form = useForm<ProductFormValues>({
-    resolver: zodResolver(productFormSchema),
-    defaultValues,
-  });
-
-  useEffect(() => {
-    form.reset(defaultValues);
-  }, [defaultValues, form]);
-
   const isNew = !initialProduct;
 
   const onSubmit = async (values: ProductFormValues) => {
@@ -431,3 +413,34 @@ export function ProductForm({ initialProduct = null }: ProductFormProps) {
     </FormProvider>
   );
 }
+
+export default function ProductForm({ initialProduct = null }: ProductFormProps) {
+  const defaultValues = useMemo<ProductFormValues>(() => ({
+    name: initialProduct?.name ?? "",
+    slug: initialProduct?.slug ?? "",
+    description: initialProduct?.description ?? "",
+    type: initialProduct?.type ?? ProductType.BEER,
+    price: initialProduct?.price ?? 0,
+    stock: initialProduct?.stock ?? 0,
+    sku: initialProduct?.sku ?? "",
+    style: initialProduct?.style ?? "",
+    rating: initialProduct?.rating ?? null,
+    limitedEdition: initialProduct?.limitedEdition ?? false,
+    categoryLabel: initialProduct?.categoryLabel ?? "",
+    metadata: stringifyJson(initialProduct?.metadata),
+    images: stringifyJson(initialProduct?.images),
+  }), [initialProduct]);
+
+  const form = useForm<ProductFormValues>({
+    resolver: zodResolver(productFormSchema),
+    defaultValues,
+  });
+
+  useEffect(() => {
+    form.reset(defaultValues);
+  }, [defaultValues, form]);
+
+  return <ProductFormContent form={form} initialProduct={initialProduct} />;
+}
+
+export { ProductForm };
