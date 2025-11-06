@@ -110,15 +110,15 @@ type ProductFormProps = {
   initialProduct?: Product | null;
 };
 
-type ProductFormContentProps = {
+type ProductFormPresentationProps = {
   form: UseFormReturn<ProductFormValues>;
   initialProduct: Product | null;
 };
 
-function ProductFormContent({
+function ProductFormPresentation({
   form,
   initialProduct,
-}: ProductFormContentProps) {
+}: ProductFormPresentationProps) {
   const router = useRouter();
   const [serverError, setServerError] = useState<string | null>(null);
   const isNew = !initialProduct;
@@ -440,7 +440,7 @@ export default function ProductForm({ initialProduct = null }: ProductFormProps)
     form.reset(defaultValues);
   }, [defaultValues, form]);
 
-  return <ProductFormContent form={form} initialProduct={initialProduct} />;
+  return <ProductFormPresentation form={form} initialProduct={initialProduct} />;
 }
 
 export { ProductForm };
