@@ -1,4 +1,6 @@
-"use client"; // CRÍTICO: Debe ser un componente de cliente para usar RHF y shadcn/ui
+"use client";
+
+// CRÍTICO: Debe ser un componente de cliente para usar RHF y shadcn/ui
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
