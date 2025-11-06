@@ -68,11 +68,11 @@ export default async function ProductDetailPage({
   params: { id: string };
 }) {
   const id = params.id;
-  const isNew = id === "new";
+  const isCreating = id === "new" || id === "create";
 
   let product: Product | null = null;
 
-  if (!isNew) {
+  if (!isCreating) {
     product = await fetchProduct(id);
 
     if (!product) {
@@ -80,8 +80,8 @@ export default async function ProductDetailPage({
     }
   }
 
-  const title = isNew ? "Crear producto" : `Editar ${product?.name ?? "producto"}`;
-  const description = isNew
+  const title = isCreating ? "Crear producto" : `Editar ${product?.name ?? "producto"}`;
+  const description = isCreating
     ? "Completa el formulario para añadir un nuevo producto al catálogo."
     : "Actualiza la información del producto seleccionado.";
 
