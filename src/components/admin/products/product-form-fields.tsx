@@ -32,7 +32,7 @@ type ProductFormFieldsProps = {
   initialProduct: Product | null;
 };
 
-export default function ProductFormFields({
+function ProductFormFieldsPresentation({
   initialProduct,
 }: ProductFormFieldsProps) {
   const { control, handleSubmit, formState } =
@@ -329,4 +329,9 @@ export default function ProductFormFields({
       </div>
     </form>
   );
+}
+
+export default function ProductFormFields(props: ProductFormFieldsProps) {
+  // Wrapper para aislar el hook del export default
+  return <ProductFormFieldsPresentation {...props} />;
 }
