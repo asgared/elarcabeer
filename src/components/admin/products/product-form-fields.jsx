@@ -25,8 +25,8 @@ import {
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 
-import type { Product } from "./product-columns";
-import type { ProductFormValues } from "./product-form";
+import { Product } from "./product-columns";
+import { ProductFormValues } from "./product-form";
 
 type ProductFormFieldsProps = {
   initialProduct: Product | null;
