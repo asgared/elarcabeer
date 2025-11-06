@@ -3,12 +3,15 @@ import { DollarSign, NotebookText, Package, ShoppingCart, Users } from "lucide-r
 
 import { AdminPageHeader } from "@/components/admin/admin-page-header";
 import { MetricCard } from "@/components/admin/metric-card";
+import { RevenueChart } from "@/components/admin/revenue-chart";
 import { getDashboardMetrics } from "@/lib/dashboard-data";
+import { getMonthlyRevenue } from "@/lib/dashboard-charts";
 
 export const dynamic = "force-dynamic";
 
 export default async function DashboardPage() {
   const metrics = await getDashboardMetrics();
+  const monthlyRevenue = await getMonthlyRevenue();
 
   const formattedRevenue = new Intl.NumberFormat("es-ES", {
     style: "currency",
@@ -67,6 +70,10 @@ export default async function DashboardPage() {
             icon={<DollarSign className="h-4 w-4 text-muted-foreground" />}
           />
         </Link>
+      </div>
+
+      <div className="mt-8">
+        <RevenueChart data={monthlyRevenue} />
       </div>
     </>
   );
