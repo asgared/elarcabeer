@@ -10,6 +10,13 @@ import { X } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
   FormControl,
   FormField,
   FormItem,
@@ -231,339 +238,367 @@ function ProductFormFieldsPresentation({
   };
 
   return (
-    <form
-      onSubmit={handleSubmit(onSubmit)}
-      className="space-y-8 rounded-2xl border border-white/10 bg-background/80 p-6 shadow-soft"
-    >
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-        <FormField
-          control={control}
-          name="name"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Nombre</FormLabel>
-              <FormControl>
-                <Input placeholder="IPA Artesanal" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={control}
-          name="slug"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Slug</FormLabel>
-              <FormControl>
-                <Input placeholder="ipa-artesanal" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={control}
-          name="type"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Tipo de producto</FormLabel>
-              <Select onValueChange={field.onChange} value={field.value}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecciona un tipo" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  <SelectItem value={ProductType.BEER}>Cerveza</SelectItem>
-                  <SelectItem value={ProductType.FOOD}>Alimento</SelectItem>
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-      </div>
-
-      <FormField
-        control={control}
-        name="description"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Descripción</FormLabel>
-            <FormControl>
-              <Textarea rows={4} placeholder="Descripción del producto" {...field} />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
-        <FormField
-          control={control}
-          name="style"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Estilo</FormLabel>
-              <FormControl>
-                <Input placeholder="IPA, Lager, etc." {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={control}
-          name="categoryLabel"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Categoría</FormLabel>
-              <FormControl>
-                <Input placeholder="Cervezas artesanales" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={control}
-          name="rating"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Calificación</FormLabel>
-              <FormControl>
-                <Input
-                  type="number"
-                  step="0.1"
-                  min={0}
-                  max={5}
-                  value={field.value ?? ""}
-                  onChange={(event) => field.onChange(event.target.value)}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-      </div>
-
-      <FormField
-        control={control}
-        name="limitedEdition"
-        render={({ field }) => (
-          <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-lg border border-white/10 p-4">
-            <FormControl>
-              <Checkbox
-                checked={field.value}
-                onCheckedChange={(checked) => field.onChange(checked === true)}
-              />
-            </FormControl>
-            <div className="space-y-1 leading-none">
-              <FormLabel className="text-base">Edición limitada</FormLabel>
-              <p className="text-sm text-white/60">
-                Marca esta casilla si el producto corresponde a una edición especial.
-              </p>
-            </div>
-          </FormItem>
-        )}
-      />
-
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-        <FormField
-          control={control}
-          name="images"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Imágenes del producto</FormLabel>
-              <FormControl>
-                <ProductImagesField
-                  value={Array.isArray(field.value) ? field.value : []}
-                  onChange={field.onChange}
-                  toast={toast}
-                  disabled={field.disabled}
-                  onBlur={field.onBlur}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-      </div>
-
-      <div className="space-y-6">
-        <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
-          <div>
-            <h3 className="text-lg font-semibold">Presentaciones</h3>
-            <p className="text-sm text-white/70">
-              Configura las variantes del producto con su SKU, precio y stock.
-            </p>
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
+      <Card className="border-white/10 bg-background/80 shadow-soft">
+        <CardHeader>
+          <CardTitle>Información principal</CardTitle>
+          <CardDescription>
+            Define los datos básicos y la descripción del producto.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+            <FormField
+              control={control}
+              name="name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Nombre</FormLabel>
+                  <FormControl>
+                    <Input placeholder="IPA Artesanal" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={control}
+              name="slug"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Slug</FormLabel>
+                  <FormControl>
+                    <Input placeholder="ipa-artesanal" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={control}
+              name="type"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Tipo de producto</FormLabel>
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecciona un tipo" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value={ProductType.BEER}>Cerveza</SelectItem>
+                      <SelectItem value={ProductType.FOOD}>Alimento</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
           </div>
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() =>
-              appendVariant({ id: undefined, name: "", sku: "", price: 0, stock: 0 })
-            }
-          >
-            Añadir presentación
-          </Button>
-        </div>
 
-        <div className="space-y-4">
-          {variantFields.map((variant, index) => (
-            <div
-              key={variant.id}
-              className="space-y-5 rounded-2xl border border-white/10 bg-background/60 p-5"
-            >
-              <div className="flex items-start justify-between gap-4">
-                <div>
-                  <h4 className="text-base font-semibold text-white">
-                    Presentación {index + 1}
-                  </h4>
+          <FormField
+            control={control}
+            name="description"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Descripción</FormLabel>
+                <FormControl>
+                  <Textarea rows={4} placeholder="Descripción del producto" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </CardContent>
+      </Card>
+
+      <Card className="border-white/10 bg-background/80 shadow-soft">
+        <CardHeader>
+          <CardTitle>Detalles de inventario</CardTitle>
+          <CardDescription>
+            Configura la clasificación, disponibilidad e imágenes del producto.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+            <FormField
+              control={control}
+              name="style"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Estilo</FormLabel>
+                  <FormControl>
+                    <Input placeholder="IPA, Lager, etc." {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={control}
+              name="categoryLabel"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Categoría</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Cervezas artesanales" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={control}
+              name="rating"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Calificación</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      step="0.1"
+                      min={0}
+                      max={5}
+                      value={field.value ?? ""}
+                      onChange={(event) => field.onChange(event.target.value)}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+
+          <FormField
+            control={control}
+            name="limitedEdition"
+            render={({ field }) => (
+              <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-lg border border-white/10 p-4">
+                <FormControl>
+                  <Checkbox
+                    checked={field.value}
+                    onCheckedChange={(checked) => field.onChange(checked === true)}
+                  />
+                </FormControl>
+                <div className="space-y-1 leading-none">
+                  <FormLabel className="text-base">Edición limitada</FormLabel>
                   <p className="text-sm text-white/60">
-                    Define los datos principales de esta presentación.
+                    Marca esta casilla si el producto corresponde a una edición especial.
                   </p>
                 </div>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => removeVariant(index)}
-                  disabled={variantFields.length === 1}
-                  className="text-white/70 hover:text-white"
-                  aria-label="Eliminar presentación"
-                >
-                  <X className="h-4 w-4" />
-                </Button>
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={control}
+            name="images"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Imágenes del producto</FormLabel>
+                <FormControl>
+                  <ProductImagesField
+                    value={Array.isArray(field.value) ? field.value : []}
+                    onChange={field.onChange}
+                    toast={toast}
+                    disabled={field.disabled}
+                    onBlur={field.onBlur}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </CardContent>
+      </Card>
+
+      <Card className="border-white/10 bg-background/80 shadow-soft">
+        <CardHeader className="gap-2">
+          <CardTitle>Presentaciones</CardTitle>
+          <CardDescription>
+            Configura las variantes del producto con su SKU, precio y stock.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+            <p className="text-sm text-white/70">
+              Añade una presentación por cada formato disponible del producto.
+            </p>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() =>
+                appendVariant({ id: undefined, name: "", sku: "", price: 0, stock: 0 })
+              }
+            >
+              Añadir presentación
+            </Button>
+          </div>
+
+          <div className="space-y-4">
+            {variantFields.map((variant, index) => (
+              <div
+                key={variant.id}
+                className="space-y-5 rounded-2xl border border-white/10 bg-background/60 p-5"
+              >
+                <div className="flex items-start justify-between gap-4">
+                  <div>
+                    <h4 className="text-base font-semibold text-white">
+                      Presentación {index + 1}
+                    </h4>
+                    <p className="text-sm text-white/60">
+                      Define los datos principales de esta presentación.
+                    </p>
+                  </div>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => removeVariant(index)}
+                    disabled={variantFields.length === 1}
+                    className="text-white/70 hover:text-white"
+                    aria-label="Eliminar presentación"
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+
+                <FormField
+                  control={control}
+                  name={`variants.${index}.id`}
+                  render={({ field }) => <input type="hidden" {...field} />}
+                />
+
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                  <FormField
+                    control={control}
+                    name={`variants.${index}.name`}
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Nombre de la presentación</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Lata 355ml" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={control}
+                    name={`variants.${index}.sku`}
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>SKU</FormLabel>
+                        <FormControl>
+                          <Input placeholder="SKU-001" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                  <FormField
+                    control={control}
+                    name={`variants.${index}.price`}
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Precio (centavos)</FormLabel>
+                        <FormControl>
+                          <Input type="number" min={0} {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={control}
+                    name={`variants.${index}.stock`}
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Stock</FormLabel>
+                        <FormControl>
+                          <Input type="number" min={0} {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
               </div>
+            ))}
+          </div>
 
-              <FormField
-                control={control}
-                name={`variants.${index}.id`}
-                render={({ field }) => <input type="hidden" {...field} />}
-              />
+          {variantsError ? (
+            <p className="text-sm text-danger">{variantsError}</p>
+          ) : null}
+        </CardContent>
+      </Card>
 
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                <FormField
-                  control={control}
-                  name={`variants.${index}.name`}
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Nombre de la presentación</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Lata 355ml" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={control}
-                  name={`variants.${index}.sku`}
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>SKU</FormLabel>
-                      <FormControl>
-                        <Input placeholder="SKU-001" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                <FormField
-                  control={control}
-                  name={`variants.${index}.price`}
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Precio (centavos)</FormLabel>
-                      <FormControl>
-                        <Input type="number" min={0} {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={control}
-                  name={`variants.${index}.stock`}
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Stock</FormLabel>
-                      <FormControl>
-                        <Input type="number" min={0} {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {variantsError ? (
-          <p className="text-sm text-danger">{variantsError}</p>
-        ) : null}
-      </div>
-
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-        <FormField
-          control={control}
-          name="tastingNotes"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Notas de cata</FormLabel>
-              <FormControl>
-                <Textarea
-                  rows={4}
-                  placeholder="Ingresa una nota por línea"
-                  value={(field.value ?? []).join("\n")}
-                  onChange={(event) =>
-                    field.onChange(
-                      event.target.value
-                        .split(/\r?\n/)
-                        .map((item) => item.trim())
-                        .filter((item) => item.length > 0),
-                    )
-                  }
-                  onBlur={field.onBlur}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={control}
-          name="suggestedPairings"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Maridajes sugeridos</FormLabel>
-              <FormControl>
-                <Textarea
-                  rows={4}
-                  placeholder="Ingresa un maridaje por línea"
-                  value={(field.value ?? []).join("\n")}
-                  onChange={(event) =>
-                    field.onChange(
-                      event.target.value
-                        .split(/\r?\n/)
-                        .map((item) => item.trim())
-                        .filter((item) => item.length > 0),
-                    )
-                  }
-                  onBlur={field.onBlur}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-      </div>
+      <Card className="border-white/10 bg-background/80 shadow-soft">
+        <CardHeader>
+          <CardTitle>Atributos adicionales</CardTitle>
+          <CardDescription>
+            Destaca notas de cata y maridajes sugeridos para el producto.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="grid grid-cols-1 gap-6 md:grid-cols-2">
+          <FormField
+            control={control}
+            name="tastingNotes"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Notas de cata</FormLabel>
+                <FormControl>
+                  <Textarea
+                    rows={4}
+                    placeholder="Ingresa una nota por línea"
+                    value={(field.value ?? []).join("\n")}
+                    onChange={(event) =>
+                      field.onChange(
+                        event.target.value
+                          .split(/\r?\n/)
+                          .map((item) => item.trim())
+                          .filter((item) => item.length > 0),
+                      )
+                    }
+                    onBlur={field.onBlur}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={control}
+            name="suggestedPairings"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Maridajes sugeridos</FormLabel>
+                <FormControl>
+                  <Textarea
+                    rows={4}
+                    placeholder="Ingresa un maridaje por línea"
+                    value={(field.value ?? []).join("\n")}
+                    onChange={(event) =>
+                      field.onChange(
+                        event.target.value
+                          .split(/\r?\n/)
+                          .map((item) => item.trim())
+                          .filter((item) => item.length > 0),
+                      )
+                    }
+                    onBlur={field.onBlur}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </CardContent>
+      </Card>
 
       {serverError ? (
         <div className="rounded-xl border border-danger/50 bg-danger/10 p-4 text-sm text-danger">

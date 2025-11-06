@@ -9,6 +9,13 @@ import {z} from "zod";
 
 import {Button} from "@/components/ui/button";
 import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
   Form,
   FormControl,
   FormField,
@@ -136,76 +143,96 @@ export function ClientEditForm({client, onSuccess}: ClientEditFormProps) {
   return (
     <Form {...form}>
       <form className="space-y-6" onSubmit={handleSubmit(onSubmit)}>
-        <div className="space-y-4">
-          <FormField
-            control={control}
-            name="name"
-            render={({field}) => (
-              <FormItem>
-                <FormLabel>Nombre</FormLabel>
-                <FormControl>
-                  <Input
-                    {...field}
-                    value={field.value ?? ""}
-                    onChange={(event) => {
-                      const value = event.target.value;
-                      field.onChange(value === "" ? undefined : value);
-                    }}
-                    placeholder="Nombre del cliente"
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={control}
-            name="lastName"
-            render={({field}) => (
-              <FormItem>
-                <FormLabel>Apellido</FormLabel>
-                <FormControl>
-                  <Input
-                    {...field}
-                    value={field.value ?? ""}
-                    onChange={(event) => {
-                      const value = event.target.value;
-                      field.onChange(value === "" ? undefined : value);
-                    }}
-                    placeholder="Apellido del cliente"
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={control}
-            name="role"
-            render={({field}) => (
-              <FormItem>
-                <FormLabel>Rol</FormLabel>
-                <Select onValueChange={field.onChange} value={field.value}>
+        <Card className="border-white/10 bg-background/80 shadow-soft">
+          <CardHeader>
+            <CardTitle>Datos personales</CardTitle>
+            <CardDescription>
+              Actualiza la información básica del perfil del cliente.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <FormField
+              control={control}
+              name="name"
+              render={({field}) => (
+                <FormItem>
+                  <FormLabel>Nombre</FormLabel>
                   <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Selecciona un rol" />
-                    </SelectTrigger>
+                    <Input
+                      {...field}
+                      value={field.value ?? ""}
+                      onChange={(event) => {
+                        const value = event.target.value;
+                        field.onChange(value === "" ? undefined : value);
+                      }}
+                      placeholder="Nombre del cliente"
+                    />
                   </FormControl>
-                  <SelectContent>
-                    <SelectItem value={UserRole.ADMIN}>ADMIN</SelectItem>
-                    <SelectItem value={UserRole.USER}>USER</SelectItem>
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={control}
+              name="lastName"
+              render={({field}) => (
+                <FormItem>
+                  <FormLabel>Apellido</FormLabel>
+                  <FormControl>
+                    <Input
+                      {...field}
+                      value={field.value ?? ""}
+                      onChange={(event) => {
+                        const value = event.target.value;
+                        field.onChange(value === "" ? undefined : value);
+                      }}
+                      placeholder="Apellido del cliente"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </CardContent>
+        </Card>
+
+        <Card className="border-white/10 bg-background/80 shadow-soft">
+          <CardHeader>
+            <CardTitle>Roles y permisos</CardTitle>
+            <CardDescription>
+              Define el rol que tendrá el cliente dentro del panel.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <FormField
+              control={control}
+              name="role"
+              render={({field}) => (
+                <FormItem>
+                  <FormLabel>Rol</FormLabel>
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecciona un rol" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value={UserRole.ADMIN}>ADMIN</SelectItem>
+                      <SelectItem value={UserRole.USER}>USER</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </CardContent>
+        </Card>
 
         {serverError ? (
-          <p className="text-sm text-red-400">{serverError}</p>
+          <div className="rounded-xl border border-danger/50 bg-danger/10 p-4 text-sm text-danger">
+            {serverError}
+          </div>
         ) : null}
 
         <div className="flex justify-end gap-3">
