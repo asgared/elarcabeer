@@ -1,9 +1,12 @@
 "use client";
 
 import { useState } from "react";
+import type { ChangeEvent } from "react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { ProductType } from "@prisma/client";
 import { useFormContext } from "react-hook-form";
+import { X } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -24,6 +27,7 @@ import {
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
+import { useCloudinaryUpload } from "@/hooks/use-cloudinary-upload";
 
 import type { Product } from "./product-columns";
 import type { ProductFormValues } from "./product-form";
@@ -31,6 +35,103 @@ import type { ProductFormValues } from "./product-form";
 type ProductFormFieldsProps = {
   initialProduct: Product | null;
 };
+
+type ProductImagesFieldProps = {
+  value: string[];
+  onChange: (urls: string[]) => void;
+  toast: ReturnType<typeof useToast>;
+  disabled?: boolean;
+  onBlur?: () => void;
+};
+
+function ProductImagesField({ value, onChange, toast, disabled, onBlur }: ProductImagesFieldProps) {
+  const { upload, isUploading } = useCloudinaryUpload({ folder: "products" });
+  const isDisabled = disabled || isUploading;
+
+  const handleRemove = (index: number) => {
+    const nextValue = value.filter((_, currentIndex) => currentIndex !== index);
+    onChange(nextValue);
+    onBlur?.();
+  };
+
+  const handleFileChange = async (event: ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files ? Array.from(event.target.files) : [];
+
+    if (files.length === 0) {
+      return;
+    }
+
+    try {
+      const uploads = await upload(files);
+      const uploadedUrls = uploads.map((item) => item.url);
+      onChange([...value, ...uploadedUrls]);
+      onBlur?.();
+    } catch (error) {
+      const message =
+        error instanceof Error
+          ? error.message
+          : "No se pudieron subir las imágenes. Inténtalo nuevamente.";
+
+      toast({
+        title: "Error al subir", 
+        description: message,
+        status: "error",
+      });
+    } finally {
+      event.target.value = "";
+    }
+  };
+
+  return (
+    <div className="space-y-4">
+      <div className="flex flex-wrap gap-4">
+        {value.length === 0 ? (
+          <p className="text-sm text-white/60">
+            Aún no hay imágenes cargadas. Agrega al menos una para destacar el producto.
+          </p>
+        ) : null}
+        {value.map((url, index) => (
+          <div
+            key={`${url}-${index}`}
+            className="group relative h-32 w-32 overflow-hidden rounded-xl border border-white/10"
+          >
+            <Image
+              src={url}
+              alt={`Imagen ${index + 1} del producto`}
+              fill
+              className="object-cover"
+              sizes="128px"
+            />
+            <button
+              type="button"
+              onClick={() => handleRemove(index)}
+              className="absolute right-2 top-2 inline-flex h-7 w-7 items-center justify-center rounded-full bg-black/60 text-white opacity-0 transition-opacity hover:bg-black/80 group-hover:opacity-100"
+              aria-label="Eliminar imagen"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          </div>
+        ))}
+      </div>
+      <label
+        className="flex h-28 w-full cursor-pointer flex-col items-center justify-center rounded-xl border border-dashed border-white/20 bg-white/5 text-center text-sm text-white/70 transition hover:border-white/40 hover:bg-white/10 hover:text-white"
+      >
+        <span className="font-medium">
+          {isUploading ? "Subiendo imágenes..." : "Haz clic o arrastra archivos"}
+        </span>
+        <span className="text-xs text-white/60">Formatos admitidos: JPG, PNG, WebP.</span>
+        <input
+          type="file"
+          accept="image/*"
+          multiple
+          className="sr-only"
+          onChange={handleFileChange}
+          disabled={isDisabled}
+        />
+      </label>
+    </div>
+  );
+}
 
 function ProductFormFieldsPresentation({
   initialProduct,
@@ -45,14 +146,27 @@ function ProductFormFieldsPresentation({
   const onSubmit = async (values: ProductFormValues) => {
     setServerError(null);
 
+    const metadataNote = values.metadata?.trim() ?? "";
+    const metadataPayload = metadataNote
+      ? JSON.stringify({ catalogNote: metadataNote })
+      : undefined;
+
+    const imageUrls = (values.images ?? [])
+      .map((url) => url.trim())
+      .filter((url) => url.length > 0);
+
+    const imagesPayload = imageUrls.length
+      ? JSON.stringify({ main: imageUrls[0], gallery: imageUrls.slice(1) })
+      : undefined;
+
     const payload = {
       ...values,
       description: values.description?.trim() ? values.description : null,
       style: values.style?.trim() ? values.style : null,
       categoryLabel: values.categoryLabel?.trim() ? values.categoryLabel : null,
       rating: typeof values.rating === "number" ? values.rating : null,
-      metadata: values.metadata?.trim() ? values.metadata : undefined,
-      images: values.images?.trim() ? values.images : undefined,
+      metadata: metadataPayload,
+      images: imagesPayload,
     };
 
     try {
@@ -281,13 +395,11 @@ function ProductFormFieldsPresentation({
           name="metadata"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Metadata (JSON)</FormLabel>
+              <FormLabel>Nota del catálogo</FormLabel>
               <FormControl>
                 <Textarea
-                  rows={6}
-                  placeholder={`{
-  "tastingNotes": []
-}`}
+                  rows={4}
+                  placeholder="Notas adicionales para el equipo de catálogo"
                   {...field}
                 />
               </FormControl>
@@ -300,14 +412,14 @@ function ProductFormFieldsPresentation({
           name="images"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Imágenes (JSON)</FormLabel>
+              <FormLabel>Imágenes del producto</FormLabel>
               <FormControl>
-                <Textarea
-                  rows={6}
-                  placeholder={`{
-  "main": "https://..."
-}`}
-                  {...field}
+                <ProductImagesField
+                  value={Array.isArray(field.value) ? field.value : []}
+                  onChange={field.onChange}
+                  toast={toast}
+                  disabled={field.disabled}
+                  onBlur={field.onBlur}
                 />
               </FormControl>
               <FormMessage />
