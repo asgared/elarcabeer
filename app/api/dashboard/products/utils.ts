@@ -4,10 +4,54 @@ export type ProductWithVariants = Prisma.ProductGetPayload<{
   include: { variants: true };
 }>;
 
+function toStringArray(value: unknown): string[] {
+  if (Array.isArray(value)) {
+    return value
+      .map((item) => (typeof item === "string" ? item.trim() : ""))
+      .filter((item) => item.length > 0);
+  }
+
+  if (typeof value === "string") {
+    const trimmed = value.trim();
+    return trimmed.length > 0 ? [trimmed] : [];
+  }
+
+  return [];
+}
+
+function asRecord(value: unknown): Record<string, unknown> | null {
+  if (value && typeof value === "object" && !Array.isArray(value)) {
+    return value as Record<string, unknown>;
+  }
+
+  return null;
+}
+
+function resolveStructuredArray(
+  source: Record<string, unknown> | null,
+  keys: string[],
+): string[] {
+  if (!source) {
+    return [];
+  }
+
+  for (const key of keys) {
+    if (key in source) {
+      const array = toStringArray(source[key]);
+
+      if (array.length > 0) {
+        return array;
+      }
+    }
+  }
+
+  return [];
+}
+
 export function parseJsonField(
   value: unknown,
   fieldName: string,
-  fallback: Prisma.InputJsonValue = {}
+  fallback: Prisma.InputJsonValue = {},
 ): Prisma.InputJsonValue {
   if (typeof value === "undefined" || value === null) {
     return fallback;
@@ -45,7 +89,33 @@ export function parseJsonField(
 }
 
 export function mapProductForResponse(product: ProductWithVariants) {
-  const primaryVariant = product.variants[0];
+  const variants = product.variants.map((variant) => ({
+    id: variant.id,
+    name: variant.name,
+    sku: variant.sku,
+    price: variant.price,
+    stock: variant.stock,
+  }));
+
+  const primaryVariant = variants[0];
+
+  const productRecord = asRecord(product);
+  const metadataRecord = asRecord(product.metadata);
+
+  const tastingNotes =
+    resolveStructuredArray(productRecord, ["tastingNotes", "tasting_notes"]) ||
+    resolveStructuredArray(metadataRecord, ["tastingNotes", "tasting_notes"]);
+  const suggestedPairings =
+    resolveStructuredArray(productRecord, [
+      "suggestedPairings",
+      "pairings",
+      "suggested_pairings",
+    ]) ||
+    resolveStructuredArray(metadataRecord, [
+      "suggestedPairings",
+      "pairings",
+      "suggested_pairings",
+    ]);
 
   return {
     id: product.id,
@@ -62,6 +132,9 @@ export function mapProductForResponse(product: ProductWithVariants) {
     price: primaryVariant?.price ?? 0,
     stock: primaryVariant?.stock ?? 0,
     sku: primaryVariant?.sku ?? null,
+    tastingNotes,
+    suggestedPairings,
+    variants,
     createdAt: product.createdAt.toISOString(),
     updatedAt: product.updatedAt.toISOString(),
   };

@@ -25,6 +25,15 @@ export type Product = {
   price: number;
   stock: number;
   sku: string | null;
+  tastingNotes: string[];
+  suggestedPairings: string[];
+  variants: Array<{
+    id: string;
+    name: string;
+    sku: string;
+    price: number;
+    stock: number;
+  }>;
   createdAt: string;
   updatedAt: string;
 };

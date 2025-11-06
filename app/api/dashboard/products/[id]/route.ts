@@ -7,6 +7,12 @@ import { productInputSchema } from "@/lib/validations/product";
 
 import { mapProductForResponse, parseJsonField } from "../utils";
 
+function normalizeStringArray(values: string[] = []): string[] {
+  return values
+    .map((value) => value.trim())
+    .filter((value, index, array) => value.length > 0 && array.indexOf(value) === index);
+}
+
 function buildMissingIdResponse() {
   return NextResponse.json(
     { error: "Identificador del producto no especificado." },
@@ -74,77 +80,134 @@ export async function PATCH(
       return NextResponse.json({ error: validation.error.flatten() }, { status: 400 });
     }
 
-    const data = validation.data;
+    const {
+      variants,
+      tastingNotes = [],
+      suggestedPairings = [],
+      metadata,
+      images,
+      ...productData
+    } = validation.data;
+
+    const normalizedTastingNotes = normalizeStringArray(tastingNotes);
+    const normalizedPairings = normalizeStringArray(suggestedPairings);
+    const normalizedVariants = variants.map((variant) => ({
+      id: variant.id?.trim(),
+      name: variant.name.trim(),
+      sku: variant.sku.trim(),
+      price: variant.price,
+      stock: variant.stock,
+    }));
 
     let metadataValue;
     let imagesValue;
 
     try {
-      metadataValue =
-        typeof data.metadata === "undefined"
+      const parsedMetadata =
+        typeof metadata === "undefined"
           ? (existingProduct.metadata as Prisma.InputJsonValue)
           : parseJsonField(
-              data.metadata,
+              metadata,
               "metadata",
-              existingProduct.metadata as Prisma.InputJsonValue
+              existingProduct.metadata as Prisma.InputJsonValue,
             );
 
+      const metadataRecord =
+        parsedMetadata && typeof parsedMetadata === "object" && !Array.isArray(parsedMetadata)
+          ? { ...(parsedMetadata as Record<string, unknown>) }
+          : {};
+
+      delete metadataRecord.tastingNotes;
+      delete metadataRecord.tasting_notes;
+      delete metadataRecord.suggestedPairings;
+      delete metadataRecord.suggested_pairings;
+      delete metadataRecord.pairings;
+
+      metadataValue = {
+        ...metadataRecord,
+        tastingNotes: normalizedTastingNotes,
+        suggestedPairings: normalizedPairings,
+      };
+
       imagesValue =
-        typeof data.images === "undefined"
+        typeof images === "undefined"
           ? (existingProduct.images as Prisma.InputJsonValue)
           : parseJsonField(
-              data.images,
+              images,
               "images",
-              existingProduct.images as Prisma.InputJsonValue
+              existingProduct.images as Prisma.InputJsonValue,
             );
     } catch (error) {
       const message = error instanceof Error ? error.message : "Datos JSON inválidos.";
       return NextResponse.json({ error: message }, { status: 400 });
     }
 
-    const primaryVariant = existingProduct.variants[0] ?? null;
-
     const updatedProduct = await prisma.$transaction(async (tx) => {
       await tx.product.update({
         where: { id },
         data: {
-          name: data.name,
-          slug: data.slug,
-          description: data.description ?? null,
-          type: data.type,
-          style: data.style ?? null,
-          rating: typeof data.rating === "number" ? data.rating : null,
+          name: productData.name,
+          slug: productData.slug,
+          description: productData.description ?? null,
+          type: productData.type,
+          style: productData.style ?? null,
+          rating: typeof productData.rating === "number" ? productData.rating : null,
           limitedEdition:
-            typeof data.limitedEdition === "boolean"
-              ? data.limitedEdition
+            typeof productData.limitedEdition === "boolean"
+              ? productData.limitedEdition
               : existingProduct.limitedEdition,
-          categoryLabel: data.categoryLabel ?? null,
+          categoryLabel: productData.categoryLabel ?? null,
           metadata: metadataValue,
           images: imagesValue,
         },
       });
 
-      if (primaryVariant) {
-        await tx.variant.update({
-          where: { id: primaryVariant.id },
-          data: {
-            name: data.name,
-            sku: data.sku,
-            price: data.price,
-            stock: data.stock,
-          },
-        });
-      } else {
-        await tx.variant.create({
-          data: {
+      const incomingVariants = normalizedVariants;
+      const incomingIds = incomingVariants
+        .map((variant) => variant.id)
+        .filter((variantId): variantId is string => typeof variantId === "string" && variantId.length > 0);
+
+      const variantsToDelete = existingProduct.variants
+        .map((variant) => variant.id)
+        .filter((variantId) => !incomingIds.includes(variantId));
+
+      if (variantsToDelete.length > 0) {
+        await tx.variant.deleteMany({
+          where: {
             productId: id,
-            name: data.name,
-            sku: data.sku,
-            price: data.price,
-            stock: data.stock,
+            id: { in: variantsToDelete },
           },
         });
       }
+
+      await Promise.all(
+        incomingVariants.map((variant) => {
+          const variantData = {
+            name: variant.name,
+            sku: variant.sku,
+            price: variant.price,
+            stock: variant.stock,
+          };
+
+          if (variant.id) {
+            return tx.variant.upsert({
+              where: { id: variant.id },
+              update: variantData,
+              create: {
+                productId: id,
+                ...variantData,
+              },
+            });
+          }
+
+          return tx.variant.create({
+            data: {
+              productId: id,
+              ...variantData,
+            },
+          });
+        }),
+      );
 
       return tx.product.findUnique({
         where: { id },

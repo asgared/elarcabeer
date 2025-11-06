@@ -6,6 +6,12 @@ import { productInputSchema } from "@/lib/validations/product";
 
 import { mapProductForResponse, parseJsonField } from "./utils";
 
+function normalizeStringArray(values: string[] = []): string[] {
+  return values
+    .map((value) => value.trim())
+    .filter((value, index, array) => value.length > 0 && array.indexOf(value) === index);
+}
+
 export const dynamic = "force-dynamic";
 
 export async function GET() {
@@ -40,42 +46,90 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: validation.error.flatten() }, { status: 400 });
     }
 
-    const data = validation.data;
+    const {
+      variants,
+      tastingNotes = [],
+      suggestedPairings = [],
+      metadata,
+      images,
+      ...productData
+    } = validation.data;
+
+    const normalizedTastingNotes = normalizeStringArray(tastingNotes);
+    const normalizedPairings = normalizeStringArray(suggestedPairings);
+    const normalizedVariants = variants.map((variant) => ({
+      id: variant.id,
+      name: variant.name.trim(),
+      sku: variant.sku.trim(),
+      price: variant.price,
+      stock: variant.stock,
+    }));
 
     let metadataValue;
     let imagesValue;
 
     try {
-      metadataValue = parseJsonField(data.metadata, "metadata");
-      imagesValue = parseJsonField(data.images, "images");
+      metadataValue = parseJsonField(metadata, "metadata");
+      imagesValue = parseJsonField(images, "images");
     } catch (error) {
       const message = error instanceof Error ? error.message : "Datos JSON inválidos.";
       return NextResponse.json({ error: message }, { status: 400 });
     }
 
-    const product = await prisma.product.create({
-      data: {
-        name: data.name,
-        slug: data.slug,
-        description: data.description ?? null,
-        type: data.type,
-        style: data.style ?? null,
-        rating: typeof data.rating === "number" ? data.rating : null,
-        limitedEdition: data.limitedEdition ?? false,
-        categoryLabel: data.categoryLabel ?? null,
-        metadata: metadataValue,
-        images: imagesValue,
-        variants: {
-          create: {
-            name: data.name,
-            sku: data.sku,
-            price: data.price,
-            stock: data.stock,
-          },
+    const metadataRecord =
+      metadataValue && typeof metadataValue === "object" && !Array.isArray(metadataValue)
+        ? { ...(metadataValue as Record<string, unknown>) }
+        : {};
+
+    delete metadataRecord.tastingNotes;
+    delete metadataRecord.tasting_notes;
+    delete metadataRecord.suggestedPairings;
+    delete metadataRecord.suggested_pairings;
+    delete metadataRecord.pairings;
+
+    const metadataWithAttributes = {
+      ...metadataRecord,
+      tastingNotes: normalizedTastingNotes,
+      suggestedPairings: normalizedPairings,
+    };
+
+    const product = await prisma.$transaction(async (tx) => {
+      const createdProduct = await tx.product.create({
+        data: {
+          name: productData.name,
+          slug: productData.slug,
+          description: productData.description ?? null,
+          type: productData.type,
+          style: productData.style ?? null,
+          rating: typeof productData.rating === "number" ? productData.rating : null,
+          limitedEdition: productData.limitedEdition ?? false,
+          categoryLabel: productData.categoryLabel ?? null,
+          metadata: metadataWithAttributes,
+          images: imagesValue,
         },
-      },
-      include: { variants: { orderBy: { name: "asc" } } },
+      });
+
+      if (variants.length > 0) {
+        await tx.variant.createMany({
+          data: normalizedVariants.map((variant) => ({
+            productId: createdProduct.id,
+            name: variant.name,
+            sku: variant.sku,
+            price: variant.price,
+            stock: variant.stock,
+          })),
+        });
+      }
+
+      return tx.product.findUnique({
+        where: { id: createdProduct.id },
+        include: { variants: { orderBy: { name: "asc" } } },
+      });
     });
+
+    if (!product) {
+      throw new Error("No se pudo crear el producto.");
+    }
 
     return NextResponse.json(
       { product: mapProductForResponse(product) },
