@@ -77,7 +77,8 @@ export default async function ProductsPage() {
         description="Administra el catálogo de productos disponibles en la tienda."
       >
         <Button asChild>
-          <Link href="/dashboard/(admin)/products/new">
+          {/* RUTA CORREGIDA: Cambiado de /new a /create */}
+          <Link href="/dashboard/(admin)/products/create">
             <PlusCircle className="mr-2 h-4 w-4" /> Añadir producto
           </Link>
         </Button>
@@ -98,3 +99,5 @@ export default async function ProductsPage() {
     </div>
   );
 }
+
+export { ProductsPage };  
