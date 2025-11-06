@@ -83,7 +83,7 @@ function ProductFormFieldsPresentation({
         status: "success",
       });
 
-      router.replace("/dashboard/(admin)/products");
+      router.replace("/dashboard/products");
       router.refresh();
     } catch (error) {
       const message =
@@ -335,7 +335,7 @@ function ProductFormFieldsPresentation({
         <Button
           type="button"
           variant="outline"
-          onClick={() => router.replace("/dashboard/(admin)/products")}
+          onClick={() => router.replace("/dashboard/products")}
         >
           Cancelar
         </Button>

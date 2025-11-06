@@ -71,7 +71,7 @@ function ProductActions({ product }: { product: Product }) {
   return (
     <div className="flex items-center gap-2">
       <Button asChild size="sm" variant="outline">
-        <Link href={`/dashboard/(admin)/products/${product.id}`}>Editar</Link>
+        <Link href={`/dashboard/products/${product.id}`}>Editar</Link>
       </Button>
       <Button
         size="sm"
