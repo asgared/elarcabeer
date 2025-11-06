@@ -31,6 +31,15 @@ body {
 :root {
   --max-width: 1100px;
   --border-radius: 5px;
+  --background: 0 0% 96%; /* #F6F6F6 - Arena Cálida */
+  --foreground: 0 0% 0%; /* #000000 - Alto Contraste */
+  --primary: 46 92% 52%; /* #F7BE00 - Oro/Tesoro */
+  --secondary-ocean: 200 80% 30%; /* #0F5A8E - Azul Profundo Marítimo */
+  --card: 0 0% 100%; /* #FFFFFF - Espuma de Mar */
+  --success: 135 60% 40%; /* #28A745 - Éxito */
+  --warning: 45 100% 52%; /* #FFC107 - Advertencia */
+  --danger: 350 70% 54%; /* #DC3545 - Peligro/Error */
+  --info: 210 100% 50%; /* #007BFF - Proceso/Información */
 }
 
 @media (prefers-color-scheme: dark) {

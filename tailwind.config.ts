@@ -19,45 +19,15 @@ const config: Config = {
     },
     extend: {
       colors: {
-        brand: {
-          50: "#0C1B1E",
-          100: "#10272D",
-          200: "#133A43",
-          300: "#1F515C",
-          400: "#2B6B77",
-          500: "#35A3B3",
-          600: "#4BC0CD",
-          700: "#6FD6E0",
-          800: "#9AE7EE",
-          900: "#D6F8FB",
-        },
-        gold: {
-          500: "#C6A15B",
-        },
-        sand: {
-          500: "#DCC9A6",
-        },
-        background: {
-          800: "#10272D",
-          900: "#0C1B1E",
-        },
-        foreground: "#f0f6f8",
-        accent: {
-          DEFAULT: "#f7be00",
-          foreground: "#0c1b1e",
-        },
-        muted: {
-          DEFAULT: "#102327",
-          foreground: "#d4e4e7",
-        },
-        warning: {
-          DEFAULT: "#f6ad55",
-          foreground: "#2d1600",
-        },
-        danger: {
-          DEFAULT: "#e53e3e",
-          foreground: "#fff5f5",
-        },
+        background: "hsl(var(--background))",
+        foreground: "hsl(var(--foreground))",
+        primary: "hsl(var(--primary))",
+        secondary: "hsl(var(--secondary-ocean))",
+        card: "hsl(var(--card))",
+        success: "hsl(var(--success))",
+        warning: "hsl(var(--warning))",
+        danger: "hsl(var(--danger))",
+        info: "hsl(var(--info))",
       },
       borderRadius: {
         xl: "1.25rem",
