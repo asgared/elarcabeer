@@ -74,7 +74,7 @@ export async function POST(request: Request) {
           },
         },
       },
-      include: { variants: { orderBy: { createdAt: "asc" } } },
+      include: { variants: { orderBy: { name: "asc" } } },
     });
 
     return NextResponse.json(
