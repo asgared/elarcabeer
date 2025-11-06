@@ -29,7 +29,7 @@ export async function GET(
 
     const product = await prisma.product.findUnique({
       where: { id },
-      include: { variants: { orderBy: { createdAt: "asc" } } },
+      include: { variants: { orderBy: { name: "asc" } } },
     });
 
     if (!product) {
@@ -60,7 +60,7 @@ export async function PATCH(
 
     const existingProduct = await prisma.product.findUnique({
       where: { id },
-      include: { variants: { orderBy: { createdAt: "asc" } } },
+      include: { variants: { orderBy: { name: "asc" } } },
     });
 
     if (!existingProduct) {
@@ -148,7 +148,7 @@ export async function PATCH(
 
       return tx.product.findUnique({
         where: { id },
-        include: { variants: { orderBy: { createdAt: "asc" } } },
+        include: { variants: { orderBy: { name: "asc" } } },
       });
     });
 
