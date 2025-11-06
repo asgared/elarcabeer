@@ -144,7 +144,7 @@ export default async function OrderDetailPage({params}: OrderDetailPageProps) {
           {error}
         </div>
         <Button asChild className="mt-6" variant="outline">
-          <Link href="/dashboard/(admin)/orders">Volver al listado</Link>
+          <Link href="/dashboard/orders">Volver al listado</Link>
         </Button>
       </div>
     );
@@ -173,7 +173,7 @@ export default async function OrderDetailPage({params}: OrderDetailPageProps) {
           description="Consulta el detalle completo de la orden, sus artículos y el estado de pago."
         >
           <Button asChild variant="outline">
-            <Link href="/dashboard/(admin)/orders">Volver al listado</Link>
+            <Link href="/dashboard/orders">Volver al listado</Link>
           </Button>
         </AdminPageHeader>
 
