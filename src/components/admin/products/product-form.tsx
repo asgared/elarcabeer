@@ -8,7 +8,7 @@ import { FormProvider, useForm } from "react-hook-form";
 import { z } from "zod";
 import { ProductType } from "@prisma/client";
 
-import ProductFormFields from "@/components/admin/products/product-form-fields.jsx";
+import ProductFormFields from "@/components/admin/products/product-form-fields";
 
 import type { Product } from "./product-columns";
 
