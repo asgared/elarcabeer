@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import { ProductType } from "@prisma/client";
 import { useFormContext } from "react-hook-form";
 
-import { toast } from "@/components/ui/use-toast";
 import { Button } from "@/components/ui/button";
 import {
   FormControl,
@@ -24,6 +23,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
+import { useToast } from "@/hooks/use-toast";
 
 import type { Product } from "./product-columns";
 import type { ProductFormValues } from "./product-form";
@@ -38,6 +38,7 @@ function ProductFormFieldsPresentation({
   const { control, handleSubmit, formState } =
     useFormContext<ProductFormValues>();
   const router = useRouter();
+  const toast = useToast();
   const [serverError, setServerError] = useState<string | null>(null);
   const isNew = !initialProduct;
 
