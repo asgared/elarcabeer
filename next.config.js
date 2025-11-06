@@ -10,10 +10,11 @@ const nextConfig = {
       {
         protocol: 'https',
         hostname: 'res.cloudinary.com',
-        pathname: '/**', // permite todos los paths dentro de Cloudinary
+        pathname: '/**',
       },
     ],
   },
+  // INSERCIÓN CRÍTICA PARA EL BUILD:
   transpilePackages: ["@/"],
 };
 
