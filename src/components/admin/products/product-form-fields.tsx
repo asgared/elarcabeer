@@ -25,8 +25,8 @@ import {
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 
-import { Product } from "./product-columns";
-import { ProductFormValues } from "./product-form";
+import type { Product } from "./product-columns";
+import type { ProductFormValues } from "./product-form";
 
 type ProductFormFieldsProps = {
   initialProduct: Product | null;
@@ -282,7 +282,13 @@ function ProductFormFieldsPresentation({
             <FormItem>
               <FormLabel>Metadata (JSON)</FormLabel>
               <FormControl>
-                <Textarea rows={6} placeholder="{\n  \"tastingNotes\": []\n}" {...field} />
+                <Textarea
+                  rows={6}
+                  placeholder={`{
+  "tastingNotes": []
+}`}
+                  {...field}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -295,7 +301,13 @@ function ProductFormFieldsPresentation({
             <FormItem>
               <FormLabel>Imágenes (JSON)</FormLabel>
               <FormControl>
-                <Textarea rows={6} placeholder="{\n  \"main\": \"https://...\"\n}" {...field} />
+                <Textarea
+                  rows={6}
+                  placeholder={`{
+  "main": "https://..."
+}`}
+                  {...field}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
