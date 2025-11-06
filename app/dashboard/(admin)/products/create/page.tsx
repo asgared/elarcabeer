@@ -1,5 +1,6 @@
 import { AdminPageHeader } from "@/components/admin/admin-page-header";
 import { ProductForm } from "@/components/admin/products/product-form";
+import { Card, CardContent } from "@/components/ui/card";
 
 export const dynamic = "force-dynamic";
 
@@ -10,9 +11,11 @@ export default function CreateProductPage() {
         title="Crear producto"
         description="Completa el formulario para añadir un nuevo producto al catálogo."
       />
-      <ProductForm />
+      <Card>
+        <CardContent className="p-6">
+          <ProductForm initialProduct={null} />
+        </CardContent>
+      </Card>
     </div>
   );
 }
-
-export { CreateProductPage };
