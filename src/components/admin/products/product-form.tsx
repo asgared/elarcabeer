@@ -4,7 +4,7 @@
 
 import { useEffect, useMemo } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm, FormProvider } from "react-hook-form";
+import { FormProvider, useForm } from "react-hook-form";
 import { z } from "zod";
 import { ProductType } from "@prisma/client";
 
@@ -110,17 +110,17 @@ export default function ProductForm({ initialProduct = null }: ProductFormProps)
     images: stringifyJson(initialProduct?.images),
   }), [initialProduct]);
 
-  const form = useForm<ProductFormValues>({
+  const methods = useForm<ProductFormValues>({
     resolver: zodResolver(productFormSchema),
     defaultValues,
   });
 
   useEffect(() => {
-    form.reset(defaultValues);
-  }, [defaultValues, form]);
+    methods.reset(defaultValues);
+  }, [defaultValues, methods]);
 
   return (
-    <FormProvider {...form}>
+    <FormProvider {...methods}>
       <ProductFormFields initialProduct={initialProduct} />
     </FormProvider>
   );

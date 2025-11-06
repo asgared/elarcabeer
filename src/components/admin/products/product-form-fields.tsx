@@ -35,7 +35,8 @@ type ProductFormFieldsProps = {
 export default function ProductFormFields({
   initialProduct,
 }: ProductFormFieldsProps) {
-  const form = useFormContext<ProductFormValues>();
+  const { control, handleSubmit, formState } =
+    useFormContext<ProductFormValues>();
   const router = useRouter();
   const [serverError, setServerError] = useState<string | null>(null);
   const isNew = !initialProduct;
@@ -97,12 +98,12 @@ export default function ProductFormFields({
 
   return (
     <form
-      onSubmit={form.handleSubmit(onSubmit)}
+      onSubmit={handleSubmit(onSubmit)}
       className="space-y-8 rounded-2xl border border-white/10 bg-background/80 p-6 shadow-soft"
     >
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
         <FormField
-          control={form.control}
+          control={control}
           name="name"
           render={({ field }) => (
             <FormItem>
@@ -115,7 +116,7 @@ export default function ProductFormFields({
           )}
         />
         <FormField
-          control={form.control}
+          control={control}
           name="slug"
           render={({ field }) => (
             <FormItem>
@@ -128,7 +129,7 @@ export default function ProductFormFields({
           )}
         />
         <FormField
-          control={form.control}
+          control={control}
           name="sku"
           render={({ field }) => (
             <FormItem>
@@ -141,7 +142,7 @@ export default function ProductFormFields({
           )}
         />
         <FormField
-          control={form.control}
+          control={control}
           name="type"
           render={({ field }) => (
             <FormItem>
@@ -162,7 +163,7 @@ export default function ProductFormFields({
           )}
         />
         <FormField
-          control={form.control}
+          control={control}
           name="price"
           render={({ field }) => (
             <FormItem>
@@ -175,7 +176,7 @@ export default function ProductFormFields({
           )}
         />
         <FormField
-          control={form.control}
+          control={control}
           name="stock"
           render={({ field }) => (
             <FormItem>
@@ -190,7 +191,7 @@ export default function ProductFormFields({
       </div>
 
       <FormField
-        control={form.control}
+        control={control}
         name="description"
         render={({ field }) => (
           <FormItem>
@@ -205,7 +206,7 @@ export default function ProductFormFields({
 
       <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
         <FormField
-          control={form.control}
+          control={control}
           name="style"
           render={({ field }) => (
             <FormItem>
@@ -218,7 +219,7 @@ export default function ProductFormFields({
           )}
         />
         <FormField
-          control={form.control}
+          control={control}
           name="categoryLabel"
           render={({ field }) => (
             <FormItem>
@@ -231,7 +232,7 @@ export default function ProductFormFields({
           )}
         />
         <FormField
-          control={form.control}
+          control={control}
           name="rating"
           render={({ field }) => (
             <FormItem>
@@ -253,7 +254,7 @@ export default function ProductFormFields({
       </div>
 
       <FormField
-        control={form.control}
+        control={control}
         name="limitedEdition"
         render={({ field }) => (
           <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-lg border border-white/10 p-4">
@@ -275,7 +276,7 @@ export default function ProductFormFields({
 
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
         <FormField
-          control={form.control}
+          control={control}
           name="metadata"
           render={({ field }) => (
             <FormItem>
@@ -288,7 +289,7 @@ export default function ProductFormFields({
           )}
         />
         <FormField
-          control={form.control}
+          control={control}
           name="images"
           render={({ field }) => (
             <FormItem>
@@ -309,8 +310,8 @@ export default function ProductFormFields({
       ) : null}
 
       <div className="flex flex-col gap-4 md:flex-row">
-        <Button type="submit" disabled={form.formState.isSubmitting}>
-          {form.formState.isSubmitting
+        <Button type="submit" disabled={formState.isSubmitting}>
+          {formState.isSubmitting
             ? isNew
               ? "Creando..."
               : "Actualizando..."
