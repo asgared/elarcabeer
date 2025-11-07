@@ -2,6 +2,8 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { createHash, randomBytes } from "node:crypto";
 
+import { UserRole } from "@prisma/client";
+
 import { prisma } from "@/lib/prisma";
 
 const SESSION_COOKIE = "elarca_admin";
@@ -81,7 +83,7 @@ export async function getAdminSession() {
 export async function requireAdmin() {
   const session = await getAdminSession();
 
-  if (!session || session.user.role !== "ADMIN") {
+  if (!session || session.user.role !== UserRole.ADMIN) {
     redirect("/dashboard/login");
   }
 

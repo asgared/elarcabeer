@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { headers } from "next/headers";
 import Stripe from "stripe";
+import { OrderStatus } from "@prisma/client";
 
 import { prisma } from "@/lib/prisma";
 import { getStripeClient } from "@/lib/stripe";
@@ -205,7 +206,7 @@ export async function POST(request: NextRequest) {
         data: {
           userId,
           total,
-          status: "processing",
+          status: OrderStatus.PROCESSING,
           items: {
             create: items.map((item) => ({
               productId: item.productId,

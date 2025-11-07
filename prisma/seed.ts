@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { PrismaClient } from "@prisma/client";
+import { OrderStatus, PrismaClient } from "@prisma/client";
 
 import { bundles } from "../src/data/bundles";
 import { posts } from "../src/data/posts";
@@ -247,7 +247,7 @@ async function main() {
         // number: "ORD-1001", 
         userId: user.id,
         total,
-        status: "fulfilled",
+        status: OrderStatus.COMPLETED,
         items: {
           create: [
             {
@@ -284,7 +284,7 @@ async function main() {
         // number: "ORD-1000", // Tu schema no tiene 'number'
         userId: user.id,
         total,
-        status: "processing",
+        status: OrderStatus.PROCESSING,
         items: {
           create: [
             {

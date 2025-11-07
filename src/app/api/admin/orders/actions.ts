@@ -1,19 +1,17 @@
-'use server';
+"use server";
 
-import {Prisma, OrderStatus} from "@prisma/client";
-import {z} from "zod";
+import { Prisma, OrderStatus } from "@prisma/client";
+import { z } from "zod";
 
-import {requireAdmin} from "@/lib/auth/admin";
-import {prisma} from "@/lib/prisma";
-
-const orderStatusValues = Object.values(OrderStatus) as [OrderStatus, ...OrderStatus[]];
+import { requireAdmin } from "@/lib/auth/admin";
+import { prisma } from "@/lib/prisma";
 
 const updateOrderStatusSchema = z.object({
   orderId: z
-    .string({required_error: "El identificador de la orden es obligatorio."})
+    .string({ required_error: "El identificador de la orden es obligatorio." })
     .trim()
     .min(1, "El identificador de la orden es obligatorio."),
-  newStatus: z.enum(orderStatusValues),
+  newStatus: z.enum(Object.values(OrderStatus) as [OrderStatus, ...OrderStatus[]]),
 });
 
 type UpdateOrderStatusResult = {
@@ -27,7 +25,7 @@ export async function updateOrderStatus(
 ): Promise<UpdateOrderStatusResult> {
   await requireAdmin();
 
-  const parsed = updateOrderStatusSchema.safeParse({orderId, newStatus});
+  const parsed = updateOrderStatusSchema.safeParse({ orderId, newStatus });
 
   if (!parsed.success) {
     return {
@@ -38,8 +36,8 @@ export async function updateOrderStatus(
 
   try {
     await prisma.order.update({
-      where: {id: parsed.data.orderId},
-      data: {status: parsed.data.newStatus},
+      where: { id: parsed.data.orderId },
+      data: { status: parsed.data.newStatus },
     });
 
     return {
