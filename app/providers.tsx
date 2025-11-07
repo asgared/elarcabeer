@@ -7,7 +7,7 @@ import { ReactNode, useMemo } from "react";
 import {Toaster} from "@/components/ui/toaster";
 import { AnalyticsProvider } from "@/providers/analytics-provider";
 import { CartDrawerProvider } from "@/providers/cart-drawer-provider";
-import { UserProvider } from "@/providers/UserProvider"; // Asegúrate que la ruta sea correcta
+import { UserProvider } from "@/providers/user-provider"; // Asegúrate que la ruta sea correcta
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import seoConfig from "../next-seo.config";
 
