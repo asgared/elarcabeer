@@ -23,8 +23,8 @@ function QuantityButton({icon, ariaLabel, onClick}: QuantityButtonProps) {
       aria-label={ariaLabel}
       onClick={onClick}
       className={cn(
-        "flex h-9 w-9 items-center justify-center rounded-full border border-secondary-ocean/30 bg-card text-sm text-secondary-ocean transition hover:border-secondary-ocean/50 hover:bg-secondary-ocean/10",
-        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary-ocean/60 focus-visible:ring-offset-2"
+        "flex h-9 w-9 items-center justify-center rounded-full border border-foreground/40 bg-background/80 text-sm font-semibold text-foreground shadow-sm transition",
+        "hover:bg-foreground/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
       )}
     >
       {icon}
