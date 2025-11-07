@@ -38,9 +38,11 @@ export function AddToCartButton({productId, variant}: Props) {
       whileTap={{scale: 0.97}}
       whileHover={{y: -1}}
       className={cn(
-        "flex items-center justify-center gap-2 bg-primary px-6 py-5 text-base font-semibold text-primary-foreground shadow-lg transition",
-        "hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2",
-        isInCart && "bg-secondary-ocean text-foreground hover:bg-secondary-ocean/90"
+        "flex items-center justify-center gap-2 rounded-full px-6 py-5 text-base font-semibold shadow-lg transition",
+        "hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2",
+        isInCart
+          ? "bg-secondary-ocean text-secondary-foreground hover:bg-secondary-ocean/90 focus-visible:ring-secondary-ocean"
+          : "bg-primary text-primary-foreground hover:bg-primary/90 focus-visible:ring-primary"
       )}
     >
       {isInCart && <FaCheck className="h-4 w-4" />}

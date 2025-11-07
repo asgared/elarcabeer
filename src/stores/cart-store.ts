@@ -16,7 +16,7 @@ type CartState = {
 type CartActions = {
   addItem: (productId: string, variant: Variant) => void;
   removeItem: (productId: string, variantId: string) => void;
-  updateQuantity: (productId: string, quantity: number, variantId?: string) => void;
+  updateQuantity: (productId: string, variantId: string, quantity: number) => void;
   clear: () => void;
   clearCart: () => void;
   setCurrency: (currency: string) => void;
@@ -67,16 +67,19 @@ const store: CartStore = {
       )
     }));
   },
-  updateQuantity(productId, quantity, variantId) {
+  updateQuantity(productId, variantId, quantity) {
     updateState((current) => {
       const targetIndex = current.items.findIndex(
-        (item) =>
-          item.productId === productId &&
-          (typeof variantId === "undefined" || item.variant.id === variantId)
+        (item) => item.productId === productId && item.variant.id === variantId
       );
 
       if (targetIndex === -1) {
-        return current;
+        return {
+          ...current,
+          items: current.items.filter(
+            (item) => !(item.productId === productId && item.variant.id === variantId)
+          )
+        };
       }
 
       if (quantity <= 0) {

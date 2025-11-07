@@ -65,7 +65,7 @@ export function CartDrawer({isOpen, onClose}: Props) {
             type="button"
             aria-label="Cerrar carrito"
             onClick={onClose}
-            className="absolute inset-0 h-full w-full bg-black/70 backdrop-blur-sm"
+            className="absolute inset-0 h-full w-full bg-foreground/80 backdrop-blur-sm"
             initial={{opacity: 0}}
             animate={{opacity: 1}}
             exit={{opacity: 0}}
@@ -117,10 +117,18 @@ export function CartDrawer({isOpen, onClose}: Props) {
                           product={product}
                           currency={currency}
                           onDecrease={() =>
-                            updateQuantity(item.productId, item.quantity - 1, item.variant.id)
+                            updateQuantity(
+                              item.productId,
+                              item.variant.id,
+                              item.quantity - 1
+                            )
                           }
                           onIncrease={() =>
-                            updateQuantity(item.productId, item.quantity + 1, item.variant.id)
+                            updateQuantity(
+                              item.productId,
+                              item.variant.id,
+                              item.quantity + 1
+                            )
                           }
                           onRemove={() => removeItem(item.productId, item.variant.id)}
                         />
