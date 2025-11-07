@@ -8,8 +8,8 @@ import {Product} from "../../types/catalog";
 import {formatCurrency} from "../../utils/currency";
 
 const cardVariants = {
-  initial: {opacity: 0, y: 16, scale: 0.98},
-  animate: {opacity: 1, y: 0, scale: 1},
+  initial: {opacity: 0, y: 18},
+  animate: {opacity: 1, y: 0},
 };
 
 export function ProductCard({product}: {product: Product}) {
@@ -23,24 +23,22 @@ export function ProductCard({product}: {product: Product}) {
       initial="initial"
       animate="animate"
       variants={cardVariants}
-      transition={{duration: 0.4, ease: "easeOut"}}
-      whileHover={{scale: 1.02, boxShadow: "0 30px 70px -40px rgba(53,163,179,0.8)"}}
-      style={{boxShadow: "0 20px 45px -20px rgba(12, 27, 30, 0.55)", willChange: "transform"}}
+      transition={{duration: 0.45, ease: "easeOut"}}
     >
       <Link
-        className="group flex h-full flex-col gap-5 rounded-3xl border border-white/10 bg-[rgba(12,27,30,0.7)] p-5 transition-colors duration-200 md:gap-6 md:p-6"
+        className="group flex h-full flex-col gap-5 rounded-[1.75rem] border border-border/60 bg-card/90 p-6 shadow-[0_28px_68px_-40px_rgba(4,12,22,0.95)] transition-transform duration-200 hover:-translate-y-1 hover:border-accent/60 md:gap-6"
         href={`/shop/${product.slug}`}
       >
         <div className="relative overflow-hidden rounded-2xl">
           {product.limitedEdition ? (
-            <span className="absolute right-3 top-3 rounded-full bg-amber-300/90 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-[#1f1300] shadow-soft">
+            <span className="absolute right-3 top-3 rounded-full bg-primary/90 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-primary-foreground shadow-soft">
               Edición limitada
             </span>
           ) : null}
-          <div className="relative aspect-[4/5] overflow-hidden rounded-2xl bg-[#11272c]">
+          <div className="relative aspect-[4/5] overflow-hidden rounded-2xl bg-background/80">
             <Image
               alt={product.name}
-              className="object-cover transition-transform duration-300 group-hover:scale-[1.05]"
+              className="object-cover transition-transform duration-500 group-hover:scale-[1.03]"
               fill
               src={product.heroImage ?? "/images/beer-bg.jpg"}
               sizes="(min-width: 1024px) 320px, (min-width: 768px) 280px, 240px"
@@ -49,27 +47,27 @@ export function ProductCard({product}: {product: Product}) {
         </div>
         <div className="flex flex-1 flex-col gap-3">
           <h3
-            className="text-lg font-semibold leading-snug"
+            className="font-heading text-lg font-semibold leading-snug text-foreground"
             style={{display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden"}}
           >
             {product.name}
           </h3>
           <p
-            className="text-sm text-white/70"
+            className="text-sm text-muted-foreground"
             style={{display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden"}}
           >
             {product.style}
           </p>
-          <div className="flex flex-wrap items-center justify-between gap-3 text-sm">
+          <div className="flex flex-wrap items-center justify-between gap-3 text-sm text-muted-foreground">
             {hasVariants && minPrice !== null ? (
-              <span className="font-semibold">{formatCurrency(minPrice)}</span>
+              <span className="text-base font-semibold text-foreground">{formatCurrency(minPrice)}</span>
             ) : (
-              <span className="text-white/60">Próximamente</span>
+              <span className="text-muted-foreground">Próximamente</span>
             )}
             {rating ? (
-              <span className="flex items-center gap-1 text-[#C6A15B]">
-                <span className="font-bold">{rating.toFixed(1)}</span>
-                <span className="text-white/60">★</span>
+              <span className="flex items-center gap-1 rounded-full bg-background/60 px-2 py-1 text-xs font-semibold text-primary">
+                <span>{rating.toFixed(1)}</span>
+                <span className="text-primary">★</span>
               </span>
             ) : null}
           </div>

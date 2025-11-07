@@ -23,8 +23,8 @@ function QuantityButton({icon, ariaLabel, onClick}: QuantityButtonProps) {
       aria-label={ariaLabel}
       onClick={onClick}
       className={cn(
-        "flex h-9 w-9 items-center justify-center rounded-full border border-secondary-ocean/60 bg-secondary-ocean/10 text-sm font-semibold text-secondary-ocean shadow-sm transition",
-        "hover:bg-secondary-ocean/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary-ocean focus-visible:ring-offset-2"
+        "flex h-9 w-9 items-center justify-center rounded-full border border-border/60 bg-background/80 text-sm font-semibold text-accent shadow-sm transition",
+        "hover:bg-background/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2"
       )}
     >
       {icon}
@@ -50,8 +50,8 @@ export function CartItem({
   onRemove
 }: CartItemProps) {
   return (
-    <article className="group grid grid-cols-[92px_1fr] gap-4 rounded-2xl border border-secondary-ocean/20 bg-card/80 p-4 shadow-sm backdrop-blur-sm transition hover:border-secondary-ocean/40">
-      <div className="relative h-24 w-24 overflow-hidden rounded-xl border border-secondary-ocean/20 bg-secondary-ocean/10">
+    <article className="group grid grid-cols-[92px_1fr] gap-4 rounded-2xl border border-border/60 bg-card/90 p-4 shadow-[0_22px_58px_-35px_rgba(4,12,22,0.85)] transition hover:border-accent/60">
+      <div className="relative h-24 w-24 overflow-hidden rounded-xl border border-border/60 bg-background/80">
         <Image
           src={product.heroImage}
           alt={product.name}
@@ -64,7 +64,7 @@ export function CartItem({
         <div className="flex items-start justify-between gap-4">
           <div>
             <p className="text-sm font-semibold text-foreground">{product.name}</p>
-            <p className="text-xs font-medium uppercase tracking-wide text-secondary-ocean">
+            <p className="text-xs font-medium uppercase tracking-wide text-accent">
               {item.variant.name}
             </p>
           </div>
@@ -73,7 +73,7 @@ export function CartItem({
           </p>
         </div>
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <div className="flex items-center gap-3 rounded-full border border-secondary-ocean/20 bg-card px-3 py-1.5">
+          <div className="flex items-center gap-3 rounded-full border border-border/60 bg-background/80 px-3 py-1.5">
             <QuantityButton
               icon={<FaMinus className="h-3.5 w-3.5" />}
               ariaLabel="Disminuir cantidad"
@@ -89,7 +89,7 @@ export function CartItem({
           <button
             type="button"
             onClick={onRemove}
-            className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-danger transition hover:text-danger/80"
+            className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-destructive transition hover:text-destructive/80"
           >
             <FaTrash className="h-3.5 w-3.5" />
             Quitar

@@ -187,7 +187,7 @@ const DropdownMenuContent = forwardRef<HTMLDivElement, DropdownMenuContentProps>
         role="menu"
         style={{marginTop: sideOffset, ...style}}
         className={cn(
-          "absolute top-full z-50 min-w-[8rem] rounded-lg border border-white/10 bg-background/95 p-1 text-sm text-white shadow-lg backdrop-blur focus:outline-none",
+          "absolute top-full z-50 min-w-[8rem] rounded-lg border border-border/60 bg-background/95 p-1 text-sm text-foreground shadow-[0_20px_45px_-28px_rgba(4,12,22,0.85)] focus:outline-none",
           align === "end" ? "right-0" : "left-0",
           className,
         )}

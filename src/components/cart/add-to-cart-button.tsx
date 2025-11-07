@@ -41,7 +41,7 @@ export function AddToCartButton({productId, variant}: Props) {
         "flex items-center justify-center gap-2 rounded-full px-6 py-5 text-base font-semibold shadow-lg transition",
         "hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2",
         isInCart
-          ? "bg-secondary-ocean text-secondary-foreground hover:bg-secondary-ocean/90 focus-visible:ring-secondary-ocean"
+          ? "bg-secondary text-secondary-foreground hover:bg-secondary/90 focus-visible:ring-secondary"
           : "bg-primary text-primary-foreground hover:bg-primary/90 focus-visible:ring-primary"
       )}
     >

@@ -26,7 +26,7 @@ export function Navbar() {
   const {open} = useCartDrawer();
 
   return (
-    <nav className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <nav className="sticky top-0 z-50 w-full border-b border-border/50 bg-background/95 shadow-[0_18px_38px_-28px_rgba(3,12,23,0.85)]">
       <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4 md:px-6">
         <Link href="/" className="flex items-center gap-3">
           <span className="hidden h-10 w-10 md:inline-flex">

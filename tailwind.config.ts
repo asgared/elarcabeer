@@ -19,6 +19,39 @@ const config: Config = {
     },
     extend: {
       colors: {
+        border: "hsl(var(--border))",
+        input: "hsl(var(--input))",
+        ring: "hsl(var(--ring))",
+        background: "hsl(var(--background))",
+        foreground: "hsl(var(--foreground))",
+        primary: {
+          DEFAULT: "hsl(var(--primary))",
+          foreground: "hsl(var(--primary-foreground))",
+        },
+        secondary: {
+          DEFAULT: "hsl(var(--secondary))",
+          foreground: "hsl(var(--secondary-foreground))",
+        },
+        destructive: {
+          DEFAULT: "hsl(var(--destructive))",
+          foreground: "hsl(var(--destructive-foreground))",
+        },
+        muted: {
+          DEFAULT: "hsl(var(--muted))",
+          foreground: "hsl(var(--muted-foreground))",
+        },
+        accent: {
+          DEFAULT: "hsl(var(--accent))",
+          foreground: "hsl(var(--accent-foreground))",
+        },
+        popover: {
+          DEFAULT: "hsl(var(--popover))",
+          foreground: "hsl(var(--popover-foreground))",
+        },
+        card: {
+          DEFAULT: "hsl(var(--card))",
+          foreground: "hsl(var(--card-foreground))",
+        },
         brand: {
           50: "#0C1B1E",
           100: "#10272D",
@@ -37,26 +70,13 @@ const config: Config = {
         sand: {
           500: "#DCC9A6",
         },
-        background: {
-          800: "#10272D",
-          900: "#0C1B1E",
-        },
-        foreground: "#f0f6f8",
-        accent: {
-          DEFAULT: "#35A3B3",
-          foreground: "#0c1b1e",
-        },
-        muted: {
-          DEFAULT: "#102327",
-          foreground: "#d4e4e7",
+        success: {
+          DEFAULT: "#28a745",
+          foreground: "#f0fff4",
         },
         warning: {
           DEFAULT: "#f6ad55",
           foreground: "#2d1600",
-        },
-        success: {
-          DEFAULT: "#28a745",
-          foreground: "#f0fff4",
         },
         info: {
           DEFAULT: "#007bff",

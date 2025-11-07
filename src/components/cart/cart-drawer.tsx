@@ -65,24 +65,24 @@ export function CartDrawer({isOpen, onClose}: Props) {
             type="button"
             aria-label="Cerrar carrito"
             onClick={onClose}
-            className="absolute inset-0 h-full w-full bg-foreground/80 backdrop-blur-sm"
+            className="absolute inset-0 h-full w-full bg-black/70"
             initial={{opacity: 0}}
             animate={{opacity: 1}}
             exit={{opacity: 0}}
             transition={{duration: 0.25, ease: "easeInOut"}}
           />
           <motion.aside
-            className="relative ml-auto flex h-full w-full max-w-full flex-col bg-card text-foreground shadow-2xl md:max-w-lg"
+            className="relative ml-auto flex h-full w-full max-w-full flex-col border-l border-border/60 bg-card/95 text-foreground shadow-[0_35px_75px_-45px_rgba(3,10,20,0.85)] md:max-w-lg"
             initial={{x: "100%"}}
             animate={{x: 0}}
             exit={{x: "100%"}}
             transition={{type: "spring", stiffness: 260, damping: 30}}
           >
             <div className="flex h-full flex-col">
-              <header className="border-b border-secondary-ocean/20 px-6 py-5">
+              <header className="border-b border-border/60 bg-background/70 px-6 py-5">
                 <div className="flex items-start justify-between">
                   <div>
-                    <p className="text-sm font-semibold uppercase tracking-[0.2em] text-secondary-ocean">
+                    <p className="text-sm font-semibold uppercase tracking-[0.2em] text-accent">
                       Resumen de compra
                     </p>
                     <h2 className="mt-1 text-xl font-bold">Tu carrito</h2>
@@ -90,7 +90,7 @@ export function CartDrawer({isOpen, onClose}: Props) {
                   <button
                     type="button"
                     onClick={onClose}
-                    className="text-sm font-semibold text-secondary-ocean transition hover:text-secondary-ocean/80"
+                    className="text-sm font-semibold text-muted-foreground transition hover:text-foreground"
                   >
                     Cerrar
                   </button>
@@ -99,7 +99,7 @@ export function CartDrawer({isOpen, onClose}: Props) {
               <div className="flex-1 overflow-y-auto px-6 py-6">
                 <div className="space-y-4">
                   {items.length === 0 ? (
-                    <p className="rounded-xl border border-secondary-ocean/20 bg-card/80 p-6 text-sm text-muted-foreground">
+                    <p className="rounded-xl border border-border/60 bg-background/80 p-6 text-sm text-muted-foreground">
                       Tu carrito está vacío por ahora.
                     </p>
                   ) : (
@@ -137,7 +137,7 @@ export function CartDrawer({isOpen, onClose}: Props) {
                   )}
                 </div>
               </div>
-              <footer className="border-t border-secondary-ocean/20 bg-card/95 px-6 py-6">
+              <footer className="border-t border-border/60 bg-background/80 px-6 py-6">
                 <div className="flex items-center justify-between text-sm">
                   <span className="font-semibold text-muted-foreground">Total</span>
                   <span className="text-lg font-bold">
@@ -147,7 +147,7 @@ export function CartDrawer({isOpen, onClose}: Props) {
                 <div className="mt-4 space-y-3">
                   <Button
                     asChild
-                    className="w-full bg-primary text-primary-foreground shadow-lg transition hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+                    className="w-full rounded-full bg-primary text-primary-foreground shadow-lg transition hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
                     onClick={() => {
                       analytics.push({event: "begin_checkout", value: total});
                       onClose();
@@ -157,7 +157,7 @@ export function CartDrawer({isOpen, onClose}: Props) {
                   </Button>
                   <Button
                     variant="outline"
-                    className="w-full border-secondary-ocean/20 text-foreground hover:bg-secondary-ocean/10"
+                    className="w-full rounded-full border-border/60 text-muted-foreground hover:bg-background/70 hover:text-foreground"
                     onClick={() => clear()}
                   >
                     Vaciar carrito
