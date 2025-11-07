@@ -1,17 +1,18 @@
 "use client";
 
 import Link from "next/link";
-import {useEffect, useState, type ReactNode} from "react";
+import {useEffect, useState} from "react";
 import {createPortal} from "react-dom";
-import {FaMinus, FaPlus, FaTrash} from "react-icons/fa6";
+import {AnimatePresence, motion} from "framer-motion";
 
 import {Button} from "@/components/ui/button";
-import {cn} from "@/lib/utils";
 
 import {useAnalyticsContext} from "../../providers/analytics-provider";
 import {products} from "../../data/products";
 import {selectCartTotal, useCartStore} from "../../stores/cart-store";
 import {formatCurrency} from "../../utils/currency";
+
+import {CartItem} from "./cart-item";
 
 type Props = {
   isOpen: boolean;
@@ -46,119 +47,120 @@ export function CartDrawer({isOpen, onClose}: Props) {
     };
   }, [isOpen, onClose]);
 
-  if (!mounted || !isOpen) {
+  if (!mounted) {
     return null;
   }
 
   return createPortal(
-    <div className="fixed inset-0 z-50 flex">
-      <button
-        type="button"
-        aria-label="Cerrar carrito"
-        onClick={onClose}
-        className="absolute inset-0 h-full w-full bg-black/70 backdrop-blur-sm"
-      />
-      <aside
-        className="relative ml-auto flex h-full w-full max-w-full flex-col bg-background p-6 shadow-card transition md:max-w-md"
-      >
-        <header className="border-b border-white/10 pb-4 text-lg font-semibold">Tu Carrito</header>
-        <div className="flex-1 overflow-y-auto py-6">
-          <div className="space-y-6">
-            {items.length === 0 ? (
-              <p className="text-sm text-muted-foreground">Tu carrito está vacío por ahora.</p>
-            ) : (
-              items.map((item) => {
-                const product = products.find((productItem) => productItem.id === item.productId);
-
-                if (!product) return null;
-
-                return (
-                  <div
-                    key={`${item.productId}-${item.variant.id}`}
-                    className="border-b border-white/5 pb-4 last:border-b-0"
-                  >
-                    <p className="text-lg font-semibold">{product.name}</p>
-                    <p className="text-sm text-muted-foreground">{item.variant.name}</p>
-                    <div className="mt-3 flex flex-wrap items-center gap-3">
-                      <QuantityButton
-                        icon={<FaMinus className="h-3.5 w-3.5" />}
-                        ariaLabel="Disminuir"
-                        onClick={() =>
-                          updateQuantity(item.productId, item.variant.id, item.quantity - 1)
-                        }
-                      />
-                      <span className="text-sm font-semibold">{item.quantity}</span>
-                      <QuantityButton
-                        icon={<FaPlus className="h-3.5 w-3.5" />}
-                        ariaLabel="Incrementar"
-                        onClick={() =>
-                          updateQuantity(item.productId, item.variant.id, item.quantity + 1)
-                        }
-                      />
-                      <QuantityButton
-                        icon={<FaTrash className="h-3.5 w-3.5" />}
-                        ariaLabel="Eliminar"
-                        variant="destructive"
-                        onClick={() => removeItem(item.productId, item.variant.id)}
-                      />
-                    </div>
-                    <p className="mt-2 text-base font-semibold">
-                      {formatCurrency(item.variant.price * item.quantity, currency)}
+    <AnimatePresence>
+      {isOpen && (
+        <motion.div
+          className="fixed inset-0 z-50 flex"
+          initial={{opacity: 0}}
+          animate={{opacity: 1}}
+          exit={{opacity: 0}}
+          transition={{duration: 0.2, ease: "easeInOut"}}
+        >
+          <motion.button
+            type="button"
+            aria-label="Cerrar carrito"
+            onClick={onClose}
+            className="absolute inset-0 h-full w-full bg-background/80 backdrop-blur-sm"
+            initial={{opacity: 0}}
+            animate={{opacity: 1}}
+            exit={{opacity: 0}}
+            transition={{duration: 0.25, ease: "easeInOut"}}
+          />
+          <motion.aside
+            className="relative ml-auto flex h-full w-full max-w-full flex-col bg-card text-foreground shadow-2xl md:max-w-lg"
+            initial={{x: "100%"}}
+            animate={{x: 0}}
+            exit={{x: "100%"}}
+            transition={{type: "spring", stiffness: 260, damping: 30}}
+          >
+            <div className="flex h-full flex-col">
+              <header className="border-b border-secondary-ocean/20 px-6 py-5">
+                <div className="flex items-start justify-between">
+                  <div>
+                    <p className="text-sm font-semibold uppercase tracking-[0.2em] text-secondary-ocean">
+                      Resumen de compra
                     </p>
+                    <h2 className="mt-1 text-xl font-bold">Tu carrito</h2>
                   </div>
-                );
-              })
-            )}
-          </div>
-        </div>
-        <footer className="mt-auto flex flex-col gap-4 border-t border-white/10 pt-6">
-          <div className="flex items-center justify-between text-sm">
-            <span className="font-semibold">Total</span>
-            <span className="text-lg font-bold">{formatCurrency(total, currency)}</span>
-          </div>
-          <div className="space-y-3">
-            <Button
-              asChild
-              onClick={() => {
-                analytics.push({event: "begin_checkout", value: total});
-                onClose();
-              }}
-            >
-              <Link href="/checkout">Ir a checkout</Link>
-            </Button>
-            <Button variant="outline" onClick={() => clear()}>
-              Vaciar carrito
-            </Button>
-          </div>
-        </footer>
-      </aside>
-    </div>,
-    document.body
-  );
-}
+                  <button
+                    type="button"
+                    onClick={onClose}
+                    className="text-sm font-semibold text-secondary-ocean transition hover:text-secondary-ocean/80"
+                  >
+                    Cerrar
+                  </button>
+                </div>
+              </header>
+              <div className="flex-1 overflow-y-auto px-6 py-6">
+                <div className="space-y-4">
+                  {items.length === 0 ? (
+                    <p className="rounded-xl border border-secondary-ocean/20 bg-card/80 p-6 text-sm text-muted-foreground">
+                      Tu carrito está vacío por ahora.
+                    </p>
+                  ) : (
+                    items.map((item) => {
+                      const product = products.find(
+                        (productItem) => productItem.id === item.productId
+                      );
 
-type QuantityButtonProps = {
-  icon: ReactNode;
-  ariaLabel: string;
-  onClick: () => void;
-  variant?: "default" | "destructive";
-};
+                      if (!product) return null;
 
-function QuantityButton({icon, ariaLabel, onClick, variant = "default"}: QuantityButtonProps) {
-  return (
-    <button
-      type="button"
-      aria-label={ariaLabel}
-      onClick={onClick}
-      className={cn(
-        "flex h-10 w-10 items-center justify-center rounded-md border border-white/10 text-sm transition",
-        "hover:border-accent hover:bg-accent/10",
-        variant === "destructive"
-          ? "border-danger/60 text-danger hover:bg-danger/10"
-          : "text-foreground"
+                      return (
+                        <CartItem
+                          key={`${item.productId}-${item.variant.id}`}
+                          item={item}
+                          product={product}
+                          currency={currency}
+                          onDecrease={() =>
+                            updateQuantity(item.productId, item.variant.id, item.quantity - 1)
+                          }
+                          onIncrease={() =>
+                            updateQuantity(item.productId, item.variant.id, item.quantity + 1)
+                          }
+                          onRemove={() => removeItem(item.productId, item.variant.id)}
+                        />
+                      );
+                    })
+                  )}
+                </div>
+              </div>
+              <footer className="border-t border-secondary-ocean/20 bg-card/95 px-6 py-6">
+                <div className="flex items-center justify-between text-sm">
+                  <span className="font-semibold text-muted-foreground">Total</span>
+                  <span className="text-lg font-bold">
+                    {formatCurrency(total, currency)}
+                  </span>
+                </div>
+                <div className="mt-4 space-y-3">
+                  <Button
+                    asChild
+                    className="w-full bg-primary text-primary-foreground shadow-lg transition hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+                    onClick={() => {
+                      analytics.push({event: "begin_checkout", value: total});
+                      onClose();
+                    }}
+                  >
+                    <Link href="/checkout">Ir a checkout</Link>
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="w-full border-secondary-ocean/20 text-foreground hover:bg-secondary-ocean/10"
+                    onClick={() => clear()}
+                  >
+                    Vaciar carrito
+                  </Button>
+                </div>
+              </footer>
+            </div>
+          </motion.aside>
+        </motion.div>
       )}
-    >
-      {icon}
-    </button>
+    </AnimatePresence>,
+    document.body
   );
 }
