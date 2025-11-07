@@ -211,9 +211,14 @@ export function CheckoutContent() {
           <h1 className="text-3xl font-semibold md:text-4xl">Checkout</h1>
           <div className="grid gap-10 lg:grid-cols-[3fr_2fr] lg:gap-12">
             <div>
-              <form className="flex flex-col gap-6" noValidate onSubmit={handleSubmit(onSubmit)}>
-                <div className="rounded-2xl border border-white/10 bg-background/60 p-6">
-                  <h2 className="mb-4 text-xl font-semibold">Datos de envío</h2>
+              <form className="flex flex-col gap-8" noValidate onSubmit={handleSubmit(onSubmit)}>
+                <section className="space-y-6 rounded-2xl border border-foreground/10 bg-card p-6 shadow-sm">
+                  <div className="space-y-2">
+                    <h2 className="text-lg font-semibold">1. Datos de contacto</h2>
+                    <p className="text-sm text-muted-foreground">
+                      Utilizaremos esta información para enviarte confirmaciones y actualizaciones de tu compra.
+                    </p>
+                  </div>
                   <div className="grid gap-4 md:grid-cols-2">
                     <div className="flex flex-col gap-2">
                       <Label htmlFor="name">Nombre completo</Label>
@@ -222,9 +227,7 @@ export function CheckoutContent() {
                         placeholder="Tu nombre"
                         {...register("name", {required: "El nombre es obligatorio"})}
                       />
-                      {errors.name ? (
-                        <p className="text-sm text-red-400">{errors.name.message}</p>
-                      ) : null}
+                      {errors.name ? <p className="text-sm text-danger">{errors.name.message}</p> : null}
                     </div>
                     <div className="flex flex-col gap-2">
                       <Label htmlFor="email">Correo electrónico</Label>
@@ -234,18 +237,25 @@ export function CheckoutContent() {
                         type="email"
                         {...register("email", {required: "El correo es obligatorio"})}
                       />
-                      {errors.email ? (
-                        <p className="text-sm text-red-400">{errors.email.message}</p>
-                      ) : null}
+                      {errors.email ? <p className="text-sm text-danger">{errors.email.message}</p> : null}
                     </div>
+                  </div>
+                </section>
+
+                <section className="space-y-6 rounded-2xl border border-foreground/10 bg-card p-6 shadow-sm">
+                  <div className="space-y-2">
+                    <h2 className="text-lg font-semibold">2. Dirección de envío</h2>
+                    <p className="text-sm text-muted-foreground">
+                      Selecciona una dirección guardada o completa los campos para tu envío.
+                    </p>
                   </div>
 
                   {addresses.length > 0 ? (
-                    <div className="mt-4 flex flex-col gap-2">
+                    <div className="flex flex-col gap-2">
                       <Label htmlFor="saved-address">Direcciones guardadas</Label>
                       <select
                         id="saved-address"
-                        className="h-10 rounded-md border border-white/15 bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-accent"
+                        className="h-10 rounded-md border border-foreground/30 bg-card px-3 text-sm text-foreground shadow-sm transition focus-visible:border-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                         value={selectedAddressId}
                         onChange={(event) => setSelectedAddressId(event.target.value)}
                       >
@@ -259,7 +269,7 @@ export function CheckoutContent() {
                     </div>
                   ) : null}
 
-                  <div className="mt-4 flex flex-col gap-4">
+                  <div className="flex flex-col gap-4">
                     <div className="flex flex-col gap-2">
                       <Label htmlFor="label">Nombre para la dirección</Label>
                       <Input id="label" placeholder="Casa, oficina, etc." {...register("label")} />
@@ -271,9 +281,7 @@ export function CheckoutContent() {
                         placeholder="Calle, número, colonia"
                         {...register("street", {required: "La dirección es obligatoria"})}
                       />
-                      {errors.street ? (
-                        <p className="text-sm text-red-400">{errors.street.message}</p>
-                      ) : null}
+                      {errors.street ? <p className="text-sm text-danger">{errors.street.message}</p> : null}
                     </div>
                     <div className="grid gap-4 md:grid-cols-3">
                       <div className="flex flex-col gap-2">
@@ -283,9 +291,7 @@ export function CheckoutContent() {
                           placeholder="Ciudad"
                           {...register("city", {required: "La ciudad es obligatoria"})}
                         />
-                        {errors.city ? (
-                          <p className="text-sm text-red-400">{errors.city.message}</p>
-                        ) : null}
+                        {errors.city ? <p className="text-sm text-danger">{errors.city.message}</p> : null}
                       </div>
                       <div className="flex flex-col gap-2">
                         <Label htmlFor="country">País o estado</Label>
@@ -294,9 +300,7 @@ export function CheckoutContent() {
                           placeholder="México, CDMX..."
                           {...register("country", {required: "El país es obligatorio"})}
                         />
-                        {errors.country ? (
-                          <p className="text-sm text-red-400">{errors.country.message}</p>
-                        ) : null}
+                        {errors.country ? <p className="text-sm text-danger">{errors.country.message}</p> : null}
                       </div>
                       <div className="flex flex-col gap-2">
                         <Label htmlFor="postal">Código postal</Label>
@@ -305,22 +309,26 @@ export function CheckoutContent() {
                           placeholder="00000"
                           {...register("postal", {required: "El código postal es obligatorio"})}
                         />
-                        {errors.postal ? (
-                          <p className="text-sm text-red-400">{errors.postal.message}</p>
-                        ) : null}
+                        {errors.postal ? <p className="text-sm text-danger">{errors.postal.message}</p> : null}
                       </div>
                     </div>
                   </div>
 
-                  <label className="mt-4 flex items-center gap-2 text-sm text-white/80">
+                  <label className="flex items-center gap-2 text-sm text-foreground/80">
                     <Checkbox checked={saveAddress} onCheckedChange={(value) => setSaveAddress(Boolean(value))} />
                     {selectedAddressId === "new"
                       ? "Guardar esta dirección"
                       : "Actualizar la dirección guardada"}
                   </label>
-                </div>
+                </section>
 
-                <div className="rounded-2xl border border-white/10 bg-background/60 p-6">
+                <section className="space-y-4 rounded-2xl border border-foreground/10 bg-card p-6 shadow-sm">
+                  <div className="space-y-2">
+                    <h2 className="text-lg font-semibold">3. Método de pago</h2>
+                    <p className="text-sm text-muted-foreground">
+                      El pago se procesará de forma segura a través de Stripe. Serás redirigido para completar la transacción.
+                    </p>
+                  </div>
                   <Button
                     className="w-full sm:w-auto"
                     disabled={!hasItems || !user || isLoading}
@@ -329,11 +337,11 @@ export function CheckoutContent() {
                   >
                     {hasItems ? "Confirmar y pagar con Stripe" : "Agrega productos para continuar"}
                   </Button>
-                </div>
+                </section>
               </form>
             </div>
             <div className="flex flex-col gap-6">
-              <div className="rounded-2xl border border-white/10 bg-background/60 p-6">
+              <div className="rounded-2xl border border-foreground/10 bg-card p-6 shadow-sm">
                 <h2 className="mb-4 text-xl font-semibold">Resumen de compra</h2>
                 {cartLines.length === 0 ? (
                   <div className="flex flex-col gap-3 text-sm text-white/70">
