@@ -54,6 +54,14 @@ const config: Config = {
           DEFAULT: "#f6ad55",
           foreground: "#2d1600",
         },
+        success: {
+          DEFAULT: "#28a745",
+          foreground: "#f0fff4",
+        },
+        info: {
+          DEFAULT: "#007bff",
+          foreground: "#f0f6ff",
+        },
         danger: {
           DEFAULT: "#e53e3e",
           foreground: "#fff5f5",

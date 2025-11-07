@@ -2,6 +2,7 @@
 
 import {useState} from "react";
 import {useRouter} from "next/navigation";
+import type {OrderStatus} from "@prisma/client";
 
 import {Button} from "@/components/ui/button";
 import {
@@ -17,20 +18,20 @@ const ORDER_STATUS_OPTIONS = [
   {value: "PENDING", label: "Pendiente"},
   {value: "PROCESSING", label: "Procesando"},
   {value: "SHIPPED", label: "Enviada"},
-  {value: "DELIVERED", label: "Entregada"},
+  {value: "COMPLETED", label: "Completada"},
   {value: "CANCELLED", label: "Cancelada"},
 ] as const;
 
 type OrderStatusFormProps = {
   orderId: string;
-  initialStatus: string;
+  initialStatus: OrderStatus;
 };
 
 export function OrderStatusForm({orderId, initialStatus}: OrderStatusFormProps) {
   const router = useRouter();
   const toast = useToast();
-  const normalizedInitialStatus = initialStatus.toUpperCase();
-  const [status, setStatus] = useState(normalizedInitialStatus);
+  const normalizedInitialStatus = initialStatus;
+  const [status, setStatus] = useState<OrderStatus>(normalizedInitialStatus);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const hasChanges = status !== normalizedInitialStatus;
@@ -81,7 +82,7 @@ export function OrderStatusForm({orderId, initialStatus}: OrderStatusFormProps) 
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-3 sm:flex-row sm:items-center">
-      <Select value={status} onValueChange={setStatus}>
+      <Select value={status} onValueChange={(value) => setStatus(value as OrderStatus)}>
         <SelectTrigger className="w-full sm:w-60">
           <SelectValue placeholder="Selecciona un estado" />
         </SelectTrigger>

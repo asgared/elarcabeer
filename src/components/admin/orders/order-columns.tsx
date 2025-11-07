@@ -2,8 +2,9 @@
 
 import Link from "next/link";
 import {ColumnDef} from "@tanstack/react-table";
+import type {OrderStatus} from "@prisma/client";
 
-import {Badge, type BadgeProps} from "@/components/ui/badge";
+import {OrderStatusUpdater} from "@/components/admin/orders/OrderStatusUpdater";
 import {Button} from "@/components/ui/button";
 import {formatCurrency} from "@/utils/currency";
 
@@ -19,7 +20,7 @@ export type OrderItem = {
 export type Order = {
   id: string;
   total: number;
-  status: string;
+  status: OrderStatus;
   createdAt: string;
   user: {
     id: string;
@@ -28,22 +29,6 @@ export type Order = {
     email: string;
   };
   items: OrderItem[];
-};
-
-const STATUS_LABELS: Record<string, string> = {
-  PENDING: "Pendiente",
-  PROCESSING: "Procesando",
-  SHIPPED: "Enviada",
-  DELIVERED: "Entregada",
-  CANCELLED: "Cancelada",
-};
-
-const STATUS_VARIANTS: Record<string, BadgeProps["variant"]> = {
-  PENDING: "warning",
-  PROCESSING: "info",
-  SHIPPED: "secondary",
-  DELIVERED: "success",
-  CANCELLED: "destructive",
 };
 
 const dateFormatter = new Intl.DateTimeFormat("es-MX", {
@@ -101,13 +86,9 @@ export const columns: ColumnDef<Order>[] = [
   {
     accessorKey: "status",
     header: "Estado",
-    cell: ({row}) => {
-      const status = row.original.status.toUpperCase();
-      const label = STATUS_LABELS[status] ?? status;
-      const variant = STATUS_VARIANTS[status] ?? "secondary";
-
-      return <Badge variant={variant}>{label}</Badge>;
-    },
+    cell: ({row}) => (
+      <OrderStatusUpdater orderId={row.original.id} currentStatus={row.original.status} />
+    ),
   },
   {
     accessorKey: "createdAt",

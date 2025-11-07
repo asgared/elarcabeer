@@ -7,7 +7,7 @@ import {prisma} from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
 
-const ORDER_STATUS_VALUES = ["PENDING", "PROCESSING", "SHIPPED", "DELIVERED", "CANCELLED"] as const;
+const ORDER_STATUS_VALUES = ["PENDING", "PROCESSING", "SHIPPED", "COMPLETED", "CANCELLED"] as const;
 
 const orderStatusSchema = z
   .object({

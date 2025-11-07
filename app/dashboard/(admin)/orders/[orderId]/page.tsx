@@ -40,15 +40,15 @@ const ORDER_STATUS_LABELS: Record<string, string> = {
   PENDING: "Pendiente",
   PROCESSING: "Procesando",
   SHIPPED: "Enviada",
-  DELIVERED: "Entregada",
+  COMPLETED: "Completada",
   CANCELLED: "Cancelada",
 };
 
 const ORDER_STATUS_VARIANTS: Record<string, BadgeProps["variant"]> = {
   PENDING: "warning",
   PROCESSING: "info",
-  SHIPPED: "secondary",
-  DELIVERED: "success",
+  SHIPPED: "info",
+  COMPLETED: "success",
   CANCELLED: "destructive",
 };
 
