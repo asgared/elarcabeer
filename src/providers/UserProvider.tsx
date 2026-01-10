@@ -259,8 +259,7 @@ export function UserProvider({ children, supabaseClient }: Props) {
         }
 
         // Filter out password from payload before sending to API
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        const { password, ...apiPayload } = payload;
+        const { password: _password, ...apiPayload } = payload;
 
         const response = await fetch(`/api/users/${user.id}`, {
           method: "PATCH",
