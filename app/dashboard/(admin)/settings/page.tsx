@@ -119,7 +119,7 @@ export default function SettingsPage() {
                             <Text fontWeight="bold" textTransform="uppercase" fontSize="sm">Preferencias de Tienda</Text>
                         </HStack>
                         <Stack spacing={4}>
-                            <FormControl display="flex" alignItems="center" justify="space-between">
+                            <FormControl display="flex" alignItems="center" justifyContent="space-between">
                                 <Box>
                                     <Text fontWeight="bold" fontSize="sm">Modo Mantenimiento</Text>
                                     <Text fontSize="xs" color="whiteAlpha.500">Muestra una página de aviso y bloquea la navegación pública.</Text>
@@ -127,7 +127,7 @@ export default function SettingsPage() {
                                 <Switch {...register("maintenanceMode")} colorScheme="amber" />
                             </FormControl>
 
-                            <FormControl display="flex" alignItems="center" justify="space-between">
+                            <FormControl display="flex" alignItems="center" justifyContent="space-between">
                                 <Box>
                                     <Text fontWeight="bold" fontSize="sm">Checkout para Invitados</Text>
                                     <Text fontSize="xs" color="whiteAlpha.500">Permite realizar compras sin necesidad de crear una cuenta.</Text>
