@@ -245,11 +245,11 @@ export function UserProvider({ children, supabaseClient }: Props) {
             ...(payload.password ? { password: payload.password } : {}),
             ...(shouldUpdateMetadata
               ? {
-                  data: {
-                    ...authUser.user_metadata,
-                    ...metadataUpdates,
-                  },
-                }
+                data: {
+                  ...authUser.user_metadata,
+                  ...metadataUpdates,
+                },
+              }
               : {}),
           });
 
@@ -258,10 +258,14 @@ export function UserProvider({ children, supabaseClient }: Props) {
           }
         }
 
+        // Filter out password from payload before sending to API
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { password, ...apiPayload } = payload;
+
         const response = await fetch(`/api/users/${user.id}`, {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
+          body: JSON.stringify(apiPayload),
         });
 
         if (!response.ok) {

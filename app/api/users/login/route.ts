@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { getUserByEmail, serializeUser } from "../utils";
 import { ValidationError, validateLoginPayload } from "../validation";
+import { createAdminSession } from "@/lib/auth/admin";
 
 export const dynamic = "force-dynamic";
 export async function POST(request: Request) {
@@ -27,6 +28,11 @@ export async function POST(request: Request) {
     if (!user) {
       return NextResponse.json({ error: "Credenciales inválidas." }, { status: 401 });
     }
+
+    if (user.role === "ADMIN") {
+      await createAdminSession(user.id);
+    }
+
     return NextResponse.json({ user: serializeUser(user) });
   } catch (error) {
     if (error instanceof ValidationError) {

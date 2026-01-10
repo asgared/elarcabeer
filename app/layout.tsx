@@ -27,8 +27,8 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="es">
-      <body>
+    <html lang="es" suppressHydrationWarning>
+      <body suppressHydrationWarning>
         {/* 3. Usa ColorModeScript directamente, pasándole el modo inicial */}
         <ColorModeScript initialColorMode={themeConfig.initialColorMode} />
         <Providers>{children}</Providers>

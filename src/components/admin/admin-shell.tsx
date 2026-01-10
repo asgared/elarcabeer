@@ -58,26 +58,38 @@ export function AdminShell({ user, children, sidebar }: AdminShellProps) { // <-
         <Flex
           as="header"
           borderBottomWidth="1px"
-          borderColor="whiteAlpha.200"
+          borderColor="whiteAlpha.100"
           px={8}
           py={4}
           align="center"
           justify="space-between"
-          bg="background.800"
+          bg="rgba(10, 10, 10, 0.8)"
+          backdropFilter="blur(10px)"
+          position="sticky"
+          top={0}
+          zIndex={10}
         >
-          <Heading size="md">El Arca · Admin</Heading>
+          <HStack spacing={4}>
+            <Text color="whiteAlpha.400" fontSize="sm" fontWeight="medium">Panel de Control</Text>
+            <Text color="whiteAlpha.300">/</Text>
+            <Heading size="sm" fontWeight="bold" letterSpacing="tight">Administración</Heading>
+          </HStack>
+
           <HStack spacing={6} align="center">
-            <Stack spacing={0} textAlign="right" fontSize="sm">
-              <Text fontWeight="semibold">{user.name ?? user.email}</Text>
-              <Text color="whiteAlpha.600">Administrador</Text>
+            <Stack spacing={0} textAlign="right" display={{ base: "none", md: "flex" }}>
+              <Text fontSize="sm" fontWeight="bold">{user.name ?? user.email}</Text>
+              <Text fontSize="xs" color="amber.500" fontWeight="bold" textTransform="uppercase" letterSpacing="widest">
+                Administrador
+              </Text>
             </Stack>
             <Button
               leftIcon={<FaPowerOff />}
-              variant="outline"
+              variant="ghost"
               size="sm"
               onClick={handleLogout}
               isLoading={isLoggingOut}
-              loadingText="Saliendo..."
+              color="whiteAlpha.600"
+              _hover={{ color: "red.400", bg: "whiteAlpha.50" }}
             >
               Cerrar sesión
             </Button>

@@ -21,19 +21,19 @@ import {
   chakra,
   useToast
 } from "@chakra-ui/react";
-import type {AlertStatus} from "@chakra-ui/react";
-import type {AuthError} from "@supabase/supabase-js";
-import {FormEvent, useMemo, useState} from "react";
-import {useRouter} from "next/navigation";
+import type { AlertStatus } from "@chakra-ui/react";
+import type { AuthError } from "@supabase/supabase-js";
+import { FormEvent, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 
 import {
   createSupabaseBrowserClient,
   getSupabaseAuthRedirectUrl
 } from "@/lib/supabase/client";
-import {useUser} from "@/providers/user-provider";
-import {OAuthButtons} from "@/components/auth/OAuthButtons";
+import { useUser } from "@/providers/user-provider";
+import { OAuthButtons } from "@/components/auth/OAuthButtons";
 
-type Feedback = {type: AlertStatus; message: string; title?: string};
+type Feedback = { type: AlertStatus; message: string; title?: string };
 
 const alertTitles: Record<AlertStatus, string> = {
   info: "Información",
@@ -92,7 +92,7 @@ export function AccountAccessPanel() {
   const router = useRouter();
   const toast = useToast();
   const supabase = useMemo(() => createSupabaseBrowserClient(), []);
-  const {status, error, clearError, refreshUser} = useUser();
+  const { status, error, clearError, refreshUser } = useUser();
   const [tabIndex, setTabIndex] = useState(0);
   const [feedback, setFeedback] = useState<Feedback | null>(null);
   const [registerForm, setRegisterForm] = useState({
@@ -119,7 +119,7 @@ export function AccountAccessPanel() {
   const alert = useMemo<Feedback | null>(
     () =>
       feedback ??
-      (error ? {type: "error", message: error, title: "Error"} : null),
+      (error ? { type: "error", message: error, title: "Error" } : null),
     [feedback, error]
   );
 
@@ -138,7 +138,7 @@ export function AccountAccessPanel() {
           return payload.error;
         }
 
-        const {formErrors, fieldErrors} = payload.error as {
+        const { formErrors, fieldErrors } = payload.error as {
           formErrors?: string[];
           fieldErrors?: Record<string, string[]>;
         };
@@ -168,11 +168,11 @@ export function AccountAccessPanel() {
 
     try {
       setIsResendingConfirmation(true);
-      const {error: resendError} = await supabase.auth.resend({
+      const { error: resendError } = await supabase.auth.resend({
         type: "signup",
         email: pendingConfirmationEmail,
         options: {
-          emailRedirectTo: getSupabaseAuthRedirectUrl()
+          emailRedirectTo: getSupabaseAuthRedirectUrl("/auth/confirm")
         }
       });
 
@@ -248,39 +248,25 @@ export function AccountAccessPanel() {
         metadata.lastName = trimmedLastName;
       }
 
-      const {data, error: signUpError} = await supabase.auth.signUp({
+      const { data, error: signUpError } = await supabase.auth.signUp({
         email,
         password: registerForm.password,
         options: {
           data: Object.keys(metadata).length ? metadata : undefined,
-          emailRedirectTo: getSupabaseAuthRedirectUrl()
+          emailRedirectTo: getSupabaseAuthRedirectUrl("/auth/confirm")
         }
       });
 
       if (signUpError) {
-        const message = getRegisterErrorMessage(signUpError);
         const normalized = signUpError.message?.toLowerCase() ?? "";
 
+        // Si el error es "ya registrado", NO nos detenemos. 
+        // Intentamos sincronizar con nuestro API para asegurar que esté en Prisma.
         if (
-          normalized.includes("email_already_registered") ||
-          normalized.includes("already registered")
+          !normalized.includes("email_already_registered") &&
+          !normalized.includes("already registered")
         ) {
-          setPendingConfirmationEmail(rawEmail);
-          setFeedback({
-            type: "info",
-            title: "Confirma tu correo",
-            message:
-              "Ya existe una cuenta asociada a este correo pero está pendiente de confirmación. Puedes reenviar el correo de activación."
-          });
-          toast({
-            status: "info",
-            title: "Confirma tu correo",
-            description:
-              "Ya existe una cuenta asociada a este correo. Revisa tu bandeja de entrada o reenvía el correo de confirmación.",
-            duration: 9000,
-            isClosable: true
-          });
-        } else {
+          const message = getRegisterErrorMessage(signUpError);
           setFeedback({
             type: "error",
             title: "No se pudo crear la cuenta",
@@ -293,39 +279,27 @@ export function AccountAccessPanel() {
             duration: 9000,
             isClosable: true
           });
+          return;
         }
 
-        return;
+        console.log("El usuario ya existe en Auth, procediendo a forzar sincronización con Prisma...");
       }
 
+      // Procedemos a la sincronización con el API sin importar si el signUp dio "already registered"
+      // ya que el endpoint /api/users ahora maneja el upsert/sincronización internamente.
+
       const alreadyRegisteredPending =
-        !!data.user &&
+        !!data?.user &&
         Array.isArray(data.user.identities) &&
         data.user.identities.length === 0;
 
-      if (alreadyRegisteredPending) {
-        setPendingConfirmationEmail(rawEmail);
-        setFeedback({
-          type: "info",
-          title: "Confirma tu correo",
-          message:
-            "Tu cuenta ya existe pero aún no ha sido confirmada. Puedes reenviar el correo de activación."
-        });
-        toast({
-          status: "info",
-          title: "Confirma tu correo",
-          description:
-            "Tu cuenta ya existe pero sigue pendiente de confirmación. Revisa tu correo o vuelve a enviar el enlace.",
-          duration: 9000,
-          isClosable: true
-        });
-        return;
-      }
+      // Incluso si ya estaba registrado pero pendiente, intentamos el fetch al API
+      // para asegurar que los metadatos y el registro en Prisma existan.
 
       try {
         const response = await fetch("/api/users", {
           method: "POST",
-          headers: {"Content-Type": "application/json"},
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             email,
             password: registerForm.password,
@@ -413,7 +387,7 @@ export function AccountAccessPanel() {
       setIsLoggingIn(true);
       const rawEmail = loginForm.email.trim();
       const normalizedEmail = rawEmail.toLowerCase();
-      const {data, error: signInError} = await supabase.auth.signInWithPassword({
+      const { data, error: signInError } = await supabase.auth.signInWithPassword({
         email: normalizedEmail,
         password: loginForm.password
       });
@@ -456,7 +430,7 @@ export function AccountAccessPanel() {
         type: "success",
         message: "Sesión iniciada. Cargando tu historial..."
       });
-      setLoginForm({email: "", password: ""});
+      setLoginForm({ email: "", password: "" });
     } catch (error) {
       console.error(error);
       const message = error instanceof Error ? error.message : "No se pudo iniciar sesión";
@@ -542,7 +516,7 @@ export function AccountAccessPanel() {
                       placeholder="Tu nombre"
                       value={registerForm.name}
                       onChange={(event) =>
-                        setRegisterForm((prev) => ({...prev, name: event.target.value}))
+                        setRegisterForm((prev) => ({ ...prev, name: event.target.value }))
                       }
                       autoComplete="given-name"
                     />
@@ -553,7 +527,7 @@ export function AccountAccessPanel() {
                       placeholder="Tu apellido"
                       value={registerForm.lastName}
                       onChange={(event) =>
-                        setRegisterForm((prev) => ({...prev, lastName: event.target.value}))
+                        setRegisterForm((prev) => ({ ...prev, lastName: event.target.value }))
                       }
                       autoComplete="family-name"
                     />
@@ -565,7 +539,7 @@ export function AccountAccessPanel() {
                       placeholder="tu@correo.com"
                       value={registerForm.email}
                       onChange={(event) =>
-                        setRegisterForm((prev) => ({...prev, email: event.target.value}))
+                        setRegisterForm((prev) => ({ ...prev, email: event.target.value }))
                       }
                       autoComplete="email"
                     />
@@ -577,7 +551,7 @@ export function AccountAccessPanel() {
                       placeholder="Mínimo 8 caracteres"
                       value={registerForm.password}
                       onChange={(event) =>
-                        setRegisterForm((prev) => ({...prev, password: event.target.value}))
+                        setRegisterForm((prev) => ({ ...prev, password: event.target.value }))
                       }
                       autoComplete="new-password"
                     />
@@ -589,7 +563,7 @@ export function AccountAccessPanel() {
                       placeholder="Repite tu contraseña"
                       value={registerForm.confirmPassword}
                       onChange={(event) =>
-                        setRegisterForm((prev) => ({...prev, confirmPassword: event.target.value}))
+                        setRegisterForm((prev) => ({ ...prev, confirmPassword: event.target.value }))
                       }
                       autoComplete="new-password"
                     />
@@ -627,7 +601,7 @@ export function AccountAccessPanel() {
                       placeholder="tu@correo.com"
                       value={loginForm.email}
                       onChange={(event) =>
-                        setLoginForm((prev) => ({...prev, email: event.target.value}))
+                        setLoginForm((prev) => ({ ...prev, email: event.target.value }))
                       }
                       autoComplete="email"
                     />
@@ -639,7 +613,7 @@ export function AccountAccessPanel() {
                       placeholder="Tu contraseña"
                       value={loginForm.password}
                       onChange={(event) =>
-                        setLoginForm((prev) => ({...prev, password: event.target.value}))
+                        setLoginForm((prev) => ({ ...prev, password: event.target.value }))
                       }
                       autoComplete="current-password"
                     />
