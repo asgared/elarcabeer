@@ -10,7 +10,7 @@ export async function GET(request: Request) {
     const next = searchParams.get("next") ?? "/";
 
     if (code) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any -- @supabase/ssr@0.4.0 types don't expose auth methods
+        // @supabase/ssr@0.4.0 types don't fully expose auth methods — cast needed
         const supabase = (await createSupabaseServerClient()) as any;
         if (supabase) {
             const { error } = await supabase.auth.exchangeCodeForSession(code);
