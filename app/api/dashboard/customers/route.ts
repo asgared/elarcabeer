@@ -39,7 +39,7 @@ export async function PUT(request: Request) {
         }
 
         const body = await request.json();
-        const { id, role, name, lastName } = body;
+        const { id, name, lastName } = body;
 
         if (!id) {
             return NextResponse.json({ error: "ID de cliente es obligatorio" }, { status: 400 });
@@ -48,7 +48,6 @@ export async function PUT(request: Request) {
         const customer = await prisma.user.update({
             where: { id },
             data: {
-                role: role || undefined,
                 name: name || undefined,
                 lastName: lastName || undefined
             }

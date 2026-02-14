@@ -35,9 +35,30 @@ function assertNotProduction() {
   }
 }
 
+// ── RBAC Roles ──────────────────────────────────────────────────────────────
+const BASE_ROLES = [
+  { key: "superadmin", name: "Super Administrador" },
+  { key: "content_editor", name: "Editor de Contenido" },
+  { key: "viewer", name: "Visor" },
+  { key: "user_admin", name: "Administrador de Usuarios" },
+] as const;
+
+async function seedRoles() {
+  for (const role of BASE_ROLES) {
+    await prisma.role.upsert({
+      where: { key: role.key },
+      update: { name: role.name },
+      create: { key: role.key, name: role.name },
+    });
+  }
+  console.info("✓ Base RBAC roles seeded:", BASE_ROLES.map((r) => r.key).join(", "));
+}
+
 async function main() {
   assertNotProduction();
 
+  // Clean up in correct order (foreign keys)
+  await prisma.userRole.deleteMany();
   await prisma.bundleItem.deleteMany();
   await prisma.bundle.deleteMany();
   await prisma.variant.deleteMany();
@@ -54,6 +75,9 @@ async function main() {
   await prisma.loyaltyLedger.deleteMany();
   await prisma.subscription.deleteMany();
   await prisma.user.deleteMany();
+
+  // Seed RBAC roles (upsert — safe to re-run)
+  await seedRoles();
 
   await Promise.all(
     products.map((product) =>
@@ -183,7 +207,7 @@ async function main() {
     data: {
       email: sampleUserEmail,
       name: "Sofía Martínez",
-      role: "USER",
+      // No role field — roles are managed via user_roles table
       addresses: {
         create: [
           {
@@ -225,16 +249,20 @@ async function main() {
     }
   });
 
-  // Create admin user — no password (auth is handled by Supabase + AdminSession)
+  // Create admin user — no password, no role field (auth is handled by Supabase + AdminSession)
+  // NOTE: To make this user an admin, you must manually assign the "superadmin" role
+  // via the user_roles table after running the seed. See docs/rbac-setup.md.
   await prisma.user.create({
     data: {
       email: sampleAdminEmail,
       name: "Equipo El Arca",
-      role: "ADMIN"
     }
   });
 
-  console.info("✓ Admin user seeded with email: %s (no password — use Supabase Auth)", sampleAdminEmail);
+  console.info(
+    "✓ Admin user seeded with email: %s (assign superadmin role manually — see docs/rbac-setup.md)",
+    sampleAdminEmail
+  );
 
   if (firstVariant) {
     const total = firstVariant.price * 2;

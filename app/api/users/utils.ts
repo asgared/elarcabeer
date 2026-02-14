@@ -7,14 +7,15 @@ import type { UserWithRelations } from "@/types/user";
 export const userInclude = {
   addresses: true,
   orders: {
-    orderBy: {createdAt: "desc"},
+    orderBy: { createdAt: "desc" },
     include: {
       items: true,
-      payment: true, // Corregido a 'payment' (singular) y sin 'orderBy'
+      payment: true,
     },
   },
   loyalty: true,
   subscriptions: true,
+  userRoles: { include: { role: true } },
 } as const;
 
 export type UserWithSensitive = Prisma.UserGetPayload<{
@@ -28,8 +29,10 @@ export function serializeUser(user: UserWithSensitive): UserWithRelations {
     email: user.email,
     name: user.name,
     lastName: user.lastName,
-    role: user.role,
-    addresses: user.addresses.map(({id, label, street, city, country, postal}) => ({
+    role: user.userRoles.map((ur) => ur.role.key).includes("superadmin")
+      ? "ADMIN"
+      : "USER",
+    addresses: user.addresses.map(({ id, label, street, city, country, postal }) => ({
       id,
       label,
       street,
@@ -38,7 +41,7 @@ export function serializeUser(user: UserWithSensitive): UserWithRelations {
       postal
     })),
     orders: user.orders.map((order) => {
-      const orderNumber = "number" in order ? (order as {number?: string | null}).number ?? null : null;
+      const orderNumber = "number" in order ? (order as { number?: string | null }).number ?? null : null;
 
       return {
         id: order.id,
@@ -46,7 +49,7 @@ export function serializeUser(user: UserWithSensitive): UserWithRelations {
         total: order.total,
         status: order.status,
         createdAt: order.createdAt.toISOString(),
-        items: order.items.map(({id, name, quantity, price, productId, variantId}) => ({
+        items: order.items.map(({ id, name, quantity, price, productId, variantId }) => ({
           id,
           name,
           quantity,
@@ -56,15 +59,15 @@ export function serializeUser(user: UserWithSensitive): UserWithRelations {
         })),
         payment: order.payment
           ? {
-              id: order.payment.id,
-              amount: order.payment.amount,
-              status: order.payment.status,
-              stripeSessionId: order.payment.stripeSessionId
-            }
+            id: order.payment.id,
+            amount: order.payment.amount,
+            status: order.payment.status,
+            stripeSessionId: order.payment.stripeSessionId
+          }
           : null
       };
     }),
-    loyalty: user.loyalty.map(({id, points, reason, createdAt}) => ({
+    loyalty: user.loyalty.map(({ id, points, reason, createdAt }) => ({
       id,
       points,
       reason,

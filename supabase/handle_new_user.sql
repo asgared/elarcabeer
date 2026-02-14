@@ -1,23 +1,25 @@
-create or replace function public.handle_new_user()
-returns trigger
-language plpgsql
-security definer
-set search_path = public, auth
-as $$
-begin
-  insert into public."User" (id, email, name, "lastName", role)
-  values (
+-- =============================================================================
+-- Updated handle_new_user trigger
+-- =============================================================================
+-- IMPORTANT: The `role` column has been removed from the User table.
+-- Roles are now managed via the `user_roles` join table (RBAC).
+-- New users are created WITHOUT any role. Roles must be assigned explicitly.
+-- =============================================================================
+
+CREATE OR REPLACE FUNCTION public.handle_new_user()
+RETURNS trigger
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public, auth
+AS $$
+BEGIN
+  INSERT INTO public."User" (id, email, name, "lastName")
+  VALUES (
     new.id,
     new.email,
-    -- CORRECCIÓN: Usamos una función segura que devuelve NULL si la clave no existe.
     jsonb_extract_path_text(new.raw_user_meta_data, 'name'),
-    jsonb_extract_path_text(new.raw_user_meta_data, 'lastName'),
-    -- Mantenemos la lógica del rol que ya es correcta.
-    coalesce(
-      (jsonb_extract_path_text(new.raw_user_meta_data, 'role'))::public."UserRole",
-      'USER'::public."UserRole"
-    )
+    jsonb_extract_path_text(new.raw_user_meta_data, 'lastName')
   );
-  return new;
-end;
+  RETURN new;
+END;
 $$;

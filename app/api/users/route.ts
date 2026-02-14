@@ -58,7 +58,6 @@ export async function POST(request: Request) {
         password,
         email_confirm: false,
         user_metadata: {
-          role: "USER",
           name: name ?? undefined,
           lastName: lastName ?? undefined,
         },
@@ -107,7 +106,6 @@ export async function POST(request: Request) {
                 email: authUser.email!,
                 name: name ?? dbUser.name,
                 lastName: lastName ?? dbUser.lastName,
-                role: dbUser.role
               }
             })
           ]);
@@ -131,7 +129,6 @@ export async function POST(request: Request) {
             email: authUser.email!,
             name: name ?? null,
             lastName: lastName ?? null,
-            role: "USER"
           }
         });
         console.log("-> Usuario creado en Prisma.");

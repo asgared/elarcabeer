@@ -1,23 +1,24 @@
-import {NextResponse} from "next/server";
-import {Prisma} from "@prisma/client";
+import { NextResponse } from "next/server";
+import { Prisma } from "@prisma/client";
 
-import {getAdminSession} from "@/lib/auth/admin";
-import {prisma} from "@/lib/prisma";
+import { getAdminSession, sessionHasRole } from "@/lib/auth/admin";
+import { SUPERADMIN_KEY } from "@/lib/auth/permissions";
+import { prisma } from "@/lib/prisma";
 
-import {ZodError} from "zod";
+import { ZodError } from "zod";
 
-import {cmsContentSchema} from "./validation";
+import { cmsContentSchema } from "./validation";
 
 export const dynamic = "force-dynamic";
 
 export async function GET() {
   const session = await getAdminSession();
 
-  if (!session || session.user.role !== "ADMIN") {
-    return NextResponse.json({error: "No autorizado."}, {status: 401});
+  if (!session || !sessionHasRole(session, SUPERADMIN_KEY, "content_editor")) {
+    return NextResponse.json({ error: "No autorizado." }, { status: 401 });
   }
 
-  const entries = await prisma.cmsContent.findMany({orderBy: {updatedAt: "desc"}});
+  const entries = await prisma.cmsContent.findMany({ orderBy: { updatedAt: "desc" } });
 
   return NextResponse.json({
     content: entries.map((entry) => ({
@@ -29,16 +30,16 @@ export async function GET() {
       imageUrl: entry.imageUrl,
       socialLinks: entry.socialLinks,
       createdAt: entry.createdAt,
-      updatedAt: entry.updatedAt
-    }))
+      updatedAt: entry.updatedAt,
+    })),
   });
 }
 
 export async function POST(request: Request) {
   const session = await getAdminSession();
 
-  if (!session || session.user.role !== "ADMIN") {
-    return NextResponse.json({error: "No autorizado."}, {status: 401});
+  if (!session || !sessionHasRole(session, SUPERADMIN_KEY, "content_editor")) {
+    return NextResponse.json({ error: "No autorizado." }, { status: 401 });
   }
 
   try {
@@ -57,18 +58,18 @@ export async function POST(request: Request) {
         subtitle: payload.subtitle || null,
         body: payload.body || null,
         imageUrl: payload.imageUrl || null,
-        socialLinks
-      }
+        socialLinks,
+      },
     });
 
-    return NextResponse.json({content: entry}, {status: 201});
+    return NextResponse.json({ content: entry }, { status: 201 });
   } catch (error) {
     console.error("Error creating CMS content", error);
 
     if (error instanceof ZodError) {
-      return NextResponse.json({error: error.flatten()}, {status: 400});
+      return NextResponse.json({ error: error.flatten() }, { status: 400 });
     }
 
-    return NextResponse.json({error: "No se pudo crear el contenido."}, {status: 500});
+    return NextResponse.json({ error: "No se pudo crear el contenido." }, { status: 500 });
   }
 }

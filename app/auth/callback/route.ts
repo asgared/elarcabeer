@@ -10,7 +10,8 @@ export async function GET(request: Request) {
     const next = searchParams.get("next") ?? "/";
 
     if (code) {
-        const supabase = await createSupabaseServerClient();
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any -- @supabase/ssr@0.4.0 types don't expose auth methods
+        const supabase = (await createSupabaseServerClient()) as any;
         if (supabase) {
             const { error } = await supabase.auth.exchangeCodeForSession(code);
             if (!error) {
@@ -44,16 +45,21 @@ export async function GET(request: Request) {
                                         email: user.email,
                                         name: dbUser.name || user.user_metadata.full_name || user.user_metadata.name || user.email.split('@')[0],
                                         lastName: dbUser.lastName || user.user_metadata.lastName,
-                                        role: dbUser.role
                                     }
                                 })
                             ]);
                             console.log(`ID sincronizado para ${user.email}`);
                         }
 
-                        // Re-verificamos el rol para sesión administrativa
-                        const finalUser = await prisma.user.findUnique({ where: { id: user.id } });
-                        if (finalUser?.role === "ADMIN") {
+                        // Re-verificamos los roles para sesión administrativa
+                        const finalUser = await prisma.user.findUnique({
+                            where: { id: user.id },
+                            include: { userRoles: { include: { role: true } } },
+                        });
+                        const hasSuperadmin = finalUser?.userRoles.some(
+                            (ur: { role: { key: string } }) => ur.role.key === "superadmin"
+                        );
+                        if (hasSuperadmin && finalUser) {
                             await createAdminSession(finalUser.id);
                             console.log(`Sesión administrativa creada para ${user.email}`);
                         }

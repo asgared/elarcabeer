@@ -37,23 +37,27 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Credenciales inválidas." }, { status: 401 });
   }
 
-  // Intenta encontrar el usuario en Prisma. 
+  // Intenta encontrar el usuario en Prisma.
   // Primero por ID (que debería ser el de Supabase)
-  let user = await prisma.user.findUnique({ where: { id: authData.user.id } });
+  let user = await prisma.user.findUnique({
+    where: { id: authData.user.id },
+    include: { userRoles: { include: { role: true } } },
+  });
 
   if (!user) {
-    // Si no está por ID, buscamos por email. 
+    // Si no está por ID, buscamos por email.
     // Esto resuelve problemas si el usuario fue creado manualmente o vía seed sin el ID de Supabase.
-    user = await prisma.user.findUnique({ where: { email: authData.user.email } });
+    const userByEmail = await prisma.user.findUnique({
+      where: { email: authData.user.email },
+      include: { userRoles: { include: { role: true } } },
+    });
 
-    if (user) {
+    if (userByEmail) {
       // Si lo encontramos por email pero el ID era distinto, lo re-sincronizamos.
       try {
-        console.log(`-> ID Mismatch en Admin Login: Prisma(${user.id}) vs Supabase(${authData.user.id}). Recalibrando...`);
+        console.log(`-> ID Mismatch en Admin Login: Prisma(${userByEmail.id}) vs Supabase(${authData.user.id}). Recalibrando...`);
 
-        // Guardamos datos temporales para no perderlos
-        const oldId = user.id;
-        const userData = { ...user };
+        const oldId = userByEmail.id;
 
         // Borramos sesiones viejas asociadas al ID anterior
         await prisma.adminSession.deleteMany({ where: { userId: oldId } });
@@ -64,15 +68,17 @@ export async function POST(request: Request) {
           prisma.user.create({
             data: {
               id: authData.user.id,
-              email: userData.email,
-              name: userData.name,
-              lastName: userData.lastName,
-              role: userData.role,
-            }
-          })
+              email: userByEmail.email,
+              name: userByEmail.name,
+              lastName: userByEmail.lastName,
+            },
+          }),
         ]);
 
-        user = await prisma.user.findUnique({ where: { id: authData.user.id } });
+        user = await prisma.user.findUnique({
+          where: { id: authData.user.id },
+          include: { userRoles: { include: { role: true } } },
+        });
         console.log(`ID de usuario sincronizado para ${email}`);
       } catch (error) {
         console.error("Error al sincronizar ID de usuario en Admin Login:", error);
@@ -81,7 +87,10 @@ export async function POST(request: Request) {
     }
   }
 
-  if (!user || user.role !== "ADMIN") {
+  // Check if user has an admin role (superadmin)
+  const isAdmin = user?.userRoles.some((ur) => ur.role.key === "superadmin");
+
+  if (!user || !isAdmin) {
     return NextResponse.json({ error: "No tienes permisos de administrador." }, { status: 401 });
   }
 
@@ -89,12 +98,14 @@ export async function POST(request: Request) {
   await prisma.adminSession.deleteMany({ where: { userId: user.id } });
   await createAdminSession(user.id);
 
+  const roleKeys = user.userRoles.map((ur) => ur.role.key);
+
   return NextResponse.json({
     user: {
       id: user.id,
       email: user.email,
       name: user.name,
-      role: user.role
-    }
+      roles: roleKeys,
+    },
   });
 }

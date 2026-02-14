@@ -29,7 +29,10 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Credenciales inválidas." }, { status: 401 });
     }
 
-    if (user.role === "ADMIN") {
+    const hasAdminRole = user.userRoles?.some(
+      (ur: { role: { key: string } }) => ur.role.key === "superadmin"
+    );
+    if (hasAdminRole) {
       await createAdminSession(user.id);
     }
 
