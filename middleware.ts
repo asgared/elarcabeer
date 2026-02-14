@@ -1,8 +1,6 @@
 import type {NextRequest} from "next/server";
 import {NextResponse} from "next/server";
 
-import {getSupabaseUserFromRequest} from "@/lib/supabase/middleware";
-
 async function hasAdminSession(request: NextRequest) {
   try {
     const response = await fetch(new URL("/api/admin/session", request.url), {
@@ -42,22 +40,13 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  const user = getSupabaseUserFromRequest(request);
-  const role =
-    user?.app_metadata && typeof user.app_metadata.role === "string"
-      ? (user.app_metadata.role as string)
-      : undefined;
+  // No valid admin session — redirect to login with returnTo
+  const redirectUrl = request.nextUrl.clone();
+  redirectUrl.pathname = "/dashboard/login";
+  redirectUrl.searchParams.set("returnTo", pathname);
+  redirectUrl.hash = "";
 
-  if (!user || role !== "ADMIN") {
-    const redirectUrl = request.nextUrl.clone();
-    redirectUrl.pathname = "/dashboard/login";
-    redirectUrl.search = "";
-    redirectUrl.hash = "";
-
-    return NextResponse.redirect(redirectUrl);
-  }
-
-  return NextResponse.next();
+  return NextResponse.redirect(redirectUrl);
 }
 
 export const config = {

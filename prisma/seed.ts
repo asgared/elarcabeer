@@ -1,15 +1,43 @@
 // @ts-nocheck
-import {PrismaClient} from "@prisma/client";
+import { PrismaClient } from "@prisma/client";
 
-import {bundles} from "../src/data/bundles";
-import {posts} from "../src/data/posts";
-import {products} from "../src/data/products";
-import {stores} from "../src/data/stores";
-import {hashPassword} from "../src/utils/auth";
+import { bundles } from "../src/data/bundles";
+import { posts } from "../src/data/posts";
+import { products } from "../src/data/products";
+import { stores } from "../src/data/stores";
 
 const prisma = new PrismaClient();
 
+function assertNotProduction() {
+  if (process.env.NODE_ENV === "production") {
+    throw new Error(
+      "🛑 Seed script BLOCKED: NODE_ENV is 'production'. " +
+      "Seeds must never run in production environments."
+    );
+  }
+
+  const dbUrl = process.env.DATABASE_URL ?? "";
+
+  // Block if DATABASE_URL looks like a production Supabase or managed DB
+  if (
+    dbUrl.includes(".supabase.co") &&
+    !dbUrl.includes("localhost") &&
+    !dbUrl.includes("127.0.0.1")
+  ) {
+    const allowProdSeed = process.env.ALLOW_SEED_ON_REMOTE === "true";
+
+    if (!allowProdSeed) {
+      throw new Error(
+        "🛑 Seed script BLOCKED: DATABASE_URL points to a remote Supabase instance. " +
+        "Set ALLOW_SEED_ON_REMOTE=true to override (only for staging!)."
+      );
+    }
+  }
+}
+
 async function main() {
+  assertNotProduction();
+
   await prisma.bundleItem.deleteMany();
   await prisma.bundle.deleteMany();
   await prisma.variant.deleteMany();
@@ -69,7 +97,7 @@ async function main() {
           items: {
             create: bundle.products.map((item) => ({
               quantity: item.quantity,
-              product: {connect: {id: item.productId}}
+              product: { connect: { id: item.productId } }
             }))
           }
         }
@@ -135,23 +163,26 @@ async function main() {
         title: "Footer",
         subtitle: "Cervezas artesanales desde 2015",
         socialLinks: [
-          {platform: "Instagram", url: "https://instagram.com/elarcabeer"},
-          {platform: "Facebook", url: "https://facebook.com/elarcabeer"},
-          {platform: "TikTok", url: "https://tiktok.com/@elarcabeer"}
+          { platform: "Instagram", url: "https://instagram.com/elarcabeer" },
+          { platform: "Facebook", url: "https://facebook.com/elarcabeer" },
+          { platform: "TikTok", url: "https://tiktok.com/@elarcabeer" }
         ]
       }
     ]
   });
 
-  const sampleVariants = await prisma.variant.findMany({take: 3, include: {product: true}});
+  const sampleVariants = await prisma.variant.findMany({ take: 3, include: { product: true } });
 
   const [firstVariant, secondVariant] = sampleVariants;
 
+  // Create sample user — email from env or safe default for dev only
+  const sampleUserEmail = process.env.SEED_USER_EMAIL ?? "sofia.martinez@example.com";
+  const sampleAdminEmail = process.env.SEED_ADMIN_EMAIL ?? "admin@localhost.test";
+
   const user = await prisma.user.create({
     data: {
-      email: "sofia.martinez@example.com",
+      email: sampleUserEmail,
       name: "Sofía Martínez",
-      password: hashPassword("Cerveza123"),
       role: "USER",
       addresses: {
         create: [
@@ -194,14 +225,16 @@ async function main() {
     }
   });
 
+  // Create admin user — no password (auth is handled by Supabase + AdminSession)
   await prisma.user.create({
     data: {
-      email: "admin@elarca.mx",
+      email: sampleAdminEmail,
       name: "Equipo El Arca",
-      password: hashPassword("Admin123!"),
       role: "ADMIN"
     }
   });
+
+  console.info("✓ Admin user seeded with email: %s (no password — use Supabase Auth)", sampleAdminEmail);
 
   if (firstVariant) {
     const total = firstVariant.price * 2;
