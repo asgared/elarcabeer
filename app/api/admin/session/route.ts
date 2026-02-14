@@ -1,18 +1,23 @@
 import { NextResponse } from "next/server";
 
-import { deleteAdminSession, getAdminSession, sessionHasRole } from "@/lib/auth/admin";
-import { SUPERADMIN_KEY } from "@/lib/auth/permissions";
+import { deleteAdminSession, getAdminSession } from "@/lib/auth/admin";
+import { getCapabilitiesForRoles, type Capability } from "@/lib/auth/permissions";
+import type { RoleKey } from "@/lib/auth/role-types";
 
 export const dynamic = "force-dynamic";
 
 export async function GET() {
   const session = await getAdminSession();
 
-  if (!session || !sessionHasRole(session, SUPERADMIN_KEY)) {
+  if (!session) {
     return NextResponse.json({ user: null });
   }
 
-  const roleKeys = session.user.userRoles.map((ur) => ur.role.key);
+  const roleKeys = session.user.userRoles.map(
+    (ur: { role: { key: string } }) => ur.role.key as RoleKey,
+  );
+
+  const capabilities = Array.from(getCapabilitiesForRoles(roleKeys));
 
   return NextResponse.json({
     user: {
@@ -20,6 +25,7 @@ export async function GET() {
       email: session.user.email,
       name: session.user.name,
       roles: roleKeys,
+      capabilities,
     },
   });
 }

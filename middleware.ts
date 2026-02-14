@@ -2,49 +2,69 @@ import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 
 // ---------------------------------------------------------------------------
-// Dashboard protection middleware
+// Dashboard protection middleware — Capability-based RBAC
 // ---------------------------------------------------------------------------
-// Current strategy: validate the custom AdminSession cookie via an internal
-// API call.  The `/api/admin/session` route checks the cookie hash against
-// the `AdminSession` table and verifies the user holds the required RBAC
-// role(s) in the `user_roles` table.
+// Strategy: validate the AdminSession cookie via `/api/admin/session`, which
+// returns the user's resolved capabilities (derived from their RBAC roles).
 //
-// ⚠️  This middleware does NOT decode JWTs — session validation is 100%
-//     server-side via Prisma queries.
+// Gate logic:
+//   1. No valid session → redirect to /dashboard/login?returnTo=...
+//   2. Valid session but missing "dashboard:access" → redirect to /
+//      (viewer role has zero capabilities, so it is ALWAYS blocked)
+//   3. Has "dashboard:access" → allow through
 //
-// TODO (RBAC Phase 2):
-//   1. Import `getAllowedRoles` from `@/lib/auth/permissions`
-//   2. Resolve the required roles for the current pathname
-//   3. Compare against the user's roles returned by `/api/admin/session`
-//   4. Return 403 if the user lacks the required role for the specific
-//      sub-route (currently all admin routes require "ADMIN" / superadmin).
+// Per-section enforcement (content:read, users:read, etc.) is handled
+// server-side in layouts/pages via `requireCapability()`.
+//
+// ⚠️  This middleware does NOT decode JWTs — validation is 100% server-side.
 // ---------------------------------------------------------------------------
 
 /** Paths under /dashboard that are always public (no session required). */
 const PUBLIC_DASHBOARD_PATHS = ["/dashboard/login", "/dashboard/health"];
 
-async function hasAdminSession(request: NextRequest): Promise<boolean> {
+type SessionPayload = {
+  user?: {
+    roles?: string[];
+    capabilities?: string[];
+  } | null;
+} | null;
+
+/**
+ * Fetch the current session and check for dashboard:access capability.
+ * Returns:
+ *   "allowed"    — session valid + has dashboard:access
+ *   "forbidden"  — session valid but lacks dashboard:access
+ *   "no-session" — no valid session at all
+ */
+async function checkDashboardAccess(
+  request: NextRequest,
+): Promise<"allowed" | "forbidden" | "no-session"> {
   try {
     const response = await fetch(new URL("/api/admin/session", request.url), {
-      headers: {
-        cookie: request.headers.get("cookie") ?? "",
-      },
+      headers: { cookie: request.headers.get("cookie") ?? "" },
       cache: "no-store",
     });
 
     if (!response.ok) {
-      return false;
+      return "no-session";
     }
 
-    const payload = (await response.json().catch(() => null)) as
-      | { user?: { roles?: string[] } | null }
-      | null;
+    const payload = (await response.json().catch(() => null)) as SessionPayload;
 
-    // TODO (RBAC Phase 2): check specific roles per route here
-    return Array.isArray(payload?.user?.roles) && payload.user.roles.length > 0;
+    if (!payload?.user) {
+      return "no-session";
+    }
+
+    const capabilities = payload.user.capabilities ?? [];
+
+    if (!capabilities.includes("dashboard:access")) {
+      return "forbidden";
+    }
+
+    return "allowed";
   } catch (error) {
     console.error("Failed to validate admin session in middleware", error);
-    return false;
+    return "no-session";
   }
 }
 
@@ -61,18 +81,28 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // Validate admin session
-  if (await hasAdminSession(request)) {
+  const result = await checkDashboardAccess(request);
+
+  if (result === "allowed") {
     return NextResponse.next();
   }
 
-  // No valid admin session — redirect to login with returnTo
-  const redirectUrl = request.nextUrl.clone();
-  redirectUrl.pathname = "/dashboard/login";
-  redirectUrl.searchParams.set("returnTo", pathname);
-  redirectUrl.hash = "";
+  if (result === "forbidden") {
+    // User is authenticated but does not have dashboard:access
+    // (e.g. viewer role). Redirect to home.
+    const homeUrl = request.nextUrl.clone();
+    homeUrl.pathname = "/";
+    homeUrl.search = "";
+    homeUrl.hash = "";
+    return NextResponse.redirect(homeUrl);
+  }
 
-  return NextResponse.redirect(redirectUrl);
+  // No valid admin session — redirect to login with returnTo
+  const loginUrl = request.nextUrl.clone();
+  loginUrl.pathname = "/dashboard/login";
+  loginUrl.searchParams.set("returnTo", pathname);
+  loginUrl.hash = "";
+  return NextResponse.redirect(loginUrl);
 }
 
 export const config = {

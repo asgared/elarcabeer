@@ -1,68 +1,96 @@
 import type { RoleKey } from "./role-types";
 
-/**
- * The role key that grants full administrative access.
- * Only assigned manually via Supabase / direct DB insert.
- */
-export const SUPERADMIN_KEY: RoleKey = "superadmin";
+// ─── Capability Definitions ────────────────────────────────────────────────
+
+export const CAPABILITIES = [
+    "dashboard:access",
+    "content:read",
+    "content:write",
+    "users:read",
+    "users:write",
+    "orders:read",
+    "orders:write",
+    "categories:read",
+    "categories:write",
+    "stores:manage",
+    "analytics:read",
+    "loyalty:manage",
+    "settings:manage",
+] as const;
+
+export type Capability = (typeof CAPABILITIES)[number];
+
+// ─── Role → Capabilities Mapping ───────────────────────────────────────────
 
 /**
- * Route-level permission map.
- *
- * Keys are path prefixes. The middleware (or layout guard) will match the
- * most-specific prefix first. If a route isn't listed, it falls through
- * to the parent prefix.
- *
- * Values are arrays of role keys that are allowed to access the route.
- * An empty array means "no one" (useful as explicit deny placeholder).
+ * Use `"*"` as a wildcard to grant ALL capabilities (superadmin only).
+ * `viewer` explicitly has NO `dashboard:access` — blocked at middleware.
  */
-export const ROUTE_PERMISSIONS: Record<string, RoleKey[]> = {
-    // General dashboard — any admin role can view the overview
-    "/dashboard": ["superadmin", "content_editor", "viewer", "user_admin"],
-
-    // Content management
-    "/dashboard/content": ["superadmin", "content_editor"],
-
-    // Customer / user management
-    "/dashboard/customers": ["superadmin", "user_admin"],
-
-    // Orders — visible to broader admin roles
-    "/dashboard/orders": ["superadmin", "content_editor", "user_admin"],
-
-    // Analytics — managers & above
-    "/dashboard/analytics": ["superadmin"],
-
-    // Store management
-    "/dashboard/stores": ["superadmin"],
-
-    // Categories
-    "/dashboard/categories": ["superadmin", "content_editor"],
-
-    // Loyalty programme
-    "/dashboard/loyalty": ["superadmin", "user_admin"],
-
-    // Settings — superadmin only
-    "/dashboard/settings": ["superadmin"],
+const ROLE_CAPABILITIES: Record<RoleKey, readonly (Capability | "*")[]> = {
+    superadmin: ["*"],
+    content_editor: [
+        "dashboard:access",
+        "content:read",
+        "content:write",
+        "categories:read",
+        "categories:write",
+        "orders:read",
+    ],
+    user_admin: [
+        "dashboard:access",
+        "users:read",
+        "users:write",
+        "orders:read",
+        "orders:write",
+        "loyalty:manage",
+    ],
+    viewer: [],
+    // ↑ viewer has NO capabilities — cannot enter /dashboard
 };
 
-/**
- * Resolve the allowed roles for a given pathname.
- *
- * Walks from the most-specific prefix to the least-specific one,
- * returning the first match. If nothing matches, returns `null`
- * (route is not protected by RBAC).
- */
-export function getAllowedRoles(pathname: string): RoleKey[] | null {
-    // Sort keys longest-first so "/dashboard/content" beats "/dashboard"
-    const sorted = Object.keys(ROUTE_PERMISSIONS).sort(
-        (a, b) => b.length - a.length,
-    );
+// ─── Helpers ───────────────────────────────────────────────────────────────
 
-    for (const prefix of sorted) {
-        if (pathname === prefix || pathname.startsWith(prefix + "/")) {
-            return ROUTE_PERMISSIONS[prefix];
+export const SUPERADMIN_KEY: RoleKey = "superadmin";
+
+/** Expand roles into a flat Set of capabilities. */
+export function getCapabilitiesForRoles(roles: RoleKey[]): Set<Capability> {
+    const caps = new Set<Capability>();
+
+    for (const role of roles) {
+        const mapping = ROLE_CAPABILITIES[role];
+        if (!mapping) continue;
+
+        if (mapping.includes("*")) {
+            // Wildcard: grant everything
+            for (const c of CAPABILITIES) caps.add(c);
+            return caps; // short-circuit, already has all
+        }
+
+        for (const c of mapping) {
+            caps.add(c as Capability);
         }
     }
 
-    return null;
+    return caps;
+}
+
+/** Check a single capability against a resolved set. */
+export function hasCapability(
+    capabilities: Set<Capability>,
+    cap: Capability,
+): boolean {
+    return capabilities.has(cap);
+}
+
+/** Check if ANY of the required capabilities is present. */
+export function hasAnyCapability(
+    capabilities: Set<Capability>,
+    required: Capability[],
+): boolean {
+    return required.some((c) => capabilities.has(c));
+}
+
+/** Shorthand: can this capability set enter /dashboard at all? */
+export function isDashboardAllowed(capabilities: Set<Capability>): boolean {
+    return capabilities.has("dashboard:access");
 }

@@ -17,77 +17,79 @@ import {
 
 import { AdminShell } from "@/components/admin/admin-shell";
 import { SideBar, SideBarNav } from "@/components/dashboard/sidebar";
-// Importamos el componente de enlace inteligente que creamos
 import { SideBarNavLink } from "@/components/dashboard/sidebar-nav-link";
+import { requireDashboardAccess } from "@/lib/auth/get-user-capabilities";
 import { getAdminSession } from "@/lib/auth/admin";
+import { getVisibleNav, type NavSection } from "@/lib/dashboard/nav-items";
+
+// Icon registry — maps href to the react-icon component
+const ICONS: Record<string, ReactNode> = {
+  "/dashboard": <FiGrid />,
+  "/dashboard/content": <FiFileText />,
+  "/dashboard/products": <FiPackage />,
+  "/dashboard/categories": <FiTag />,
+  "/dashboard/orders": <FiShoppingCart />,
+  "/dashboard/customers": <FiUsers />,
+  "/dashboard/loyalty": <FiStar />,
+  "/dashboard/stores": <FiMapPin />,
+  "/dashboard/analytics": <FiBarChart2 />,
+  "/dashboard/settings": <FiSettings />,
+};
 
 type Props = {
   children: ReactNode;
 };
 
 export default async function DashboardAdminLayout({ children }: Props) {
+  // ── Server-side gate: redirect if user lacks dashboard:access ──
+  const capabilities = await requireDashboardAccess();
+
   const session = await getAdminSession();
   const user = session?.user;
 
   if (!user) {
-    // Aquí puedes manejar la redirección al login si lo prefieres
+    // requireDashboardAccess already redirects, but guard for type safety
     return null;
   }
 
-  // Construimos el componente de la barra lateral aquí
+  // ── Build capability-filtered sidebar ──
+  const visibleNav = getVisibleNav(capabilities);
+
   const sidebar = (
     <SideBar>
       <SideBarNav>
-        <SideBarNavLink href="/dashboard" icon={<FiGrid />}>
-          Resumen
-        </SideBarNavLink>
-
-        <Box py={2} />
-        <Text px={4} fontSize="xs" fontWeight="bold" color="whiteAlpha.400" textTransform="uppercase" letterSpacing="wider">
-          Contenido
-        </Text>
-        <SideBarNavLink href="/dashboard/content" icon={<FiFileText />}>
-          Secciones CMS
-        </SideBarNavLink>
-        <SideBarNavLink href="/dashboard/products" icon={<FiPackage />}>
-          Productos
-        </SideBarNavLink>
-        <SideBarNavLink href="/dashboard/categories" icon={<FiTag />}>
-          Categorías
-        </SideBarNavLink>
-
-        <Box py={2} />
-        <Text px={4} fontSize="xs" fontWeight="bold" color="whiteAlpha.400" textTransform="uppercase" letterSpacing="wider">
-          Ventas
-        </Text>
-        <SideBarNavLink href="/dashboard/orders" icon={<FiShoppingCart />}>
-          Órdenes
-        </SideBarNavLink>
-        <SideBarNavLink href="/dashboard/customers" icon={<FiUsers />}>
-          Clientes
-        </SideBarNavLink>
-        <SideBarNavLink href="/dashboard/loyalty" icon={<FiStar />}>
-          Lealtad
-        </SideBarNavLink>
-
-        <Box py={2} />
-        <Text px={4} fontSize="xs" fontWeight="bold" color="whiteAlpha.400" textTransform="uppercase" letterSpacing="wider">
-          Sistema
-        </Text>
-        <SideBarNavLink href="/dashboard/stores" icon={<FiMapPin />}>
-          Tiendas
-        </SideBarNavLink>
-        <SideBarNavLink href="/dashboard/analytics" icon={<FiBarChart2 />}>
-          Analíticas
-        </SideBarNavLink>
-        <SideBarNavLink href="/dashboard/settings" icon={<FiSettings />}>
-          Configuración
-        </SideBarNavLink>
+        {visibleNav.map((section: NavSection, i: number) => (
+          <div key={i}>
+            {section.title && (
+              <>
+                <Box py={2} />
+                <Text
+                  px={4}
+                  fontSize="xs"
+                  fontWeight="bold"
+                  color="whiteAlpha.400"
+                  textTransform="uppercase"
+                  letterSpacing="wider"
+                >
+                  {section.title}
+                </Text>
+              </>
+            )}
+            {section.items.map((item) => (
+              <SideBarNavLink
+                key={item.href}
+                href={item.href}
+                icon={ICONS[item.href]}
+              >
+                {item.label}
+              </SideBarNavLink>
+            ))}
+          </div>
+        ))}
       </SideBarNav>
     </SideBar>
   );
 
-  // Pasamos el usuario y la barra lateral al AdminShell
   return (
     <AdminShell user={user} sidebar={sidebar}>
       {children}
