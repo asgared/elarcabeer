@@ -9,11 +9,13 @@
 ALTER TABLE public.user_roles ENABLE ROW LEVEL SECURITY;
 
 -- 2. SELECT — authenticated users can only read their own role assignments
+--    NOTE: Prisma generates the column as "userId" (camelCase) since no
+--    @map("user_id") is used in the schema. We must quote it in PostgreSQL.
 CREATE POLICY "Users can read own roles"
   ON public.user_roles
   FOR SELECT
   TO authenticated
-  USING (auth.uid()::text = user_id);
+  USING (auth.uid()::text = "userId");
 
 -- 3. By default, INSERT / UPDATE / DELETE are denied for all client roles.
 --    Role assignment must be done via:
@@ -32,8 +34,8 @@ CREATE POLICY "Users can read own roles"
 --     EXISTS (
 --       SELECT 1
 --       FROM public.user_roles AS ur
---       INNER JOIN public."Role" AS r ON r.id = ur.role_id
---       WHERE ur.user_id = auth.uid()::text
+--       INNER JOIN public."Role" AS r ON r.id = ur."roleId"
+--       WHERE ur."userId" = auth.uid()::text
 --         AND r.key = 'superadmin'
 --     )
 --   );

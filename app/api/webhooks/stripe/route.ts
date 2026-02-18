@@ -302,6 +302,14 @@ export async function POST(request: NextRequest) {
           },
         },
       });
+
+      // Decrement stock for each purchased variant
+      for (const item of orderItems) {
+        await prisma.variant.update({
+          where: { id: item.variantId },
+          data: { stock: { decrement: item.quantity } },
+        });
+      }
     } catch (error) {
       console.error(
         "[webhooks/stripe] Error al crear la orden para la sesión %s.",

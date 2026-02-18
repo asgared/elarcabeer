@@ -35,19 +35,13 @@ export async function GET(request: Request) {
                             });
                             console.log(`Usuario social ${user.email} creado en Prisma.`);
                         } else if (dbUser.id !== user.id) {
-                            // Si existe por email pero el ID es distinto, borramos y re-creamos con el ID correcto
+                            // Si existe por email pero el ID es distinto, actualizamos el ID
+                            // ✅ Usamos UPDATE para preservar órdenes, direcciones, loyalty y roles
                             console.log(`Corrigiendo ID mismatch para ${user.email} en Callback...`);
-                            await prisma.$transaction([
-                                prisma.user.delete({ where: { email: user.email } }),
-                                prisma.user.create({
-                                    data: {
-                                        id: user.id,
-                                        email: user.email,
-                                        name: dbUser.name || user.user_metadata.full_name || user.user_metadata.name || user.email.split('@')[0],
-                                        lastName: dbUser.lastName || user.user_metadata.lastName,
-                                    }
-                                })
-                            ]);
+                            await prisma.user.update({
+                                where: { id: dbUser.id },
+                                data: { id: user.id },
+                            });
                             console.log(`ID sincronizado para ${user.email}`);
                         }
 
@@ -56,10 +50,11 @@ export async function GET(request: Request) {
                             where: { id: user.id },
                             include: { userRoles: { include: { role: true } } },
                         });
-                        const hasSuperadmin = finalUser?.userRoles.some(
-                            (ur: { role: { key: string } }) => ur.role.key === "superadmin"
+                        const dashboardRoles = ["superadmin", "content_editor", "user_admin"];
+                        const hasDashboardAccess = finalUser?.userRoles.some(
+                            (ur: { role: { key: string } }) => dashboardRoles.includes(ur.role.key)
                         );
-                        if (hasSuperadmin && finalUser) {
+                        if (hasDashboardAccess && finalUser) {
                             await createAdminSession(finalUser.id);
                             console.log(`Sesión administrativa creada para ${user.email}`);
                         }

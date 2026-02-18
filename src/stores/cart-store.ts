@@ -1,6 +1,6 @@
-import {useSyncExternalStore} from "react";
+import { useSyncExternalStore } from "react";
 
-import type {Variant} from "../types/catalog";
+import type { Variant } from "../types/catalog";
 
 type CartItem = {
   productId: string;
@@ -47,7 +47,7 @@ const store: CartStore = {
           ...current,
           items: current.items.map((item) =>
             item.productId === productId && item.variant.id === variant.id
-              ? {...item, quantity: item.quantity + 1}
+              ? { ...item, quantity: item.quantity + 1 }
               : item
           )
         };
@@ -55,7 +55,7 @@ const store: CartStore = {
 
       return {
         ...current,
-        items: [...current.items, {productId, variant, quantity: 1}]
+        items: [...current.items, { productId, variant, quantity: 1 }]
       };
     });
   },
@@ -82,20 +82,21 @@ const store: CartStore = {
         ...current,
         items: current.items.map((item) =>
           item.productId === productId && item.variant.id === variantId
-            ? {...item, quantity}
+            ? { ...item, quantity }
             : item
         )
       };
     });
   },
   clear() {
-    updateState((current) => ({...current, items: []}));
+    updateState((current) => ({ ...current, items: [] }));
   },
+  /** @deprecated Use `clear()` instead. Kept for backward compatibility. */
   clearCart() {
-    updateState((current) => ({...current, items: []}));
+    store.clear();
   },
   setCurrency(currency) {
-    updateState((current) => ({...current, currency}));
+    updateState((current) => ({ ...current, currency }));
   }
 };
 
@@ -154,7 +155,7 @@ function hydrate() {
     const items = Array.isArray(parsed.items) ? parsed.items : [];
     const currency = typeof parsed.currency === "string" ? parsed.currency : DEFAULT_CURRENCY;
 
-    updateStore({items, currency});
+    updateStore({ items, currency });
     notifySubscribers();
   } catch (error) {
     console.warn("No se pudo hidratar el carrito", error);
@@ -190,4 +191,4 @@ export const selectCartCount = (snapshot: Pick<CartStore, "items">) =>
 export const selectCartTotal = (snapshot: Pick<CartStore, "items">) =>
   snapshot.items.reduce((total, item) => total + item.variant.price * item.quantity, 0);
 
-export type {CartItem};
+export type { CartItem };

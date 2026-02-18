@@ -1,9 +1,9 @@
-import {NextResponse} from "next/server";
+import { NextResponse } from "next/server";
 
-import {products} from "@/data/products";
-import type {Stripe} from "stripe";
+import type { Stripe } from "stripe";
 
-import {getStripeClient} from "@/lib/stripe";
+import { prisma } from "@/lib/prisma";
+import { getStripeClient } from "@/lib/stripe";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -53,21 +53,26 @@ function normalizeOrigin(request: Request) {
   return originHeader ?? `${url.protocol}//${url.host}`;
 }
 
-function validateCheckoutPayload(
+/**
+ * Validates the checkout payload and fetches **canonical prices from the
+ * database** via Prisma.  This prevents price-manipulation attacks where a
+ * client could submit arbitrary prices.
+ */
+async function validateCheckoutPayload(
   payload: CheckoutRequest,
-  request: Request
-): ValidatedCheckout | NextResponse {
+  request: Request,
+): Promise<ValidatedCheckout | NextResponse> {
   if (!payload || typeof payload !== "object") {
     return NextResponse.json(
       { error: "Cuerpo de la petición inválido." },
-      { status: 400 }
+      { status: 400 },
     );
   }
 
   if (typeof payload.userId !== "string" || payload.userId.trim().length === 0) {
     return NextResponse.json(
       { error: "Falta el identificador del usuario." },
-      { status: 400 }
+      { status: 400 },
     );
   }
 
@@ -78,7 +83,7 @@ function validateCheckoutPayload(
   if (!payload.customer || typeof payload.customer.email !== "string") {
     return NextResponse.json(
       { error: "Falta el correo electrónico del cliente." },
-      { status: 400 }
+      { status: 400 },
     );
   }
 
@@ -87,14 +92,14 @@ function validateCheckoutPayload(
   if (!customerEmail) {
     return NextResponse.json(
       { error: "El correo electrónico del cliente es obligatorio." },
-      { status: 400 }
+      { status: 400 },
     );
   }
 
   if (!payload.shippingAddress || typeof payload.shippingAddress !== "object") {
     return NextResponse.json(
       { error: "Falta la dirección de envío." },
-      { status: 400 }
+      { status: 400 },
     );
   }
 
@@ -116,7 +121,7 @@ function validateCheckoutPayload(
     if (typeof value !== "string" || value.trim().length === 0) {
       return NextResponse.json(
         { error: `El campo "${field}" de la dirección es obligatorio.` },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -130,6 +135,7 @@ function validateCheckoutPayload(
       ? payload.currency.trim().toLowerCase()
       : "mxn";
 
+  // --- Validate & normalize each cart entry against the DB ---
   const items: Stripe.Checkout.SessionCreateParams.LineItem[] = [];
   const normalizedItems: NormalizedCheckoutItem[] = [];
 
@@ -137,7 +143,7 @@ function validateCheckoutPayload(
     if (!entry || typeof entry !== "object") {
       return NextResponse.json(
         { error: "Formato de producto inválido." },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -146,7 +152,7 @@ function validateCheckoutPayload(
     if (typeof productId !== "string" || typeof variantId !== "string") {
       return NextResponse.json(
         { error: "Faltan datos del producto." },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -155,39 +161,48 @@ function validateCheckoutPayload(
     if (!Number.isInteger(numericQuantity) || numericQuantity <= 0) {
       return NextResponse.json(
         { error: "Las cantidades deben ser mayores a cero." },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
-    const product = products.find((item) => item.id === productId);
+    // ──────────────────────────────────────────────────────────────────────
+    // 🔒  Fetch canonical price from the database (never trust the client)
+    // ──────────────────────────────────────────────────────────────────────
+    const dbVariant = await prisma.variant.findUnique({
+      where: { id: variantId },
+      include: { product: { select: { id: true, name: true, imageUrl: true } } },
+    });
 
-    if (!product) {
-      return NextResponse.json({ error: "Producto no encontrado." }, { status: 400 });
-    }
-
-    const variant = product.variants.find((item) => item.id === variantId);
-
-    if (!variant) {
+    if (!dbVariant || dbVariant.product.id !== productId) {
       return NextResponse.json(
-        { error: "Variante de producto no válida." },
-        { status: 400 }
+        { error: "Producto o variante no encontrada." },
+        { status: 400 },
       );
     }
 
-    const price = Number(variant.price);
+    if (dbVariant.stock < numericQuantity) {
+      return NextResponse.json(
+        {
+          error: `Stock insuficiente para "${dbVariant.product.name} · ${dbVariant.name}". Disponible: ${dbVariant.stock}.`,
+        },
+        { status: 400 },
+      );
+    }
+
+    const price = dbVariant.price; // Canonical DB price in centavos
 
     if (!Number.isInteger(price) || price <= 0) {
       return NextResponse.json(
         { error: "El precio del producto es inválido." },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
-    const imageUrl = product.heroImage
-      ? new URL(product.heroImage, origin).toString()
+    const imageUrl = dbVariant.product.imageUrl
+      ? new URL(dbVariant.product.imageUrl, origin).toString()
       : undefined;
 
-    const itemName = `${product.name} · ${variant.name}`;
+    const itemName = `${dbVariant.product.name} · ${dbVariant.name}`;
 
     const lineItem: Stripe.Checkout.SessionCreateParams.LineItem = {
       price_data: {
@@ -195,8 +210,8 @@ function validateCheckoutPayload(
         product_data: {
           name: itemName,
           metadata: {
-            productId: product.id,
-            variantId: variant.id,
+            productId: dbVariant.product.id,
+            variantId: dbVariant.id,
           },
           ...(imageUrl ? { images: [imageUrl] } : {}),
         },
@@ -220,7 +235,7 @@ function validateCheckoutPayload(
     customerEmail,
     customerName:
       typeof payload.customer.name === "string" &&
-      payload.customer.name.trim().length > 0
+        payload.customer.name.trim().length > 0
         ? payload.customer.name.trim()
         : undefined,
     shippingAddress,
@@ -239,11 +254,11 @@ export async function POST(request: Request) {
   } catch {
     return NextResponse.json(
       { error: "No se pudo leer el cuerpo de la petición." },
-      { status: 400 }
+      { status: 400 },
     );
   }
 
-  const validationResult = validateCheckoutPayload(payload, request);
+  const validationResult = await validateCheckoutPayload(payload, request);
 
   if (validationResult instanceof NextResponse) {
     return validationResult;
@@ -265,8 +280,8 @@ export async function POST(request: Request) {
 
     if (!stripe) {
       return NextResponse.json(
-        {error: "Stripe no está configurado correctamente."},
-        {status: 500}
+        { error: "Stripe no está configurado correctamente." },
+        { status: 500 },
       );
     }
 
@@ -277,7 +292,7 @@ export async function POST(request: Request) {
       billing_address_collection: "auto",
       success_url: new URL(
         `/order/success?session_id={CHECKOUT_SESSION_ID}`,
-        origin
+        origin,
       ).toString(),
       cancel_url: new URL(`/checkout?status=cancelled`, origin).toString(),
       metadata: {
@@ -296,7 +311,7 @@ export async function POST(request: Request) {
             name: item.name,
             quantity: item.quantity,
             unitAmount: item.unitAmount,
-          }))
+          })),
         ),
         order_total: normalizedItems
           .reduce((total, item) => total + item.unitAmount * item.quantity, 0)
@@ -314,4 +329,3 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }
-

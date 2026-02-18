@@ -54,26 +54,18 @@ export async function POST(request: Request) {
 
     if (userByEmail) {
       // Si lo encontramos por email pero el ID era distinto, lo re-sincronizamos.
+      // ✅ Usamos UPDATE para preservar órdenes, direcciones, loyalty y roles.
       try {
         console.log(`-> ID Mismatch en Admin Login: Prisma(${userByEmail.id}) vs Supabase(${authData.user.id}). Recalibrando...`);
 
-        const oldId = userByEmail.id;
-
         // Borramos sesiones viejas asociadas al ID anterior
-        await prisma.adminSession.deleteMany({ where: { userId: oldId } });
+        await prisma.adminSession.deleteMany({ where: { userId: userByEmail.id } });
 
-        // Borramos y re-creamos el usuario con el ID correcto de Supabase
-        await prisma.$transaction([
-          prisma.user.delete({ where: { id: oldId } }),
-          prisma.user.create({
-            data: {
-              id: authData.user.id,
-              email: userByEmail.email,
-              name: userByEmail.name,
-              lastName: userByEmail.lastName,
-            },
-          }),
-        ]);
+        // Actualizamos el ID del usuario para sincronizarlo con Supabase
+        await prisma.user.update({
+          where: { id: userByEmail.id },
+          data: { id: authData.user.id },
+        });
 
         user = await prisma.user.findUnique({
           where: { id: authData.user.id },
@@ -87,8 +79,9 @@ export async function POST(request: Request) {
     }
   }
 
-  // Check if user has an admin role (superadmin)
-  const isAdmin = user?.userRoles.some((ur) => ur.role.key === "superadmin");
+  // Check if user has a dashboard-capable role
+  const dashboardRoles = ["superadmin", "content_editor", "user_admin"];
+  const isAdmin = user?.userRoles.some((ur) => dashboardRoles.includes(ur.role.key));
 
   if (!user || !isAdmin) {
     return NextResponse.json({ error: "No tienes permisos de administrador." }, { status: 401 });
