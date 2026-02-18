@@ -1,5 +1,6 @@
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
+import { createClient } from "@supabase/supabase-js";
 
 import { createSupabaseMiddlewareClient } from "@/lib/supabase/middleware";
 
@@ -7,19 +8,17 @@ import { createSupabaseMiddlewareClient } from "@/lib/supabase/middleware";
 // Middleware — protects /dashboard routes
 // ---------------------------------------------------------------------------
 //
-// All admin functionality lives under /dashboard.
-//
-// Authentication:
-//   Supabase JWT validated via `auth.getUser()`.
-//   Roles resolved via `user_roles` → `Role` join.
-//   Only users whose role key is in DASHBOARD_ALLOWED_ROLES may proceed.
+// Authentication flow:
+//   1. Supabase JWT validated via `auth.getUser()` (anon-key middleware client).
+//   2. Roles resolved via `user_roles` → `Role` join using a **service_role**
+//      client so we bypass RLS ("permission denied for schema public").
+//   3. Only users whose role key is in DASHBOARD_ALLOWED_ROLES may proceed.
 //
 // Defense-in-depth:
-//   The `(admin)` layout also calls `requireDashboardAccess()` server-side,
-//   so even if middleware is bypassed, the layout rejects the request.
+//   The `(admin)` layout also calls `requireDashboardAccess()` server-side.
 //
 // ⚠️  Safe paths (/_next/static, /_next/image, images, /api/auth) are
-//     excluded via the `config.matcher` — no redirect loops.
+//     excluded via `config.matcher` — no redirect loops.
 // ---------------------------------------------------------------------------
 
 /** Roles that are allowed to access /dashboard routes. */
@@ -27,6 +26,33 @@ const DASHBOARD_ALLOWED_ROLES = ["superadmin", "content_editor", "user_admin"];
 
 /** Paths under /dashboard that are always public (no session required). */
 const PUBLIC_DASHBOARD_PATHS = ["/dashboard/login", "/dashboard/health"];
+
+// ---------------------------------------------------------------------------
+// Service-role client (bypasses RLS — for role queries only)
+// ---------------------------------------------------------------------------
+
+/**
+ * Create a lightweight Supabase client with the service_role key.
+ * This client is used exclusively for the role-lookup query so it is
+ * not blocked by RLS policies.
+ *
+ * Returns `null` if env vars are not configured.
+ */
+function createServiceRoleClient() {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+  if (!url || !serviceKey) {
+    console.error(
+      "[middleware] NEXT_PUBLIC_SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY is not set.",
+    );
+    return null;
+  }
+
+  return createClient(url, serviceKey, {
+    auth: { persistSession: false, autoRefreshToken: false },
+  });
+}
 
 // ---------------------------------------------------------------------------
 // Supabase auth + user_roles RBAC check
@@ -38,26 +64,21 @@ type DashboardAccessResult =
   | { status: "forbidden" };
 
 /**
- * Verify the current Supabase user's role via the `user_roles` + `Role` tables.
- *
- * Flow:
- *  1. Create a Supabase middleware client (Edge-safe).
- *  2. Call `auth.getUser()` to validate the JWT.
- *  3. Query `user_roles` joined with `Role` to get the user's role keys.
- *  4. Check if any role key is in the allowed list.
+ * 1. Validate the JWT with `auth.getUser()` (anon-key middleware client).
+ * 2. Query `user_roles` + `Role` with the service_role client (bypasses RLS).
+ * 3. Check if the user holds any of the allowed roles.
  */
 async function checkDashboardRouteAccess(
   request: NextRequest,
 ): Promise<DashboardAccessResult> {
   try {
+    // ── 1. Authenticate the user (anon-key, Edge-safe) ──────────────────
     const { supabase, response } = createSupabaseMiddlewareClient(request);
 
-    // If Supabase is not configured, deny access gracefully.
     if (!supabase) {
       return { status: "no-session" };
     }
 
-    // 1. Authenticate the user via Supabase JWT
     const {
       data: { user },
       error: userError,
@@ -67,26 +88,49 @@ async function checkDashboardRouteAccess(
       return { status: "no-session" };
     }
 
-    // 2. Query the user's roles via user_roles → Role join
-    const { data: userRoles, error: rolesError } = await supabase
-      .from("user_roles")
-      .select("Role ( key )")
-      .eq("userId", user.id);
+    // ── 2. Query roles with service_role key (bypasses RLS) ─────────────
+    const admin = createServiceRoleClient();
 
-    if (rolesError) {
-      console.error("[middleware] Failed to fetch user roles:", rolesError.message);
+    if (!admin) {
+      // Env vars missing — cannot check roles; deny gracefully.
+      console.error("[middleware] Service-role client unavailable. Denying access.");
       return { status: "no-session" };
     }
 
-    // 3. Extract role keys and check against allowed list
-    const roleKeys: string[] = (userRoles ?? [])
-      .map((ur: Record<string, unknown>) => {
-        const role = ur.Role as { key: string } | null;
-        return role?.key ?? null;
-      })
-      .filter((key): key is string => key !== null);
+    let roleKeys: string[] = [];
 
-    const isAllowed = roleKeys.some((key) => DASHBOARD_ALLOWED_ROLES.includes(key));
+    try {
+      const { data: userRoles, error: rolesError } = await admin
+        .from("user_roles")
+        .select(`"roleId", Role:Role!inner ( key )`)
+        .eq("userId", user.id);
+
+      if (rolesError) {
+        console.error(
+          "[middleware] Failed to fetch user roles:",
+          rolesError.message,
+          rolesError.details,
+          rolesError.hint,
+        );
+        // Don't loop — treat as no-session so the user lands on the login page.
+        return { status: "no-session" };
+      }
+
+      roleKeys = (userRoles ?? [])
+        .map((ur: Record<string, unknown>) => {
+          const role = ur.Role as { key: string } | null;
+          return role?.key ?? null;
+        })
+        .filter((key): key is string => key !== null);
+    } catch (queryError) {
+      console.error("[middleware] Unexpected error querying roles:", queryError);
+      return { status: "no-session" };
+    }
+
+    // ── 3. Authorise ────────────────────────────────────────────────────
+    const isAllowed = roleKeys.some((key) =>
+      DASHBOARD_ALLOWED_ROLES.includes(key),
+    );
 
     if (!isAllowed) {
       return { status: "forbidden" };
