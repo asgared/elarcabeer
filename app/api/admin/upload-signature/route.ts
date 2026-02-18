@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { createHash } from "crypto";
 
 import { requireAdmin } from "@/lib/auth/admin";
-
+export const dynamic = 'force-dynamic';
 const OMITTED_SIGNATURE_KEYS = new Set(["file", "api_key", "resource_type", "signature"]);
 
 function signCloudinaryRequest(

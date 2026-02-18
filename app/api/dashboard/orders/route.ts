@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getAdminSession } from "@/lib/auth/admin";
-
+export const dynamic = 'force-dynamic';
 export async function GET() {
     try {
         const session = await getAdminSession();
