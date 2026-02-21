@@ -8,6 +8,7 @@ import {
   Button,
   Divider,
   FormControl,
+  FormErrorMessage,
   FormLabel,
   HStack,
   Input,
@@ -23,8 +24,10 @@ import {
 } from "@chakra-ui/react";
 import type { AlertStatus } from "@chakra-ui/react";
 import type { AuthError } from "@supabase/supabase-js";
-import { FormEvent, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 
 import {
   createSupabaseBrowserClient,
@@ -32,6 +35,11 @@ import {
 } from "@/lib/supabase/client";
 import { useUser } from "@/providers/user-provider";
 import { OAuthButtons } from "@/components/auth/OAuthButtons";
+import {
+  registerSchema,
+  loginSchema,
+} from "@/lib/validations/schemas";
+import type { RegisterFormData, LoginFormData } from "@/lib/validations/schemas";
 
 type Feedback = { type: AlertStatus; message: string; title?: string };
 
@@ -95,17 +103,30 @@ export function AccountAccessPanel() {
   const { status, error, clearError, refreshUser } = useUser();
   const [tabIndex, setTabIndex] = useState(0);
   const [feedback, setFeedback] = useState<Feedback | null>(null);
-  const [registerForm, setRegisterForm] = useState({
-    name: "",
-    lastName: "",
-    email: "",
-    password: "",
-    confirmPassword: ""
+
+  // ── Register form (react-hook-form + zod) ──
+  const registerMethods = useForm<RegisterFormData>({
+    resolver: zodResolver(registerSchema),
+    mode: "onBlur",
+    defaultValues: {
+      name: "",
+      lastName: "",
+      email: "",
+      password: "",
+      confirmPassword: "",
+    },
   });
-  const [loginForm, setLoginForm] = useState({
-    email: "",
-    password: ""
+
+  // ── Login form (react-hook-form + zod) ──
+  const loginMethods = useForm<LoginFormData>({
+    resolver: zodResolver(loginSchema),
+    mode: "onBlur",
+    defaultValues: {
+      email: "",
+      password: "",
+    },
   });
+
   const [isRegistering, setIsRegistering] = useState(false);
   const [isLoggingIn, setIsLoggingIn] = useState(false);
   const [pendingConfirmationEmail, setPendingConfirmationEmail] =
@@ -210,31 +231,12 @@ export function AccountAccessPanel() {
     }
   };
 
-  const handleRegister = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
+  const handleRegister = async (formValues: RegisterFormData) => {
     resetFeedback();
 
-    if (registerForm.password !== registerForm.confirmPassword) {
-      const message = "Las contraseñas no coinciden.";
-      setFeedback({
-        type: "error",
-        title: "Datos inválidos",
-        message
-      });
-      toast({
-        status: "error",
-        title: "Datos inválidos",
-        description: message,
-        duration: 5000,
-        isClosable: true
-      });
-      return;
-    }
-
-    const trimmedName = registerForm.name.trim();
-    const trimmedLastName = registerForm.lastName.trim();
-    const rawEmail = registerForm.email.trim();
-    const email = rawEmail.toLowerCase();
+    const trimmedName = (formValues.name ?? "").trim();
+    const trimmedLastName = (formValues.lastName ?? "").trim();
+    const email = formValues.email; // already lowercased by Zod transform
 
     try {
       setIsRegistering(true);
@@ -250,7 +252,7 @@ export function AccountAccessPanel() {
 
       const { data, error: signUpError } = await supabase.auth.signUp({
         email,
-        password: registerForm.password,
+        password: formValues.password,
         options: {
           data: Object.keys(metadata).length ? metadata : undefined,
           emailRedirectTo: getSupabaseAuthRedirectUrl("/auth/confirm")
@@ -260,8 +262,6 @@ export function AccountAccessPanel() {
       if (signUpError) {
         const normalized = signUpError.message?.toLowerCase() ?? "";
 
-        // Si el error es "ya registrado", NO nos detenemos. 
-        // Intentamos sincronizar con nuestro API para asegurar que esté en Prisma.
         if (
           !normalized.includes("email_already_registered") &&
           !normalized.includes("already registered")
@@ -285,24 +285,13 @@ export function AccountAccessPanel() {
         console.log("El usuario ya existe en Auth, procediendo a forzar sincronización con Prisma...");
       }
 
-      // Procedemos a la sincronización con el API sin importar si el signUp dio "already registered"
-      // ya que el endpoint /api/users ahora maneja el upsert/sincronización internamente.
-
-      const alreadyRegisteredPending =
-        !!data?.user &&
-        Array.isArray(data.user.identities) &&
-        data.user.identities.length === 0;
-
-      // Incluso si ya estaba registrado pero pendiente, intentamos el fetch al API
-      // para asegurar que los metadatos y el registro en Prisma existan.
-
       try {
         const response = await fetch("/api/users", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             email,
-            password: registerForm.password,
+            password: formValues.password,
             name: trimmedName || undefined,
             lastName: trimmedLastName || undefined
           })
@@ -346,20 +335,14 @@ export function AccountAccessPanel() {
       }
 
       setPendingConfirmationEmail(null);
-      setRegisterForm({
-        name: "",
-        lastName: "",
-        email: "",
-        password: "",
-        confirmPassword: ""
-      });
+      registerMethods.reset();
     } catch (error) {
       console.error(error);
       const message =
         error instanceof Error ? error.message : "No se pudo registrar la cuenta";
 
       if (message.toLowerCase().includes("registrad")) {
-        setPendingConfirmationEmail(rawEmail);
+        setPendingConfirmationEmail(email);
       }
 
       setFeedback({
@@ -379,17 +362,15 @@ export function AccountAccessPanel() {
     }
   };
 
-  const handleLogin = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
+  const handleLogin = async (formValues: LoginFormData) => {
     resetFeedback();
 
     try {
       setIsLoggingIn(true);
-      const rawEmail = loginForm.email.trim();
-      const normalizedEmail = rawEmail.toLowerCase();
+      const normalizedEmail = formValues.email; // already lowercased by Zod transform
       const { data, error: signInError } = await supabase.auth.signInWithPassword({
         email: normalizedEmail,
-        password: loginForm.password
+        password: formValues.password
       });
 
       if (signInError) {
@@ -397,7 +378,7 @@ export function AccountAccessPanel() {
         const normalized = signInError.message?.toLowerCase() ?? "";
 
         if (normalized.includes("email not confirmed")) {
-          setPendingConfirmationEmail(rawEmail);
+          setPendingConfirmationEmail(normalizedEmail);
         }
 
         setFeedback({
@@ -430,7 +411,7 @@ export function AccountAccessPanel() {
         type: "success",
         message: "Sesión iniciada. Cargando tu historial..."
       });
-      setLoginForm({ email: "", password: "" });
+      loginMethods.reset();
     } catch (error) {
       console.error(error);
       const message = error instanceof Error ? error.message : "No se pudo iniciar sesión";
@@ -451,6 +432,9 @@ export function AccountAccessPanel() {
     }
   };
 
+  const regErrors = registerMethods.formState.errors;
+  const logErrors = loginMethods.formState.errors;
+
   return (
     <Stack spacing={6}>
       {pendingConfirmationEmail && (
@@ -461,7 +445,7 @@ export function AccountAccessPanel() {
             <AlertDescription>
               <Stack spacing={3}>
                 <Text>
-                  Hemos detectado que {""}
+                  Hemos detectado que {" "}
                   <chakra.span fontWeight="semibold">
                     {pendingConfirmationEmail}
                   </chakra.span>{" "}
@@ -507,72 +491,62 @@ export function AccountAccessPanel() {
         </TabList>
         <TabPanels>
           <TabPanel>
-            <chakra.form onSubmit={handleRegister}>
+            <chakra.form onSubmit={registerMethods.handleSubmit(handleRegister)}>
               <Stack spacing={6}>
                 <Stack spacing={4}>
-                  <FormControl>
+                  <FormControl isInvalid={!!regErrors.name}>
                     <FormLabel>Nombre</FormLabel>
                     <Input
                       placeholder="Tu nombre"
-                      value={registerForm.name}
-                      onChange={(event) =>
-                        setRegisterForm((prev) => ({ ...prev, name: event.target.value }))
-                      }
+                      {...registerMethods.register("name")}
                       autoComplete="given-name"
                     />
+                    <FormErrorMessage>{regErrors.name?.message}</FormErrorMessage>
                   </FormControl>
-                  <FormControl>
+                  <FormControl isInvalid={!!regErrors.lastName}>
                     <FormLabel>Apellido</FormLabel>
                     <Input
                       placeholder="Tu apellido"
-                      value={registerForm.lastName}
-                      onChange={(event) =>
-                        setRegisterForm((prev) => ({ ...prev, lastName: event.target.value }))
-                      }
+                      {...registerMethods.register("lastName")}
                       autoComplete="family-name"
                     />
+                    <FormErrorMessage>{regErrors.lastName?.message}</FormErrorMessage>
                   </FormControl>
-                  <FormControl isRequired>
+                  <FormControl isRequired isInvalid={!!regErrors.email}>
                     <FormLabel>Correo electrónico</FormLabel>
                     <Input
                       type="email"
                       placeholder="tu@correo.com"
-                      value={registerForm.email}
-                      onChange={(event) =>
-                        setRegisterForm((prev) => ({ ...prev, email: event.target.value }))
-                      }
+                      {...registerMethods.register("email")}
                       autoComplete="email"
                     />
+                    <FormErrorMessage>{regErrors.email?.message}</FormErrorMessage>
                   </FormControl>
-                  <FormControl isRequired>
+                  <FormControl isRequired isInvalid={!!regErrors.password}>
                     <FormLabel>Contraseña</FormLabel>
                     <Input
                       type="password"
                       placeholder="Mínimo 8 caracteres"
-                      value={registerForm.password}
-                      onChange={(event) =>
-                        setRegisterForm((prev) => ({ ...prev, password: event.target.value }))
-                      }
+                      {...registerMethods.register("password")}
                       autoComplete="new-password"
                     />
+                    <FormErrorMessage>{regErrors.password?.message}</FormErrorMessage>
                   </FormControl>
-                  <FormControl isRequired>
+                  <FormControl isRequired isInvalid={!!regErrors.confirmPassword}>
                     <FormLabel>Confirmar contraseña</FormLabel>
                     <Input
                       type="password"
                       placeholder="Repite tu contraseña"
-                      value={registerForm.confirmPassword}
-                      onChange={(event) =>
-                        setRegisterForm((prev) => ({ ...prev, confirmPassword: event.target.value }))
-                      }
+                      {...registerMethods.register("confirmPassword")}
                       autoComplete="new-password"
                     />
+                    <FormErrorMessage>{regErrors.confirmPassword?.message}</FormErrorMessage>
                   </FormControl>
                 </Stack>
-                <Stack spacing={3}>
-                  <HStack align="center" spacing={3} color="whiteAlpha.700">
+                <Stack spacing={5}>
+                  <HStack align="center" spacing={5} color="whiteAlpha.700">
                     <Divider />
-                    <Text fontSize="sm" fontWeight="medium" textTransform="uppercase">
+                    <Text fontSize="sm" fontWeight="medium" textTransform="uppercase" minWidth={"12vh"}>
                       O continúa con
                     </Text>
                     <Divider />
@@ -584,6 +558,7 @@ export function AccountAccessPanel() {
                   type="submit"
                   isLoading={isRegisterLoading}
                   loadingText="Creando cuenta"
+                  isDisabled={!registerMethods.formState.isValid}
                 >
                   Crear cuenta
                 </Button>
@@ -591,38 +566,34 @@ export function AccountAccessPanel() {
             </chakra.form>
           </TabPanel>
           <TabPanel>
-            <chakra.form onSubmit={handleLogin}>
+            <chakra.form onSubmit={loginMethods.handleSubmit(handleLogin)}>
               <Stack spacing={6}>
                 <Stack spacing={4}>
-                  <FormControl isRequired>
+                  <FormControl isRequired isInvalid={!!logErrors.email}>
                     <FormLabel>Correo electrónico</FormLabel>
                     <Input
                       type="email"
                       placeholder="tu@correo.com"
-                      value={loginForm.email}
-                      onChange={(event) =>
-                        setLoginForm((prev) => ({ ...prev, email: event.target.value }))
-                      }
+                      {...loginMethods.register("email")}
                       autoComplete="email"
                     />
+                    <FormErrorMessage>{logErrors.email?.message}</FormErrorMessage>
                   </FormControl>
-                  <FormControl isRequired>
+                  <FormControl isRequired isInvalid={!!logErrors.password}>
                     <FormLabel>Contraseña</FormLabel>
                     <Input
                       type="password"
                       placeholder="Tu contraseña"
-                      value={loginForm.password}
-                      onChange={(event) =>
-                        setLoginForm((prev) => ({ ...prev, password: event.target.value }))
-                      }
+                      {...loginMethods.register("password")}
                       autoComplete="current-password"
                     />
+                    <FormErrorMessage>{logErrors.password?.message}</FormErrorMessage>
                   </FormControl>
                 </Stack>
-                <Stack spacing={3}>
-                  <HStack align="center" spacing={3} color="whiteAlpha.700">
+                <Stack spacing={5}>
+                  <HStack align="center" spacing={5} color="whiteAlpha.700">
                     <Divider />
-                    <Text fontSize="sm" fontWeight="medium" textTransform="uppercase">
+                    <Text fontSize="sm" fontWeight="medium" textTransform="uppercase" minWidth={"12vh"}>
                       O continúa con
                     </Text>
                     <Divider />
@@ -634,6 +605,7 @@ export function AccountAccessPanel() {
                   type="submit"
                   isLoading={isLoginLoading}
                   loadingText="Iniciando sesión"
+                  isDisabled={!loginMethods.formState.isValid}
                 >
                   Iniciar sesión
                 </Button>

@@ -1,6 +1,6 @@
 "use client";
 
-import {Container} from "@/components/ui/container";
+import { Container } from "@/components/ui/container";
 import {
   Avatar,
   Box,
@@ -26,24 +26,24 @@ import {
   DrawerCloseButton,
   useBreakpointValue
 } from "@chakra-ui/react";
-import type {DrawerProps} from "@chakra-ui/react";
+import type { DrawerProps } from "@chakra-ui/react";
 import NextLink from "next/link";
-import {useEffect, useState} from "react";
-import {FaBars, FaCartShopping, FaChevronDown, FaUser} from "react-icons/fa6";
+import { useEffect, useState } from "react";
+import { FaBars, FaCartShopping, FaChevronDown, FaUser } from "react-icons/fa6";
 
-import {products} from "../../data/products";
-import {posts} from "../../data/posts";
-import {useCartDrawer} from "../../providers/cart-drawer-provider";
-import {selectCartCount, useCartStore} from "../../stores/cart-store";
-import {useUser} from "@/providers/user-provider";
+import { products } from "../../data/products";
+import { posts } from "../../data/posts";
+import { useCartDrawer } from "../../providers/cart-drawer-provider";
+import { selectCartCount, useCartStore } from "../../stores/cart-store";
+import { useUser } from "@/providers/user-provider";
 
 export function Navbar() {
   const count = useCartStore(selectCartCount);
-  const {open} = useCartDrawer();
-  const {isOpen, onOpen, onClose} = useDisclosure();
+  const { open } = useCartDrawer();
+  const { isOpen, onOpen, onClose } = useDisclosure();
   const [isClient, setIsClient] = useState(false);
-  const {user, logout} = useUser();
-  const drawerSize = useBreakpointValue<DrawerProps["size"]>({base: "full", md: "xs"}) ?? "xs";
+  const { user, logout } = useUser();
+  const drawerSize = useBreakpointValue<DrawerProps["size"]>({ base: "full", md: "xs" }) ?? "xs";
 
   useEffect(() => {
     setIsClient(true);
@@ -57,12 +57,12 @@ export function Navbar() {
   return (
     <Box as="header" backdropFilter="blur(12px)" bg="rgba(12,27,30,0.85)" position="sticky" top={0} zIndex={1000}>
       <Container maxW="6xl" py={4}>
-        <Flex align="center" justify="space-between" flexWrap="wrap" gap={{base: 3, md: 4}}>
-          <HStack spacing={{base: 3, md: 6}}>
-            <NextLink href="/" style={{fontWeight: 700, fontSize: "1.125rem"}}>
+        <Flex align="center" justify="space-between" flexWrap="wrap" gap={{ base: 3, md: 4 }}>
+          <HStack spacing={{ base: 3, md: 6 }}>
+            <NextLink href="/" style={{ fontWeight: 700, fontSize: "1.125rem" }}>
               El Arca
             </NextLink>
-            <HStack display={{base: "none", md: "flex"}} spacing={6}>
+            <HStack display={{ base: "none", md: "flex" }} spacing={6}>
               <Menu isLazy>
                 <MenuButton as={Button} rightIcon={<FaChevronDown />} variant="ghost">
                   Tienda
@@ -98,7 +98,7 @@ export function Navbar() {
               </Button>
             </HStack>
           </HStack>
-          <HStack spacing={{base: 2, md: 3}}>
+          <HStack spacing={{ base: 2, md: 3 }}>
             <Box position="relative">
               <IconButton
                 aria-label="Abrir carrito"
@@ -137,8 +137,9 @@ export function Navbar() {
                   variant="outline"
                 >
                   <Avatar
-                    size="sm"
+                    size="md"
                     name={user.name ?? user.email}
+                    src={user.avatarUrl ?? undefined}
                     bg="gold.500"
                     color="black"
                   />
@@ -174,7 +175,7 @@ export function Navbar() {
             )}
             <IconButton
               aria-label="Menu"
-              display={{base: "flex", md: "none"}}
+              display={{ base: "flex", md: "none" }}
               icon={<FaBars />}
               variant="ghost"
               onClick={onOpen}

@@ -24,13 +24,41 @@ export async function GET(request: Request) {
                             where: { email: user.email }
                         });
 
+                        // Extract Google avatar from user metadata
+                        const googleAvatar: string | null =
+                            user.user_metadata?.avatar_url
+                            ?? user.user_metadata?.picture
+                            ?? null;
+
+                        // Split full name if available
+                        let name = user.user_metadata.name || user.email.split('@')[0];
+                        let lastName: string | null = null;
+                        let secondLastName: string | null = null;
+
+                        const fullName = user.user_metadata.full_name;
+                        if (fullName) {
+                            const parts = fullName.trim().split(/\s+/);
+                            if (parts.length > 0) {
+                                name = parts[0];
+                                if (parts.length > 1) {
+                                    lastName = parts[1];
+                                }
+                                if (parts.length > 2) {
+                                    secondLastName = parts.slice(2).join(" ");
+                                }
+                            }
+                        }
+
                         if (!dbUser) {
                             // Crear usuario en Prisma si no existe
                             await prisma.user.create({
                                 data: {
                                     id: user.id, // ID de Supabase
                                     email: user.email,
-                                    name: user.user_metadata.full_name || user.user_metadata.name || user.email.split('@')[0],
+                                    name,
+                                    lastName,
+                                    secondLastName,
+                                    avatarUrl: googleAvatar,
                                 }
                             });
                             console.log(`Usuario social ${user.email} creado en Prisma.`);
@@ -43,6 +71,13 @@ export async function GET(request: Request) {
                                 data: { id: user.id },
                             });
                             console.log(`ID sincronizado para ${user.email}`);
+                        } else if (!dbUser.avatarUrl && googleAvatar) {
+                            // Soft-sync: fill avatar if user logged in via Google but had no avatar
+                            await prisma.user.update({
+                                where: { id: dbUser.id },
+                                data: { avatarUrl: googleAvatar },
+                            });
+                            console.log(`Avatar sincronizado para ${user.email}`);
                         }
 
                         // Re-verificamos los roles para sesión administrativa

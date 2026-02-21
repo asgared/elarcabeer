@@ -52,6 +52,9 @@ export type UserWithRelations = {
   email: string;
   name: string | null;
   lastName: string | null;
+  secondLastName: string | null;
+  avatarUrl: string | null;
+  phone: string | null;
   role?: "USER" | "ADMIN";
   addresses: Address[];
   orders: Order[];
@@ -59,7 +62,7 @@ export type UserWithRelations = {
   subscriptions: Subscription[];
 };
 
-export type AddressInput = Omit<Address, "id"> & {id?: string};
+export type AddressInput = Omit<Address, "id"> & { id?: string };
 
 export type UserRegistrationPayload = {
   email: string;
@@ -73,6 +76,9 @@ export type UserUpdatePayload = {
   email?: string;
   name?: string | null;
   lastName?: string | null;
+  secondLastName?: string | null;
+  avatarUrl?: string | null;
+  phone?: string | null;
   password?: string;
   addresses?: AddressInput[];
 };

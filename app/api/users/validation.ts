@@ -5,6 +5,8 @@ import type {
   UserUpdatePayload
 } from "@/types/user";
 
+const PHONE_REGEX = /^[0-9+\-\s()]*$/;
+
 export type ValidationIssue = {
   path: string;
   message: string;
@@ -58,10 +60,10 @@ function readString(
   value: unknown,
   path: string,
   issues: ValidationIssue[],
-  {minLength, maxLength, email, required}: ReadStringOptions = {}
+  { minLength, maxLength, email, required }: ReadStringOptions = {}
 ): string | undefined {
   if (typeof value !== "string") {
-    issues.push({path, message: "Debe ser una cadena de texto."});
+    issues.push({ path, message: "Debe ser una cadena de texto." });
     return undefined;
   }
 
@@ -72,17 +74,17 @@ function readString(
   }
 
   if (minLength !== undefined && trimmed.length < minLength) {
-    issues.push({path, message: `Debe tener al menos ${minLength} caracteres.`});
+    issues.push({ path, message: `Debe tener al menos ${minLength} caracteres.` });
     return undefined;
   }
 
   if (maxLength !== undefined && trimmed.length > maxLength) {
-    issues.push({path, message: `Debe tener como máximo ${maxLength} caracteres.`});
+    issues.push({ path, message: `Debe tener como máximo ${maxLength} caracteres.` });
     return undefined;
   }
 
   if (email && !EMAIL_REGEX.test(trimmed)) {
-    issues.push({path, message: "Debe ser un correo electrónico válido."});
+    issues.push({ path, message: "Debe ser un correo electrónico válido." });
     return undefined;
   }
 
@@ -98,7 +100,7 @@ function readField(
 ): string | null | undefined {
   if (!(key in source) || source[key] === undefined) {
     if (options.required) {
-      issues.push({path, message: "Campo requerido."});
+      issues.push({ path, message: "Campo requerido." });
     }
 
     return undefined;
@@ -109,7 +111,7 @@ function readField(
       return null;
     }
 
-    issues.push({path, message: "No puede ser nulo."});
+    issues.push({ path, message: "No puede ser nulo." });
     return undefined;
   }
 
@@ -131,7 +133,7 @@ function validateAddresses(
   }
 
   if (!Array.isArray(value)) {
-    issues.push({path: "addresses", message: "Debe ser una lista de direcciones."});
+    issues.push({ path: "addresses", message: "Debe ser una lista de direcciones." });
     return undefined;
   }
 
@@ -141,17 +143,17 @@ function validateAddresses(
     const pathPrefix = `addresses[${index}]`;
 
     if (!isRecord(entry)) {
-      issues.push({path: pathPrefix, message: "Debe ser un objeto."});
+      issues.push({ path: pathPrefix, message: "Debe ser un objeto." });
       return;
     }
 
     let isValid = true;
 
-    const label = readField(entry, "label", `${pathPrefix}.label`, issues, {required: true, minLength: 1});
-    const street = readField(entry, "street", `${pathPrefix}.street`, issues, {required: true, minLength: 1});
-    const city = readField(entry, "city", `${pathPrefix}.city`, issues, {required: true, minLength: 1});
-    const country = readField(entry, "country", `${pathPrefix}.country`, issues, {required: true, minLength: 1});
-    const postal = readField(entry, "postal", `${pathPrefix}.postal`, issues, {required: true, minLength: 1});
+    const label = readField(entry, "label", `${pathPrefix}.label`, issues, { required: true, minLength: 1 });
+    const street = readField(entry, "street", `${pathPrefix}.street`, issues, { required: true, minLength: 1 });
+    const city = readField(entry, "city", `${pathPrefix}.city`, issues, { required: true, minLength: 1 });
+    const country = readField(entry, "country", `${pathPrefix}.country`, issues, { required: true, minLength: 1 });
+    const postal = readField(entry, "postal", `${pathPrefix}.postal`, issues, { required: true, minLength: 1 });
 
     if (label === undefined || street === undefined || city === undefined || country === undefined || postal === undefined) {
       isValid = false;
@@ -173,7 +175,7 @@ function validateAddresses(
 
 function ensurePayload(data: unknown): Record<string, unknown> {
   if (!isRecord(data)) {
-    throw new ValidationError([{path: "root", message: "Debe ser un objeto."}]);
+    throw new ValidationError([{ path: "root", message: "Debe ser un objeto." }]);
   }
 
   return data;
@@ -183,10 +185,10 @@ export function validateCreateUserPayload(data: unknown): UserRegistrationPayloa
   const issues: ValidationIssue[] = [];
   const payload = ensurePayload(data);
 
-  const email = readField(payload, "email", "email", issues, {required: true, minLength: 1, email: true});
-  const password = readField(payload, "password", "password", issues, {required: true, minLength: 8});
-  const name = readField(payload, "name", "name", issues, {minLength: 2, maxLength: 120});
-  const lastName = readField(payload, "lastName", "lastName", issues, {minLength: 2, maxLength: 120});
+  const email = readField(payload, "email", "email", issues, { required: true, minLength: 1, email: true });
+  const password = readField(payload, "password", "password", issues, { required: true, minLength: 8 });
+  const name = readField(payload, "name", "name", issues, { minLength: 2, maxLength: 120 });
+  const lastName = readField(payload, "lastName", "lastName", issues, { minLength: 2, maxLength: 120 });
   const addresses = validateAddresses(payload, issues);
 
   if (
@@ -199,7 +201,7 @@ export function validateCreateUserPayload(data: unknown): UserRegistrationPayloa
     throw new ValidationError(issues);
   }
 
-  const result: UserRegistrationPayload = {email, password};
+  const result: UserRegistrationPayload = { email, password };
 
   if (typeof name === "string" && name.length > 0) {
     result.name = name;
@@ -220,8 +222,8 @@ export function validateLoginPayload(data: unknown): UserLoginPayload {
   const issues: ValidationIssue[] = [];
   const payload = ensurePayload(data);
 
-  const email = readField(payload, "email", "email", issues, {required: true, minLength: 1, email: true});
-  const password = readField(payload, "password", "password", issues, {required: true, minLength: 1});
+  const email = readField(payload, "email", "email", issues, { required: true, minLength: 1, email: true });
+  const password = readField(payload, "password", "password", issues, { required: true, minLength: 1 });
 
   if (
     issues.length > 0 ||
@@ -233,21 +235,21 @@ export function validateLoginPayload(data: unknown): UserLoginPayload {
     throw new ValidationError(issues);
   }
 
-  return {email, password};
+  return { email, password };
 }
 
 export function validateUpdateUserPayload(data: unknown): UserUpdatePayload {
   const issues: ValidationIssue[] = [];
   const payload = ensurePayload(data);
 
-  const email = readField(payload, "email", "email", issues, {minLength: 1, email: true});
-  const name = readField(payload, "name", "name", issues, {minLength: 2, maxLength: 120, nullable: true});
+  const email = readField(payload, "email", "email", issues, { minLength: 1, email: true });
+  const name = readField(payload, "name", "name", issues, { minLength: 2, maxLength: 120, nullable: true });
   const lastName = readField(payload, "lastName", "lastName", issues, {
     minLength: 2,
     maxLength: 120,
     nullable: true
   });
-  const password = readField(payload, "password", "password", issues, {minLength: 8});
+  const password = readField(payload, "password", "password", issues, { minLength: 8 });
   const addresses = validateAddresses(payload, issues);
 
   if (issues.length > 0) {
@@ -272,12 +274,52 @@ export function validateUpdateUserPayload(data: unknown): UserUpdatePayload {
     result.lastName = null;
   }
 
+  // secondLastName
+  if ("secondLastName" in payload) {
+    const rawSecondLastName = payload.secondLastName;
+    if (rawSecondLastName === null) {
+      result.secondLastName = null;
+    } else if (typeof rawSecondLastName === "string") {
+      result.secondLastName = rawSecondLastName.trim() || null;
+    }
+  }
+
   if (typeof password === "string") {
     result.password = password;
   }
 
+  // avatarUrl
+  if ("avatarUrl" in payload) {
+    const rawAvatar = payload.avatarUrl;
+    if (rawAvatar === null) {
+      result.avatarUrl = null;
+    } else if (typeof rawAvatar === "string" && rawAvatar.trim().length > 0) {
+      result.avatarUrl = rawAvatar.trim();
+    }
+  }
+
+  // phone
+  if ("phone" in payload) {
+    const rawPhone = payload.phone;
+    if (rawPhone === null) {
+      result.phone = null;
+    } else if (typeof rawPhone === "string") {
+      const trimmedPhone = rawPhone.trim();
+      if (trimmedPhone.length > 0 && !PHONE_REGEX.test(trimmedPhone)) {
+        issues.push({ path: "phone", message: "Solo números, +, - y paréntesis." });
+      } else {
+        result.phone = trimmedPhone || null;
+      }
+    }
+  }
+
   if (Array.isArray(addresses)) {
     result.addresses = addresses;
+  }
+
+  // Re-check issues after phone validation
+  if (issues.length > 0) {
+    throw new ValidationError(issues);
   }
 
   return result;

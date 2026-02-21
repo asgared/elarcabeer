@@ -29,6 +29,9 @@ export function serializeUser(user: UserWithSensitive): UserWithRelations {
     email: user.email,
     name: user.name,
     lastName: user.lastName,
+    secondLastName: user.secondLastName,
+    avatarUrl: user.avatarUrl,
+    phone: user.phone,
     role: user.userRoles.map((ur) => ur.role.key).includes("superadmin")
       ? "ADMIN"
       : "USER",

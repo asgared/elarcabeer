@@ -122,10 +122,12 @@ function persist(nextState: CartState) {
   }
 }
 
+let currentSnapshot: CartStore = { ...store };
+
 function updateStore(nextState: CartState) {
   state = nextState;
-  store.items = state.items;
-  store.currency = state.currency;
+  Object.assign(store, state);
+  currentSnapshot = { ...store };
 }
 
 function updateState(recipe: (current: CartState) => CartState) {
@@ -171,7 +173,7 @@ function subscribe(listener: () => void) {
 
 function getSnapshot(): CartStore {
   hydrate();
-  return store;
+  return currentSnapshot;
 }
 
 export function useCartStore(): CartStore;

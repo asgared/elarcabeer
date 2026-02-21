@@ -1,6 +1,6 @@
 "use client";
 
-import {Container} from "@/components/ui/container";
+import { Container } from "@/components/ui/container";
 import {
   Box,
   Button,
@@ -22,15 +22,18 @@ import {
 } from "@chakra-ui/react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { loadStripe } from "@stripe/stripe-js";
 import type { Stripe } from "@stripe/stripe-js";
 
-import {Price} from "@/components/ui/price";
-import {products} from "@/data/products";
-import {selectCartTotal, useCartStore} from "@/stores/cart-store";
+import { Price } from "@/components/ui/price";
+import { products } from "@/data/products";
+import { selectCartTotal, useCartStore } from "@/stores/cart-store";
 import NextLink from "next/link";
-import {useUser} from "@/providers/user-provider";
+import { useUser } from "@/providers/user-provider";
 import type { Address, UserUpdatePayload } from "@/types/user";
+import { checkoutSchema } from "@/lib/validations/schemas";
+import type { CheckoutFormData } from "@/lib/validations/schemas";
 
 let stripePromise: Promise<Stripe | null> | undefined;
 
@@ -45,34 +48,33 @@ function getStripe() {
   return stripePromise;
 }
 
-type CheckoutFormData = {
-  name: string;
-  email: string;
-  label: string;
-  street: string;
-  city: string;
-  country: string;
-  postal: string;
-};
-
 export function CheckoutContent() {
   const items = useCartStore((state) => state.items);
   const total = useCartStore(selectCartTotal);
   const currency = useCartStore((state) => state.currency);
   const { user, updateUser, status } = useUser();
   const toast = useToast();
+
   const methods = useForm<CheckoutFormData>({
+    resolver: zodResolver(checkoutSchema),
+    mode: "onBlur",
     defaultValues: {
       name: user?.name ?? "",
       email: user?.email ?? "",
-      label: "", street: "", city: "", country: "", postal: ""
+      phone: "",
+      label: "",
+      street: "",
+      city: "",
+      country: "",
+      postal: "",
     },
   });
+
   const {
     register,
     handleSubmit,
     setValue,
-    formState: { isSubmitting, errors },
+    formState: { isSubmitting, errors, isValid },
   } = methods;
 
   const [selectedAddressId, setSelectedAddressId] = useState<string>("new");
@@ -111,6 +113,7 @@ export function CheckoutContent() {
     if (user) {
       setValue("name", user.name ?? "");
       setValue("email", user.email);
+      setValue("phone", user.phone ?? "");
       if (addresses.length > 0 && selectedAddressId === "new") {
         setSelectedAddressId(addresses[0].id);
       }
@@ -145,7 +148,7 @@ export function CheckoutContent() {
       }
 
       const shippingAddress = {
-        label: formData.label.trim(),
+        label: formData.label?.trim() ?? "",
         street: formData.street.trim(),
         city: formData.city.trim(),
         country: formData.country.trim(),
@@ -193,7 +196,7 @@ export function CheckoutContent() {
 
         const payload = await response.json().catch(() => null);
         if (!response.ok) throw new Error(payload?.error ?? "No se pudo iniciar el proceso de pago.");
-        
+
         const sessionId = payload?.sessionId;
         if (!sessionId) throw new Error("La pasarela de pagos no devolvió una sesión válida.");
 
@@ -202,7 +205,6 @@ export function CheckoutContent() {
 
         const { error: stripeError } = await stripe.redirectToCheckout({ sessionId });
         if (stripeError) throw new Error(stripeError.message ?? "No se pudo redirigir a Stripe.");
-
       } catch (error) {
         console.error(error);
         toast({ title: "Error al procesar el checkout", description: error instanceof Error ? error.message : "Ocurrió un error inesperado.", status: "error", isClosable: true });
@@ -227,15 +229,30 @@ export function CheckoutContent() {
                     <SimpleGrid columns={{ base: 1, md: 2 }} spacing={4}>
                       <FormControl isRequired isInvalid={!!errors.name}>
                         <FormLabel>Nombre completo</FormLabel>
-                        <Input placeholder="Tu nombre" {...register("name", { required: "El nombre es obligatorio" })} />
+                        <Input placeholder="Tu nombre" {...register("name")} autoComplete="name" />
                         <FormErrorMessage>{errors.name?.message}</FormErrorMessage>
                       </FormControl>
                       <FormControl isRequired isInvalid={!!errors.email}>
                         <FormLabel>Correo electrónico</FormLabel>
-                        <Input placeholder="tu@email.com" type="email" {...register("email", { required: "El correo es obligatorio" })} />
+                        <Input placeholder="tu@email.com" type="email" {...register("email")} autoComplete="email" />
                         <FormErrorMessage>{errors.email?.message}</FormErrorMessage>
                       </FormControl>
                     </SimpleGrid>
+
+                    <FormControl isInvalid={!!errors.phone}>
+                      <FormLabel>Teléfono de contacto</FormLabel>
+                      <Input
+                        type="tel"
+                        inputMode="numeric"
+                        placeholder="55 1234 5678"
+                        {...register("phone")}
+                        autoComplete="tel"
+                      />
+                      <FormErrorMessage>{errors.phone?.message}</FormErrorMessage>
+                      <FormHelperText color="whiteAlpha.600">
+                        Para coordinar la entrega de tu pedido.
+                      </FormHelperText>
+                    </FormControl>
 
                     {addresses.length > 0 && (
                       <FormControl>
@@ -249,29 +266,35 @@ export function CheckoutContent() {
                       </FormControl>
                     )}
 
-                    <FormControl>
+                    <FormControl isInvalid={!!errors.label}>
                       <FormLabel>Nombre para la dirección</FormLabel>
                       <Input placeholder="Casa, oficina, etc." {...register("label")} />
+                      <FormErrorMessage>{errors.label?.message}</FormErrorMessage>
                     </FormControl>
                     <FormControl isRequired isInvalid={!!errors.street}>
                       <FormLabel>Dirección</FormLabel>
-                      <Input placeholder="Calle, número, colonia" {...register("street", { required: "La dirección es obligatoria" })} />
+                      <Input placeholder="Calle, número, colonia" {...register("street")} autoComplete="street-address" />
                       <FormErrorMessage>{errors.street?.message}</FormErrorMessage>
                     </FormControl>
                     <SimpleGrid columns={{ base: 1, md: 3 }} spacing={4}>
                       <FormControl isRequired isInvalid={!!errors.city}>
                         <FormLabel>Ciudad</FormLabel>
-                        <Input placeholder="Ciudad" {...register("city", { required: "La ciudad es obligatoria" })} />
+                        <Input placeholder="Ciudad" {...register("city")} autoComplete="address-level2" />
                         <FormErrorMessage>{errors.city?.message}</FormErrorMessage>
                       </FormControl>
                       <FormControl isRequired isInvalid={!!errors.country}>
                         <FormLabel>País o estado</FormLabel>
-                        <Input placeholder="México, CDMX..." {...register("country", { required: "El país es obligatorio" })} />
+                        <Input placeholder="México, CDMX..." {...register("country")} autoComplete="country-name" />
                         <FormErrorMessage>{errors.country?.message}</FormErrorMessage>
                       </FormControl>
                       <FormControl isRequired isInvalid={!!errors.postal}>
                         <FormLabel>Código postal</FormLabel>
-                        <Input placeholder="00000" {...register("postal", { required: "El código postal es obligatorio" })} />
+                        <Input
+                          placeholder="00000"
+                          inputMode="numeric"
+                          {...register("postal")}
+                          autoComplete="postal-code"
+                        />
                         <FormErrorMessage>{errors.postal?.message}</FormErrorMessage>
                       </FormControl>
                     </SimpleGrid>
@@ -282,7 +305,14 @@ export function CheckoutContent() {
                   </Stack>
                 </Box>
                 <Box borderRadius="2xl" borderWidth="1px" p={6}>
-                  <Button mt={2} size="lg" type="submit" w={{ base: "full", sm: "auto" }} isLoading={isLoading} isDisabled={!hasItems || !user}>
+                  <Button
+                    mt={2}
+                    size="lg"
+                    type="submit"
+                    w={{ base: "full", sm: "auto" }}
+                    isLoading={isLoading}
+                    isDisabled={!hasItems || !user || !isValid}
+                  >
                     {hasItems ? "Confirmar y pagar con Stripe" : "Agrega productos para continuar"}
                   </Button>
                 </Box>

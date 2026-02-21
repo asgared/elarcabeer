@@ -1,11 +1,11 @@
 "use client";
 
-import {Button, Stack, useToast} from "@chakra-ui/react";
-import {useMemo, useState} from "react";
-import type {IconType} from "react-icons";
-import {FaApple, FaFacebook, FaGoogle} from "react-icons/fa";
+import { Button, Stack, useToast } from "@chakra-ui/react";
+import { useMemo, useState } from "react";
+import type { IconType } from "react-icons";
+import { FaApple, FaFacebook, FaGoogle } from "react-icons/fa";
 
-import {createSupabaseBrowserClient} from "@/lib/supabase/client";
+import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 
 type OAuthProvider = "google" | "facebook" | "apple";
 
@@ -16,9 +16,9 @@ type ProviderConfig = {
 };
 
 const providers: ProviderConfig[] = [
-  {provider: "google", label: "Continuar con Google", icon: FaGoogle},
-  {provider: "facebook", label: "Continuar con Facebook", icon: FaFacebook},
-  {provider: "apple", label: "Continuar con Apple", icon: FaApple}
+  { provider: "google", label: "Continuar con Google", icon: FaGoogle },
+  // {provider: "facebook", label: "Continuar con Facebook", icon: FaFacebook},
+  // {provider: "apple", label: "Continuar con Apple", icon: FaApple}
 ];
 
 export function OAuthButtons() {
@@ -50,7 +50,7 @@ export function OAuthButtons() {
 
   return (
     <Stack spacing={3}>
-      {providers.map(({provider, label, icon: Icon}) => (
+      {providers.map(({ provider, label, icon: Icon }) => (
         <Button
           key={provider}
           variant="outline"
